@@ -1,0 +1,23 @@
+{
+  "name"            : "pako",
+  "description"     : "zlib port to javascript - fast, modularized, with browser support.",
+  "version"         : "0.0.0",
+  "keywords"        : [ "zlib", "deflate", "inflate" ],
+  "homepage"        : "https://github.com/nodeca/pako",
+
+  "contributors"    : [ "Andrei Tuputcyn (https://github.com/andr83)",
+                        "Vitaly Puzrin (https://github.com/puzrin)" ],
+
+  "bugs"            : { "url": "https://github.com/nodeca/pako/issues" },
+  "license"         : { "type": "MIT", "url": "https://github.com/nodeca/pako/blob/master/LICENSE" },
+  "repository"      : { "type": "git", "url": "git://github.com/nodeca/pako.git" },
+
+  "main"            : "./index.js",
+
+  "devDependencies" : {
+                        "mocha":     "*",
+                        "benchmark": "*",
+                        "ansi":      "*",
+                        "zlibjs":    "*"
+                      }
+}
