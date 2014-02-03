@@ -38,30 +38,35 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
       content  = new Uint8Array(fs.readFileSync(filepath)),
       title    = util.format('%s (%d bytes)', sample, content.length);
 
-  function onStart() {
-    console.log('\nSample: %s', this.name);
-  }
-
-  function onCycle(event) {
-    cursor.horizontalAbsolute();
-    cursor.eraseLine();
-    cursor.write(' > ' + event.target);
-  }
-
   function onComplete() {
     cursor.write('\n');
   }
 
+
   var suite = new Benchmark.Suite(title, {
-    onStart: onStart,
+
+    onStart: function onStart() {
+      console.log('\nSample: %s', sample);
+    },
+
     onComplete: onComplete
+
   });
+
 
   IMPLS.forEach(function (impl) {
     suite.add(impl.name, {
-      onCycle: onCycle,
+
+      onCycle: function onCycle(event) {
+        cursor.horizontalAbsolute();
+        cursor.eraseLine();
+        cursor.write(' > ' + event.target);
+      },
+
       onComplete: onComplete,
+
       defer: !!impl.code.async,
+
       fn: function (deferred) {
         if (!!impl.code.async) {
           impl.code.run(content, function() {
@@ -75,6 +80,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
       }
     });
   });
+
 
   SAMPLES.push({
     name: basename,
@@ -117,7 +123,7 @@ function run(files) {
       console.log(' > %s', sample.name);
     });
   } else {
-    console.log("There isn't any sample matches any of these patterns: %s", util.inspect(files));
+    console.log('There isn\'t any sample matches any of these patterns: %s', util.inspect(files));
   }
 
   selected.forEach(function (sample) {

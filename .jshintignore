@@ -1,4 +1,4 @@
 .git/
 node_modules/
-lib/
-/benchmark/implementations
+benchmark/implementations
+lib/zlib
