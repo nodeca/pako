@@ -17,7 +17,6 @@
   "devDependencies" : {
                         "mocha":     "*",
                         "benchmark": "*",
-                        "ansi":      "*",
-                        "zlibjs":    "*"
+                        "ansi":      "*"
                       }
 }

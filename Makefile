@@ -46,6 +46,16 @@ doc:
 	ndoc --link-format "{package.homepage}/blob/${CURR_HEAD}/{file}#L{line}"
 
 
+dev-deps:
+	@if test ! `which npm` ; then \
+		echo "You need 'npm' installed." >&2 ; \
+		echo "  See: http://npmjs.org/" >&2 ; \
+		exit 128 ; \
+		fi
+	npm install -g jshint
+	npm install
+
+
 gh-pages:
 	@if test -z ${REMOTE_REPO} ; then \
 		echo 'Remote repo URL not found' >&2 ; \
