@@ -31,33 +31,33 @@ describe.skip('Deflate defaults', function () {
 });
 
 
-describe.skip('Deflate levels', function () {
+describe('Deflate levels', function () {
 
-  it('level 9', function(done) {
+  it.skip('level 9', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 9 }, done);
   });
-  it('level 8', function(done) {
+  it.skip('level 8', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 8 }, done);
   });
-  it('level 7', function(done) {
+  it.skip('level 7', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 7 }, done);
   });
-  it('level 6', function(done) {
+  it.skip('level 6', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 6 }, done);
   });
-  it('level 5', function(done) {
+  it.skip('level 5', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 5 }, done);
   });
-  it('level 4', function(done) {
+  it.skip('level 4', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 4 }, done);
   });
-  it('level 3', function(done) {
+  it.skip('level 3', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 3 }, done);
   });
-  it('level 2', function(done) {
+  it.skip('level 2', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 2 }, done);
   });
-  it('level 1', function(done) {
+  it.skip('level 1', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 1 }, done);
   });
   it('level 0', function(done) {

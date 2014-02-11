@@ -1,7 +1,7 @@
 {
   // Enforcing Options /////////////////////////////////////////////////////////
 
-  "bitwise"       : true,   // Prohibit bitwise operators (&, |, ^, etc.).
+  "bitwise"       : false,   // Prohibit bitwise operators (&, |, ^, etc.).
   "camelcase"     : false,  // true: Identifiers must be in camelCase
   "curly"         : true,   // Require {} for every new block or scope.
   "eqeqeq"        : true,   // Require triple equals i.e. `===`.
