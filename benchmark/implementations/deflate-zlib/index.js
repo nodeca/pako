@@ -8,8 +8,8 @@ exports.run = function(data, callback) {
   //zlib.deflate(new Buffer(data), callback);
 
   var zlibStream = zlib.createDeflate({
-    chunkSize: 1*1024*1024/*,
-    level: 6*/
+    /*chunkSize: 128*1024,
+    level: 0*/
   });
   var buffers = [], nread = 0;
 
