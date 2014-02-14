@@ -18,13 +18,17 @@ var sample_file = path.join(__dirname, 'fixtures/lorem_100k.txt');
 var sample = new Uint8Array(fs.readFileSync(sample_file));
 
 
-describe.skip('Deflate defaults', function () {
+describe('Deflate defaults', function () {
 
-  it('deflate', function(done) {
+  it.skip('deflate', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, {}, done);
   });
 
-  it('deflate raw', function(done) {
+  it.skip('deflate raw', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, {}, done);
+  });
+
+  it.skip('deflate raw (level 0)', function(done) {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, {}, done);
   });
 
