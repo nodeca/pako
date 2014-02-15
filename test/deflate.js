@@ -32,6 +32,11 @@ describe('Deflate defaults', function () {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, { level: 0 }, done);
   });
 
+  // OS_CODE can differ. Probably should add param to compare function
+  // to ignore some buffer positions
+  it.skip('gzip (level 0)', function(done) {
+    testDeflate(zlib.createGzip, pako.gzip, sample, { level: 0 }, done);
+  });
 });
 
 
