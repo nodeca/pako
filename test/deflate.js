@@ -28,8 +28,8 @@ describe('Deflate defaults', function () {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, {}, done);
   });
 
-  it.skip('deflate raw (level 0)', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, {}, done);
+  it('deflate raw (level 0)', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, { level: 0 }, done);
   });
 
 });
