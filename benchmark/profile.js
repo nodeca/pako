@@ -7,5 +7,5 @@ var data = new Uint8Array(fs.readFileSync(__dirname +'/samples/lorem_1mb.txt'));
 
 
 for (var i=0; i<50; i++) {
-  pako.deflate(data, { level: 0 });
+  pako.deflate(data, { level: 1 });
 }
