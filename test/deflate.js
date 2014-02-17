@@ -20,11 +20,11 @@ var sample = new Uint8Array(fs.readFileSync(sample_file));
 
 describe('Deflate defaults', function () {
 
-  it.skip('deflate', function(done) {
+  it('deflate', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, {}, done);
   });
 
-  it.skip('deflate raw', function(done) {
+  it('deflate raw', function(done) {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, sample, {}, done);
   });
 
@@ -34,39 +34,39 @@ describe('Deflate defaults', function () {
 
   // OS_CODE can differ. Probably should add param to compare function
   // to ignore some buffer positions
-  it.skip('gzip (level 0)', function(done) {
-    testDeflate(zlib.createGzip, pako.gzip, sample, { level: 0 }, done);
+  it.skip('gzip', function(done) {
+    testDeflate(zlib.createGzip, pako.gzip, sample, {}, done);
   });
 });
 
 
 describe('Deflate levels', function () {
 
-  it.skip('level 9', function(done) {
+  it('level 9', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 9 }, done);
   });
-  it.skip('level 8', function(done) {
+  it('level 8', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 8 }, done);
   });
-  it.skip('level 7', function(done) {
+  it('level 7', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 7 }, done);
   });
-  it.skip('level 6', function(done) {
+  it('level 6', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 6 }, done);
   });
-  it.skip('level 5', function(done) {
+  it('level 5', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 5 }, done);
   });
   it.skip('level 4', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 4 }, done);
   });
-  it.skip('level 3', function(done) {
+  it('level 3', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 3 }, done);
   });
-  it.skip('level 2', function(done) {
+  it('level 2', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 2 }, done);
   });
-  it.skip('level 1', function(done) {
+  it('level 1', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { level: 1 }, done);
   });
   it('level 0', function(done) {
@@ -76,40 +76,37 @@ describe('Deflate levels', function () {
 });
 
 
-describe.skip('Deflate windowBits', function () {
+describe('Deflate windowBits', function () {
 
-  it('windowBits 16', function(done) {
-    testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 16 }, done);
-  });
   it('windowBits 15', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 15 }, done);
   });
   it('windowBits 14', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 14 }, done);
   });
-  it('windowBits 13', function(done) {
+  it.skip('windowBits 13', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 13 }, done);
   });
-  it('windowBits 12', function(done) {
+  it.skip('windowBits 12', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 12 }, done);
   });
-  it('windowBits 11', function(done) {
+  it.skip('windowBits 11', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 11 }, done);
   });
-  it('windowBits 10', function(done) {
+  it.skip('windowBits 10', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 10 }, done);
   });
-  it('windowBits 9', function(done) {
+  it.skip('windowBits 9', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 9 }, done);
   });
-  it('windowBits 8', function(done) {
+  it.skip('windowBits 8', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { windowBits: 8 }, done);
   });
 
 });
 
 
-describe.skip('Deflate memLevel', function () {
+describe('Deflate memLevel', function () {
 
   it('memLevel 9', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 9 }, done);
@@ -117,7 +114,7 @@ describe.skip('Deflate memLevel', function () {
   it('memLevel 8', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 8 }, done);
   });
-  it('memLevel 7', function(done) {
+  it.skip('memLevel 7', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 7 }, done);
   });
   it('memLevel 6', function(done) {
@@ -126,16 +123,16 @@ describe.skip('Deflate memLevel', function () {
   it('memLevel 5', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 5 }, done);
   });
-  it('memLevel 4', function(done) {
+  it.skip('memLevel 4', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 4 }, done);
   });
-  it('memLevel 3', function(done) {
+  it.skip('memLevel 3', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 3 }, done);
   });
-  it('memLevel 2', function(done) {
+  it.skip('memLevel 2', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 2 }, done);
   });
-  it('memLevel 1', function(done) {
+  it.skip('memLevel 1', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, sample, { memLevel: 1 }, done);
   });
 
