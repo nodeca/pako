@@ -17,6 +17,8 @@
   "devDependencies" : {
                         "mocha":     "*",
                         "benchmark": "*",
-                        "ansi":      "*"
+                        "ansi":      "*",
+                        "lodash":    "2.4.1",
+                        "async":     "0.2.10"
                       }
 }
