@@ -4,12 +4,12 @@ var zlib = require('zlib');
 
 exports.async = true;
 
-exports.run = function(data, callback) {
+exports.run = function(data, level, callback) {
   //zlib.deflate(new Buffer(data), callback);
 
   var zlibStream = zlib.createDeflate({
-    /*chunkSize: 128*1024,
-    level: 0*/
+    /*chunkSize: 128*1024,*/
+    level: level
   });
   var buffers = [], nread = 0;
 

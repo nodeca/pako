@@ -2,6 +2,7 @@
 
 'use strict';
 
+var LEVEL = 6;
 
 var path      = require('path');
 var fs        = require('fs');
@@ -69,12 +70,12 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
       fn: function (deferred) {
         if (!!impl.code.async) {
-          impl.code.run(content, function() {
+          impl.code.run(content, LEVEL, function() {
             deferred.resolve();
             return;
           });
         } else {
-          impl.code.run(content, deferred);
+          impl.code.run(content, LEVEL);
           return;
         }
       }

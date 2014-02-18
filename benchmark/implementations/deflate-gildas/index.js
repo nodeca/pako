@@ -2,6 +2,6 @@
 
 var deflate = require('./deflate');
 
-exports.run = function(data) {
-  return deflate(data);
+exports.run = function(data, level) {
+  return deflate(data, level);
 }
