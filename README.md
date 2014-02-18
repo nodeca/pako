@@ -1,13 +1,11 @@
-pako
-====
+pako - zlib port to javascript, very fast!
+==========================================
 
 [![Build Status](https://travis-ci.org/nodeca/pako.png?branch=master)](https://travis-ci.org/nodeca/pako)
 
-zlib port to javascript. _Very fast!_
-
 __Why pako is cool:__
 
-- Almost as fast im modern browsers as C implementation (see benchmarks)
+- Almost as fast in modern browsers as C implementation (see benchmarks)
 - Works in browser
 - Modular - you can browserify any separate component
 - Both Sync & streamable interfaces (streamable is for big blobs)
@@ -34,11 +32,50 @@ node v0.11, 10mb sample:
    deflate-zlib x 9.28 ops/sec ±1.98% (47 runs sampled)
 ```
 
+__Install:__
 
-API
----
+node.js:
 
-TBD
+```
+npm install pako
+```
+
+browser:
+
+```
+bower install pako
+```
+
+
+Example & API
+-------------
+
+```javascript
+var pako = require('pako');
+
+//
+// Deflate
+//
+
+var input = new Uint8Array();
+//... fill input data here
+var output = pako.deflate(input);
+
+//
+// Inflate
+//
+
+var compressed = new Uint8Array();
+//... fill data to uncompress here
+var result = pako.inflate(compressed);
+if (result.err) {
+  console.log(result.err, result.msg);
+}
+var uncompressed = result.data;
+
+```
+
+See docs for full API specs.
 
 
 Notes
@@ -57,15 +94,16 @@ TBD
 
 We will probably provide more modular design, to keep significant part of code reasonably small.
 
+
 Authors
 -------
 
 - Andrey Tupitsin [@anrd83](https://github.com/andr83)
-- Vitaly Puzrin [@puzrin](https://github.com/andr83)
+- Vitaly Puzrin [@puzrin](https://github.com/puzrin)
 
-Special thanks to Vyacheslav Egorov ([@mraleph](https://github.com/mraleph)) for
-his awesome tutoruals about optimising code for v8, [IRHydra](http://mrale.ph/irhydra/)
-tool and personal advices.
+Personal thanks to Vyacheslav Egorov ([@mraleph](https://github.com/mraleph)) for
+his awesome tutoruals about optimising JS code for v8, [IRHydra](http://mrale.ph/irhydra/)
+tool and his advices.
 
 
 License
