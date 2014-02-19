@@ -135,7 +135,7 @@ describe('Deflate memLevel', function () {
 });
 
 
-describe.skip('Deflate strategy', function () {
+describe('Deflate strategy', function () {
 
   it('Z_DEFAULT_STRATEGY', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 0 }, done);
@@ -149,7 +149,7 @@ describe.skip('Deflate strategy', function () {
   it('Z_RLE', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 3 }, done);
   });
-  it('Z_FIXED', function(done) {
+  it.skip('Z_FIXED', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 4 }, done);
   });
 
