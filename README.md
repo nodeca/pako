@@ -17,19 +17,19 @@ __Benchmarks:__
 
 
 ```
+node v0.10, 10mb sample:
+
+   deflate-gildas x 4.62 ops/sec ±1.93% (15 runs sampled)
+   deflate-imaya x 3.82 ops/sec ±1.31% (13 runs sampled)
+ ! deflate-pako x 9.09 ops/sec ±0.42% (26 runs sampled)
+   deflate-zlib x 14.16 ops/sec ±3.33% (63 runs sampled)
+
 node v0.11, 10mb sample:
 
-   deflate-gildas x 2.82 ops/sec ±1.21% (11 runs sampled)
-   deflate-imaya x 2.25 ops/sec ±0.59% (9 runs sampled)
- ! deflate-pako x 6.09 ops/sec ±0.98% (19 runs sampled)
-   deflate-zlib x 9.13 ops/sec ±0.92% (46 runs sampled)
-
-node v0.11, 10mb sample:
-
-   deflate-gildas x 3.39 ops/sec ±6.58% (12 runs sampled)
-   deflate-imaya x 2.14 ops/sec ±4.29% (9 runs sampled)
- ! deflate-pako x 6.61 ops/sec ±0.66% (20 runs sampled)
-   deflate-zlib x 9.28 ops/sec ±1.98% (47 runs sampled)
+   deflate-gildas x 5.10 ops/sec ±4.94% (16 runs sampled)
+   deflate-imaya x 3.42 ops/sec ±4.11% (12 runs sampled)
+ ! deflate-pako x 11.28 ops/sec ±0.42% (32 runs sampled)
+   deflate-zlib x 14.17 ops/sec ±3.34% (64 runs sampled)
 ```
 
 __Install:__
