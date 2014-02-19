@@ -14,23 +14,19 @@ var testDeflate = helpers.testDeflate;
 var samples = helpers.loadSamples();
 
 
-describe('Deflate defaults', function () {
+describe('Defaults', function () {
 
-  it('deflate', function(done) {
+  it('deflate, no options', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, {}, done);
   });
 
-  it('deflate raw', function(done) {
+  it('deflate raw, no options', function(done) {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, {}, done);
-  });
-
-  it('deflate raw (level 0)', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 0 }, done);
   });
 
   // OS_CODE can differ. Probably should add param to compare function
   // to ignore some buffer positions
-  it.skip('gzip', function(done) {
+  it.skip('gzip, no options', function(done) {
     testDeflate(zlib.createGzip, pako.gzip, samples, {}, done);
   });
 });
@@ -151,6 +147,42 @@ describe('Deflate strategy', function () {
   });
   it.skip('Z_FIXED', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 4 }, done);
+  });
+
+});
+
+
+describe('Deflate RAW', function () {
+  // Since difference is only in rwapper, levels test is enougth
+  it('level 9', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 9 }, done);
+  });
+  it('level 8', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 8 }, done);
+  });
+  it('level 7', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 7 }, done);
+  });
+  it('level 6', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 6 }, done);
+  });
+  it('level 5', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 5 }, done);
+  });
+  it('level 4', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 4 }, done);
+  });
+  it('level 3', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 3 }, done);
+  });
+  it('level 2', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 2 }, done);
+  });
+  it('level 1', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 1 }, done);
+  });
+  it('level 0', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 0 }, done);
   });
 
 });
