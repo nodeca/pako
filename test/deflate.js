@@ -65,7 +65,7 @@ describe('Deflate levels', function () {
   it('level 1', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { level: 1 }, done);
   });
-  it.skip('level 0', function(done) {
+  it('level 0', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { level: 0 }, done);
   });
 
