@@ -91,5 +91,5 @@ publish:
 	npm publish https://github.com/${GITHUB_PROJ}/tarball/${NPM_VERSION}
 
 
-.PHONY: publish lint
+.PHONY: publish lint doc
 .SILENT: help lint

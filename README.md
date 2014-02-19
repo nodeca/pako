@@ -50,21 +50,19 @@ bower install pako
 Example & API
 -------------
 
+[Full docs](http://nodeca.github.io/pako/).
+
 ```javascript
 var pako = require('pako');
 
-//
 // Deflate
 //
-
 var input = new Uint8Array();
 //... fill input data here
 var output = pako.deflate(input);
 
-//
 // Inflate
 //
-
 var compressed = new Uint8Array();
 //... fill data to uncompress here
 var result = pako.inflate(compressed);
@@ -75,24 +73,15 @@ var uncompressed = result.data;
 
 ```
 
-See docs for full API specs.
-
 
 Notes
 -----
 
-Since pako was done mostly for browser, some specific functions were left unported.
+Pako does not contains some very specific zlib functions.
 
-deflate:
-
-- writing custom gzip headers (default is ok)
-- `deflateSetDictionary`, `deflateParams`, `deflateSetHeader`, `deflateBound`, `deflatePending`
-
-inflate:
-
-TBD
-
-We will probably provide more modular design, to keep significant part of code reasonably small.
+- __deflate__ - writing bustom gzip headers and methods `deflateSetDictionary`,
+  `deflateParams`, `deflateSetHeader`, `deflateBound`, `deflatePending`.
+- __inflate__ - TBD.
 
 
 Authors
@@ -101,9 +90,9 @@ Authors
 - Andrey Tupitsin [@anrd83](https://github.com/andr83)
 - Vitaly Puzrin [@puzrin](https://github.com/puzrin)
 
-Personal thanks to Vyacheslav Egorov ([@mraleph](https://github.com/mraleph)) for
-his awesome tutoruals about optimising JS code for v8, [IRHydra](http://mrale.ph/irhydra/)
-tool and his advices.
+Personal thanks to Vyacheslav Egorov ([@mraleph](https://github.com/mraleph))
+for his awesome tutoruals about optimising JS code for v8,
+[IRHydra](http://mrale.ph/irhydra/) tool and his advices.
 
 
 License

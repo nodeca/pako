@@ -14,4 +14,6 @@
 # Paths with sources
 ################################################################################
 
-lib
+lib/deflate.js
+lib/inflate.js
+index.js

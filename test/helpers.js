@@ -37,6 +37,7 @@ function cmpBuf(a, b) {
 
   for (var i=0, l=a.length; i<l; i++) {
     if (a[i] !== b[i]) {
+      //console.log('pos: ' +i+ ' - ' + a[i].toString(16) + '/' + b[i].toString(16));
       return false;
     }
   }
