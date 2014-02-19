@@ -72,7 +72,7 @@ describe('Deflate levels', function () {
 });
 
 
-describe.skip('Deflate windowBits', function () {
+describe('Deflate windowBits', function () {
 
   it('windowBits 15', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { windowBits: 15 }, done);
