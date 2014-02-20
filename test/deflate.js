@@ -26,7 +26,7 @@ describe('Defaults', function () {
 
   // OS_CODE can differ. Probably should add param to compare function
   // to ignore some buffer positions
-  it.skip('gzip, no options', function(done) {
+  it('gzip, no options', function(done) {
     testDeflate(zlib.createGzip, pako.gzip, samples, {}, done);
   });
 });
