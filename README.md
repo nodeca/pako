@@ -5,16 +5,12 @@ pako - zlib port to javascript, very fast!
 
 __Why pako is cool:__
 
-- Almost as fast in modern browsers as C implementation (see benchmarks)
-- Works in browser
-- Modular - you can browserify any separate component
-- Both Sync & streamable interfaces (streamable is for big blobs)
-- It's fresh - ports the latest zlib version (now 1.2.8)
-- Tested - result is binary equal to zlib's one
-- No restrictions - MIT licence
+- Almost as fast in modern browsers as C implementation (see benchmarks).
+- Works in browser, you can browserify any separate component.
+- Both Sync & streamable (for big blobs) interfaces.
+- It's fresh - ports the latest zlib version (now 1.2.8), results are binary equal.
 
 __Benchmarks:__
-
 
 ```
 node v0.10, 10mb sample:
