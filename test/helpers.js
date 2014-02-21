@@ -54,7 +54,12 @@ function cmpBuf(a, b) {
 //
 function testDeflateSingle(zlib_factory, pako_deflate, data, options, callback) {
 
-  var zlibStream = zlib_factory(options);
+  var zlib_options = _.clone(options);
+
+  // hack for testing negative windowBits
+  if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
+
+  var zlibStream = zlib_factory(zlib_options);
   var buffers = [], nread = 0;
 
 

@@ -35,6 +35,9 @@ test: lint
 		fi
 	mocha
 
+cover:
+	rm -rf cover
+	istanbul cover node_modules/.bin/_mocha -- -t 30000 -R spec
 
 doc:
 	@if test ! `which ndoc` ; then \

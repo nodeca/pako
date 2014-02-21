@@ -64,7 +64,9 @@ describe('Deflate levels', function () {
   it('level 0', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { level: 0 }, done);
   });
-
+  it('level -1 (implicit default)', function(done) {
+    testDeflate(zlib.createDeflate, pako.deflate, samples, { level: 0 }, done);
+  });
 });
 
 
@@ -93,6 +95,9 @@ describe('Deflate windowBits', function () {
   });
   it('windowBits 8', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { windowBits: 8 }, done);
+  });
+  it('windowBits -15 (implicit raw)', function(done) {
+    testDeflate(zlib.createDeflateRaw, pako.deflate, samples, { windowBits: -15 }, done);
   });
 
 });

@@ -1,5 +1,6 @@
-/banchmark/
+/benchmark/
 /test/
+/coverage/
 /.*
 /Makefile
 
