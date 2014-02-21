@@ -6,6 +6,8 @@ var path  = require('path');
 var _     = require('lodash');
 var async = require('async');
 
+var pako_utils = require('../lib/zlib/utils');
+
 // Load fixtures to test
 // return: { 'filename1': content1, 'filename2': content2, ...}
 //
@@ -91,7 +93,23 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
   var queue = [];
 
   _.forEach(samples, function(data, name) {
+    // with untyped arrays
     queue.push(function (done) {
+      pako_utils.forceUntyped = true;
+
+      testDeflateSingle(zlib_factory, pako_deflate, data, options, function (err) {
+        if (err) {
+          done('Error in "' + name + '" - zlib result != pako result');
+          return;
+        }
+        done();
+      });
+    });
+
+    // with typed arrays
+    queue.push(function (done) {
+      pako_utils.forceUntyped = false;
+
       testDeflateSingle(zlib_factory, pako_deflate, data, options, function (err) {
         if (err) {
           done('Error in "' + name + '" - zlib result != pako result');
