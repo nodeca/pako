@@ -7,6 +7,7 @@ var _     = require('lodash');
 var async = require('async');
 
 var pako_utils = require('../lib/zlib/utils');
+var pako  = require('../index');
 
 // Load fixtures to test
 // return: { 'filename1': content1, 'filename2': content2, ...}
@@ -123,7 +124,34 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
   async.series(queue, callback);
 }
 
+
+function testInflate(samples, options, callback) {
+  var name, data, deflated;
+
+  for (name in samples) {
+    data = samples[name];
+    deflated = pako.deflate(data, options);
+
+    // with untyped arrays
+    pako_utils.forceUntyped = true;
+    if (cmpBuf(pako.inflate(deflated, options).result, data)) {
+      callback('Error in "' + name + '" - zlib result != pako result');
+      return;
+    }
+
+    // with typed arrays
+    pako_utils.forceUntyped = true;
+    if (cmpBuf(pako.inflate(deflated, options).result, data)) {
+      callback('Error in "' + name + '" - zlib result != pako result');
+      return;
+    }
+  }
+
+  callback();
+}
+
+
 exports.cmpBuf = cmpBuf;
 exports.testDeflate = testDeflate;
-exports.testDeflateSingle = testDeflateSingle;
+exports.testInflate = testInflate;
 exports.loadSamples = loadSamples;

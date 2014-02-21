@@ -14,7 +14,7 @@ var testDeflate = helpers.testDeflate;
 var samples = helpers.loadSamples();
 
 
-describe('Defaults', function () {
+describe('Deflate defaults', function () {
 
   it('deflate, no options', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, {}, done);
@@ -153,30 +153,9 @@ describe('Deflate strategy', function () {
 
 
 describe('Deflate RAW', function () {
-  // Since difference is only in rwapper, levels test is enougth
-  it('level 9', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 9 }, done);
-  });
-  it('level 8', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 8 }, done);
-  });
-  it('level 7', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 7 }, done);
-  });
-  it('level 6', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 6 }, done);
-  });
-  it('level 5', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 5 }, done);
-  });
+  // Since difference is only in rwapper, test for store/fast/slow methods are enougth
   it('level 4', function(done) {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 4 }, done);
-  });
-  it('level 3', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 3 }, done);
-  });
-  it('level 2', function(done) {
-    testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 2 }, done);
   });
   it('level 1', function(done) {
     testDeflate(zlib.createDeflateRaw, pako.deflateRaw, samples, { level: 1 }, done);
