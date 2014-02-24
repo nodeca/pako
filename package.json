@@ -22,6 +22,7 @@
                         "uglify-js": "*",
                         "jshint":    "*",
                         "istanbul":  "*",
+                        "ndoc":      "*",
                         "lodash":    "2.4.1",
                         "async":     "0.2.10"
                       }
