@@ -2,7 +2,7 @@
   "name"            : "pako",
   "description"     : "zlib port to javascript - fast, modularized, with browser support.",
   "version"         : "0.0.0",
-  "keywords"        : [ "zlib", "deflate", "inflate" ],
+  "keywords"        : [ "zlib", "deflate", "inflate", "gzip" ],
   "homepage"        : "https://github.com/nodeca/pako",
 
   "contributors"    : [ "Andrei Tuputcyn (https://github.com/andr83)",
@@ -18,6 +18,10 @@
                         "mocha":     "*",
                         "benchmark": "*",
                         "ansi":      "*",
+                        "browserify":"*",
+                        "uglify-js": "*",
+                        "jshint":    "*",
+                        "istanbul":  "*",
                         "lodash":    "2.4.1",
                         "async":     "0.2.10"
                       }

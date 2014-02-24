@@ -9,7 +9,7 @@ REMOTE_NAME ?= origin
 REMOTE_REPO ?= $(shell git config --get remote.${REMOTE_NAME}.url)
 
 CURR_HEAD   := $(firstword $(shell git show-ref --hash HEAD | cut --bytes=-6) master)
-GITHUB_PROJ := fontello/${NPM_PACKAGE}
+GITHUB_PROJ := nodeca/${NPM_PACKAGE}
 
 
 help:
@@ -49,6 +49,34 @@ doc:
 	ndoc --link-format "{package.homepage}/blob/${CURR_HEAD}/{file}#L{line}"
 
 
+browserify:
+	if test ! `which browserify` ; then npm install browserify ; fi
+	if test ! `which uglifyjs` ; then npm install uglify-js ; fi
+	# Browserify
+	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+		browserify -r ./ -s pako \
+		) > dist/pako.js
+	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+		browserify -r ./lib/deflate.js -s pako \
+		) > dist/pako_deflate.js
+	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+		browserify -r ./lib/inflate.js -s pako \
+		) > dist/pako_inflate.js
+	# Minify
+	uglifyjs dist/pako.js -c -m \
+		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
+		> dist/pako.min.js
+	uglifyjs dist/pako_deflate.js -c -m \
+		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
+		> dist/pako_deflate.min.js
+	uglifyjs dist/pako_inflate.js -c -m \
+		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
+		> dist/pako_inflate.min.js
+	# Update bower package
+	sed -i -r -e \
+		"s/(\"version\":\s*)\"[0-9]+[.][0-9]+[.][0-9]+\"/\1\"${NPM_VERSION}\"/" \
+		bower.json
+
 dev-deps:
 	@if test ! `which npm` ; then \
 		echo "You need 'npm' installed." >&2 ; \
@@ -73,7 +101,7 @@ gh-pages:
 		git commit -q -m 'Recreated docs'
 	cd ${TMP_PATH} && \
 		git remote add remote ${REMOTE_REPO} && \
-		git push --force remote +master:gh-pages 
+		git push --force remote +master:gh-pages
 	rm -rf ${TMP_PATH}
 
 
