@@ -5,10 +5,13 @@ pako - zlib port to javascript, very fast!
 
 __Why pako is cool:__
 
-- Almost as fast in modern browsers as C implementation (see benchmarks).
-- Works in browser, you can browserify any separate component.
+- Almost as fast in modern JS engines as C implementation (see benchmarks).
+- Works in browsers, you can browserify any separate component.
 - Both Sync & streamable (for big blobs) interfaces.
 - It's fresh - ports the latest zlib version (now 1.2.8), results are binary equal.
+
+This project was done to understand how fast JS can be and is it necessary to
+develop native C modules for CPU-intensive tasks. Enjoy the result!
 
 __Benchmarks:__
 
@@ -27,6 +30,9 @@ node v0.11, 10mb sample:
  ! deflate-pako x 11.28 ops/sec ±0.42% (32 runs sampled)
    deflate-zlib x 14.17 ops/sec ±3.34% (64 runs sampled)
 ```
+
+If you doubt, that zlib is slow because of marshalling, try benchmark with `level 0`.
+You will see, that node bindings don't add noticeable slowdown.
 
 __Install:__
 
