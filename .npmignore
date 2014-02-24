@@ -1,7 +1,7 @@
-/benchmark/
-/test/
-/coverage/
-/.*
-/Makefile
-
+benchmark/
+test/
+coverage/
+.*
+Makefile
+v8.log
 

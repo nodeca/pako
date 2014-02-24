@@ -1,4 +1,4 @@
-/doc
-/node_modules/
-/coverage
-
+doc/
+node_modules/
+coverage/
+v8.log
