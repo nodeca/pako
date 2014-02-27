@@ -3,7 +3,7 @@
 var pako = require('../../../index.js');
 
 exports.run = function(data, level) {
-  return pako.deflate(data, {
+  return pako.deflate(data.typed, {
     level: level
   });
 }

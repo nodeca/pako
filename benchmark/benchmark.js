@@ -11,6 +11,8 @@ var Benchmark = require('benchmark');
 var ansi      = require('ansi');
 var cursor    = ansi(process.stdout);
 
+var pako      = require('../');
+
 
 var IMPLS_DIRECTORY = path.join(__dirname, 'implementations');
 var IMPLS_PATHS = {};
@@ -35,9 +37,21 @@ var SAMPLES = [];
 fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
   var filepath = path.join(SAMPLES_DIRECTORY, sample),
       extname  = path.extname(filepath),
-      basename = path.basename(filepath, extname),
-      content  = new Uint8Array(fs.readFileSync(filepath)),
-      title    = util.format('%s (%d bytes)', sample, content.length);
+      basename = path.basename(filepath, extname);
+
+  var content = {}; // raw/compressed data in different formats
+
+  content.buffer = fs.readFileSync(filepath);
+  content.typed  = new Uint8Array(content.buffer);
+
+  content.deflateTyped = pako.deflate(content.typed, { level: LEVEL });
+  content.deflateBuffer = new Buffer(content.deflateTyped);
+
+  content.deflateRawTyped = pako.deflateRaw(content.typed, { level: LEVEL });
+  content.deflateRawBuffer = new Buffer(content.deflateRawTyped);
+
+  var title    = util.format('(%d bytes raw / ~%d bytes compressed)', content.typed.length, content.deflateTyped.length);
+
 
   function onComplete() {
     cursor.write('\n');
@@ -47,7 +61,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
   var suite = new Benchmark.Suite(title, {
 
     onStart: function onStart() {
-      console.log('\nSample: %s', sample);
+      console.log('\nSample: %s %s', sample, title);
     },
 
     onComplete: onComplete

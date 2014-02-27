@@ -34,6 +34,6 @@ exports.run = function(data, level, callback) {
     callback(null);
   });
 
-  zlibStream.write(new Buffer(data));
+  zlibStream.write(data.buffer);
   zlibStream.end();
 }
