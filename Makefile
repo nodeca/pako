@@ -32,7 +32,7 @@ test: lint
 test-browser: lint
 	rm -f ./test/browser/pako.js
 	browserify -r ./ -s pako > test/browser/pako.js
-	@SAUCE_PROJ=${GITHUB_PROJ} test/browser/sauce-run.js
+	@SAUCE_PROJ=${GITHUB_PROJ} grunt test
 
 cover:
 	rm -rf cover
