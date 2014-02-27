@@ -16,6 +16,7 @@
 
   "devDependencies" : {
                         "mocha":     "*",
+                        "chai":      "*",
                         "benchmark": "*",
                         "ansi":      "*",
                         "browserify":"*",
@@ -24,6 +25,10 @@
                         "istanbul":  "*",
                         "ndoc":      "*",
                         "lodash":    "2.4.1",
-                        "async":     "0.2.10"
+                        "async":     "0.2.10",
+
+                        "mocha-cloud": "*",
+                        "mocha-cloud-grid-view": "*",
+                        "term-canvas": "*"
                       }
 }
