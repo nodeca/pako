@@ -12,10 +12,12 @@ module.exports = function(grunt) {
     version: '4.0'
   }, {
     browserName: 'firefox',
-    platform: 'XP'
+    platform: 'XP',
+    version: '27'
   }, {
     browserName: 'chrome',
-    platform: 'XP'
+    platform: 'XP',
+    version: '32'
   }, {
     browserName: 'internet explorer',
     platform: 'WIN8',
@@ -32,11 +34,11 @@ module.exports = function(grunt) {
     browserName: 'internet explorer',
     platform: 'XP',
     version: '7'
-  }, {
+  }, {/*
     browserName: 'opera',
     platform: 'Windows 2008',
     version: '12'
-  }, {
+  }, {*/
     browserName: 'safari',
     platform: 'OS X 10.8',
     version: '6'
@@ -56,12 +58,9 @@ module.exports = function(grunt) {
       all: {
         options: {
           urls: ['http://127.0.0.1:9999/test/browser/test.html'],
-          tunnelTimeout: 5,
-          build: process.env.TRAVIS_JOB_ID,
-          concurrency: 3,
+          build: process.env.TRAVIS_JOB_ID || ('local' + ~~(Math.random()*1000)),
           browsers: browsers,
-          testname: process.env.SAUCE_PROJ || 'mocha tests',
-          tags: ['master']
+          testname: process.env.SAUCE_PROJ || 'mocha tests'
         }
       }
     },
