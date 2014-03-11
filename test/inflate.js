@@ -12,7 +12,7 @@ var pako  = require('../index');
 var samples = helpers.loadSamples();
 
 
-describe.skip('Inflate defaults', function () {
+describe('Inflate defaults', function () {
 
   it('inflate, no options', function(done) {
     testInflate(samples, {}, done);
@@ -25,22 +25,22 @@ describe.skip('Inflate defaults', function () {
 });
 
 
-describe.skip('Inflate ungzip', function () {
+describe('Inflate ungzip', function () {
   var orig = samples.lorem_cat;
   var gzipped = pako.gzip(samples.lorem_cat);
 
-  it('ungzip with autodetect', function(done) {
+  it.skip('ungzip with autodetect', function(done) {
     done(helpers.cmp(orig, pako.inflate(gzipped).result));
   });
 
-  it('ungzip with method set directly', function(done) {
+  it.skip('ungzip with method set directly', function(done) {
     done(helpers.cmp(orig, pako.inflate(gzipped, { windowBits: 15 + 16 }).result));
   });
 
 });
 
 
-describe.skip('Inflate levels', function () {
+describe('Inflate levels', function () {
 
   it('level 9', function(done) {
     testInflate(samples, { level: 9 }, done);
@@ -69,14 +69,14 @@ describe.skip('Inflate levels', function () {
   it('level 1', function(done) {
     testInflate(samples, { level: 1 }, done);
   });
-  it('level 0', function(done) {
+  it.skip('level 0', function(done) {
     testInflate(samples, { level: 0 }, done);
   });
 
 });
 
 
-describe.skip('Inflate windowBits', function () {
+describe('Inflate windowBits', function () {
 
   it('windowBits 15', function(done) {
     testInflate(samples, { windowBits: 15 }, done);
@@ -99,13 +99,13 @@ describe.skip('Inflate windowBits', function () {
   it('windowBits 9', function(done) {
     testInflate(samples, { windowBits: 9 }, done);
   });
-  it('windowBits 8', function(done) {
+  it.skip('windowBits 8', function(done) {
     testInflate(samples, { windowBits: 8 }, done);
   });
 
 });
 
-describe.skip('Inflate strategy', function () {
+describe('Inflate strategy', function () {
 
   it('Z_DEFAULT_STRATEGY', function(done) {
     testInflate(samples, { strategy: 0 }, done);
@@ -126,7 +126,7 @@ describe.skip('Inflate strategy', function () {
 });
 
 
-describe.skip('Inflate RAW', function () {
+describe('Inflate RAW', function () {
   // Since difference is only in rwapper, test for store/fast/slow methods are enougth
   it('level 4', function(done) {
     testInflate(samples, { level: 4, raw: true }, done);
@@ -134,7 +134,7 @@ describe.skip('Inflate RAW', function () {
   it('level 1', function(done) {
     testInflate(samples, { level: 1, raw: true }, done);
   });
-  it('level 0', function(done) {
+  it.skip('level 0', function(done) {
     testInflate(samples, { level: 0, raw: true }, done);
   });
 

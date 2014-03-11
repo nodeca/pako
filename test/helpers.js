@@ -131,7 +131,7 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
 
 
 function testInflate(samples, options, callback) {
-  var name, data, deflated;
+  var name, data, deflated, inflated;
 
   for (name in samples) {
     data = samples[name];
@@ -139,15 +139,19 @@ function testInflate(samples, options, callback) {
 
     // with untyped arrays
     pako_utils.forceUntyped = true;
-    if (cmpBuf(pako.inflate(deflated, options).result, data)) {
-      callback('Error in "' + name + '" - zlib result != pako result');
+    inflated = pako.inflate(deflated, options);
+    pako_utils.forceUntyped = false;
+
+    if (!cmpBuf(inflated, data)) {
+      callback('Error in "' + name + '" - inflate result != original');
       return;
     }
 
     // with typed arrays
-    pako_utils.forceUntyped = true;
-    if (cmpBuf(pako.inflate(deflated, options).result, data)) {
-      callback('Error in "' + name + '" - zlib result != pako result');
+    inflated = pako.inflate(deflated, options);
+
+    if (!cmpBuf(inflated, data)) {
+      callback('Error in "' + name + '" - inflate result != original');
       return;
     }
   }
