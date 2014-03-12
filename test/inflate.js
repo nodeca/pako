@@ -69,7 +69,7 @@ describe('Inflate levels', function () {
   it('level 1', function(done) {
     testInflate(samples, { level: 1 }, done);
   });
-  it.skip('level 0', function(done) {
+  it('level 0', function(done) {
     testInflate(samples, { level: 0 }, done);
   });
 
@@ -134,7 +134,7 @@ describe('Inflate RAW', function () {
   it('level 1', function(done) {
     testInflate(samples, { level: 1, raw: true }, done);
   });
-  it.skip('level 0', function(done) {
+  it('level 0', function(done) {
     testInflate(samples, { level: 0, raw: true }, done);
   });
 
