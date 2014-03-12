@@ -131,7 +131,14 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
 
 
 function testInflate(samples, options, callback) {
-  var name, data, deflated, inflated;
+  var name, data, deflated, inflated, inflate_options;
+
+  // inflate options have windowBits = 0 to force autodetect window size
+  //
+  inflate_options = pako_utils.assign({}, options);
+  if (inflate_options.windowBits > 0 && inflate_options.windowBits < 16) {
+    inflate_options.windowBits = 0;
+  }
 
   for (name in samples) {
     data = samples[name];
@@ -139,7 +146,7 @@ function testInflate(samples, options, callback) {
 
     // with untyped arrays
     pako_utils.forceUntyped = true;
-    inflated = pako.inflate(deflated, options);
+    inflated = pako.inflate(deflated, inflate_options);
     pako_utils.forceUntyped = false;
 
     if (!cmpBuf(inflated, data)) {
@@ -148,7 +155,7 @@ function testInflate(samples, options, callback) {
     }
 
     // with typed arrays
-    inflated = pako.inflate(deflated, options);
+    inflated = pako.inflate(deflated, inflate_options);
 
     if (!cmpBuf(inflated, data)) {
       callback('Error in "' + name + '" - inflate result != original');

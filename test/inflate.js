@@ -30,11 +30,11 @@ describe('Inflate ungzip', function () {
   var gzipped = pako.gzip(samples.lorem_cat);
 
   it.skip('ungzip with autodetect', function(done) {
-    done(helpers.cmp(orig, pako.inflate(gzipped).result));
+    done(helpers.cmp(orig, pako.inflate(gzipped)));
   });
 
   it.skip('ungzip with method set directly', function(done) {
-    done(helpers.cmp(orig, pako.inflate(gzipped, { windowBits: 15 + 16 }).result));
+    done(helpers.cmp(orig, pako.inflate(gzipped, { windowBits: 15 + 16 })));
   });
 
 });
@@ -99,7 +99,7 @@ describe('Inflate windowBits', function () {
   it('windowBits 9', function(done) {
     testInflate(samples, { windowBits: 9 }, done);
   });
-  it.skip('windowBits 8', function(done) {
+  it('windowBits 8', function(done) {
     testInflate(samples, { windowBits: 8 }, done);
   });
 
