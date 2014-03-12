@@ -63,15 +63,32 @@ var input = new Uint8Array();
 //... fill input data here
 var output = pako.deflate(input);
 
-// Inflate
+// Inflate (simple wrapper can throw exception on broken stream)
 //
 var compressed = new Uint8Array();
 //... fill data to uncompress here
-var result = pako.inflate(compressed);
-if (result.err) {
-  console.log(result.err, result.msg);
+try {
+  var result = pako.inflate(compressed);
+catch (err) {
+  console.log(err);
 }
-var uncompressed = result.data;
+
+//
+// Alternate interface for chunking & without exceptions
+//
+
+var inflator = new pako.Inflate();
+
+inflator.push(chunk1, false);
+inflator.push(chunk2, false);
+...
+inflator.push(chunkN, true); // true -> last
+
+if (inflator.err) {
+  console.log(inflator.msg);
+}
+
+var output = inflator.result;
 
 ```
 
