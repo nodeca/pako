@@ -36,7 +36,7 @@ test-browser: lint
 
 cover:
 	rm -rf cover
-	istanbul cover node_modules/.bin/_mocha -- -t 30000 -R spec
+	istanbul cover node_modules/.bin/_mocha
 
 doc:
 	rm -rf ./doc

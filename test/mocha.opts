@@ -1,1 +1,1 @@
--R spec
+-R spec -t 60000
