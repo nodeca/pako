@@ -130,7 +130,7 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
 }
 
 
-function testInflate(samples, options, callback) {
+function testInflate(samples, options, callback, is_gzip) {
   var name, data, deflated, inflated, inflate_options;
 
   // inflate options have windowBits = 0 to force autodetect window size
@@ -142,7 +142,7 @@ function testInflate(samples, options, callback) {
 
   for (name in samples) {
     data = samples[name];
-    deflated = pako.deflate(data, options);
+    deflated = is_gzip ? pako.gzip(data, options) : pako.deflate(data, options);
 
     // with untyped arrays
     pako_utils.setTyped(false);

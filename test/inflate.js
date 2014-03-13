@@ -6,7 +6,6 @@
 
 var helpers = require('./helpers');
 var testInflate = helpers.testInflate;
-var pako  = require('../index');
 
 
 var samples = helpers.loadSamples();
@@ -26,15 +25,12 @@ describe('Inflate defaults', function () {
 
 
 describe('Inflate ungzip', function () {
-  var orig = samples.lorem_cat;
-  var gzipped = pako.gzip(samples.lorem_cat);
-
-  it.skip('ungzip with autodetect', function(done) {
-    done(helpers.cmp(orig, pako.inflate(gzipped)));
+  it.skip('with autodetect', function(done) {
+    testInflate(samples, {}, done, true);
   });
 
-  it.skip('ungzip with method set directly', function(done) {
-    done(helpers.cmp(orig, pako.inflate(gzipped, { windowBits: 15 + 16 })));
+  it('with method set directly', function(done) {
+    testInflate(samples, { windowBits: 15 + 16 }, done, true);
   });
 
 });
