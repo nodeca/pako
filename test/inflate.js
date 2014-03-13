@@ -28,12 +28,12 @@ describe('Inflate ungzip', function () {
   // TODO: Investigate, why ungzip does not autodetect window size and
   // require to set windowBits directly
 
-  it.skip('with autodetect', function(done) {
+  it('with autodetect', function(done) {
     testInflate(samples, {}, { gzip: true }, done);
   });
 
   it('with method set directly', function(done) {
-    testInflate(samples, { windowBits: 15 + 16 }, { gzip: true }, done);
+    testInflate(samples, { windowBits: 16 }, { gzip: true }, done);
   });
 });
 
