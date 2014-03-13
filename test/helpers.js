@@ -130,23 +130,18 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
 }
 
 
-function testInflate(samples, options, callback, is_gzip) {
-  var name, data, deflated, inflated, inflate_options;
+function testInflate(samples, inflateOptions, deflateOptions, callback) {
+  var name, data, deflated, inflated;
 
   // inflate options have windowBits = 0 to force autodetect window size
   //
-  inflate_options = pako_utils.assign({}, options);
-  if (inflate_options.windowBits > 0 && inflate_options.windowBits < 16) {
-    inflate_options.windowBits = 0;
-  }
-
   for (name in samples) {
     data = samples[name];
-    deflated = is_gzip ? pako.gzip(data, options) : pako.deflate(data, options);
+    deflated = pako.deflate(data, deflateOptions);
 
     // with untyped arrays
     pako_utils.setTyped(false);
-    inflated = pako.inflate(deflated, inflate_options);
+    inflated = pako.inflate(deflated, inflateOptions);
     pako_utils.setTyped(true);
 
     if (!cmpBuf(inflated, data)) {
@@ -155,7 +150,7 @@ function testInflate(samples, options, callback, is_gzip) {
     }
 
     // with typed arrays
-    inflated = pako.inflate(deflated, inflate_options);
+    inflated = pako.inflate(deflated, inflateOptions);
 
     if (!cmpBuf(inflated, data)) {
       callback('Error in "' + name + '" - inflate result != original');
