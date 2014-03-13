@@ -25,9 +25,6 @@ describe('Inflate defaults', function () {
 
 
 describe('Inflate ungzip', function () {
-  // TODO: Investigate, why ungzip does not autodetect window size and
-  // require to set windowBits directly
-
   it('with autodetect', function(done) {
     testInflate(samples, {}, { gzip: true }, done);
   });
