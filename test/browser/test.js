@@ -17,16 +17,24 @@ var cmp = function (a, b) {
 };
 
 
-describe('Generic tests', function () {
+describe('Generic', function () {
 
-  it('dummy', function() {
-    pako.deflate(data_bin);
+  it('defaults', function() {
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin))));
   });
 
-  it.skip('levels', function() {
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin))));
+
+  it('levels 0-9', function() {
     assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 0 }))));
     assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 1 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 2 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 3 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 4 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 5 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 6 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 7 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 8 }))));
+    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 9 }))));
   });
 });
 
