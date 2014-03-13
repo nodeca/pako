@@ -26,13 +26,6 @@ var Z_DEFLATED  = 8;
 /* ===========================================================================*/
 
 
-// return sliced buffer, trying to avoid new objects creation and mem copy
-function sliceBuf(buf, size) {
-  if (buf.length === size) { return buf; }
-
-  return utils.typedOk() ? buf.subarray(0, size) : buf.slice(0, size);
-}
-
 /**
  * class Deflate
  *
@@ -190,7 +183,7 @@ Deflate.prototype.push = function(data, mode) {
   strm.next_in = data;
   strm.next_in_index = 0;
   strm.avail_in = strm.next_in.length;
-  strm.next_out = utils.arrayCreate(chunkSize);
+  strm.next_out = new utils.Buf8(chunkSize);
 
   do {
     strm.avail_out = this.options.chunkSize;
@@ -203,10 +196,10 @@ Deflate.prototype.push = function(data, mode) {
       return false;
     }
     if(strm.next_out_index) {
-      this.onData(sliceBuf(strm.next_out, strm.next_out_index));
+      this.onData(utils.shrinkBuf(strm.next_out, strm.next_out_index));
       // Allocate buffer for next chunk, if not last
       if (strm.avail_in > 0 || strm.avail_out === 0) {
-        strm.next_out = utils.arrayCreate(this.options.chunkSize);
+        strm.next_out = new utils.Buf8(this.options.chunkSize);
       }
     }
   } while (strm.avail_in > 0 || strm.avail_out === 0);
@@ -252,7 +245,7 @@ Deflate.prototype.onEnd = function(status) {
   }
   this.chunks = [];
   this.err = status;
-  this.msg = msg[status];
+  this.msg = this.strm.msg;
 };
 
 
@@ -288,7 +281,7 @@ function deflate(input, options) {
   deflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (deflator.err) { throw msg[deflator.err]; }
+  if (deflator.err) { throw deflator.msg; }
 
   return deflator.result;
 }
@@ -336,24 +329,27 @@ exports.gzip = gzip;
 // Small size is preferable.
 
 function adler32(adler, buf, len, pos) {
-  var s1 = adler & 0xffff
-    , s2 = (adler >>> 16) & 0xffff
+  var s1 = (adler & 0xffff) |0
+    , s2 = ((adler >>> 16) & 0xffff) |0
     , n = 0;
 
   while (len !== 0) {
-    n = len > 5552 ? 5552 : len;
+    // Set limit ~ twice less than 5552, to keep
+    // s2 in 31-bits, because we force signed ints.
+    // in other case %= will fail.
+    n = len > 2000 ? 2000 : len;
     len -= n;
 
     do {
-      s1 += buf[pos++];
-      s2 += s1;
+      s1 = (s1 + buf[pos++]) |0;
+      s2 = (s2 + s1) |0;
     } while (--n);
 
     s1 %= 65521;
     s2 %= 65521;
   }
 
-  return (s1 | (s2 << 16));
+  return (s1 | (s2 << 16)) |0;
 }
 
 
@@ -407,6 +403,7 @@ var utils   = _dereq_('./utils');
 var trees   = _dereq_('./trees');
 var adler32 = _dereq_('./adler32');
 var crc32   = _dereq_('./crc32');
+var msg   = _dereq_('./messages');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -505,6 +502,10 @@ var BS_FINISH_DONE    = 4; /* finish done, accept no more input or output */
 
 var OS_CODE = 0x03; // Unix :) . Don't detect, use this default.
 
+function err(strm, errorCode) {
+  strm.msg = msg[errorCode];
+  return errorCode;
+}
 
 function rank(f) {
   return ((f) << 1) - ((f) > 4 ? 9 : 0);
@@ -1570,9 +1571,9 @@ function DeflateState() {
 
   // Use flat array of DOUBLE size, with interleaved fata,
   // because JS does not support effective
-  this.dyn_ltree  = utils.array16Create(HEAP_SIZE * 2);
-  this.dyn_dtree  = utils.array16Create((2*D_CODES+1) * 2);
-  this.bl_tree    = utils.array16Create((2*BL_CODES+1) * 2);
+  this.dyn_ltree  = new utils.Buf16(HEAP_SIZE * 2);
+  this.dyn_dtree  = new utils.Buf16((2*D_CODES+1) * 2);
+  this.bl_tree    = new utils.Buf16((2*BL_CODES+1) * 2);
   zero(this.dyn_ltree);
   zero(this.dyn_dtree);
   zero(this.bl_tree);
@@ -1589,11 +1590,11 @@ function DeflateState() {
   this.bl_desc  = null;         /* desc. for bit length tree */
 
   //ush bl_count[MAX_BITS+1];
-  this.bl_count = utils.array16Create(MAX_BITS+1);
+  this.bl_count = new utils.Buf16(MAX_BITS+1);
   /* number of codes at each bit length for an optimal tree */
 
   //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
-  this.heap = utils.array16Create(2*L_CODES+1);  /* heap used to build the Huffman trees */
+  this.heap = new utils.Buf16(2*L_CODES+1);  /* heap used to build the Huffman trees */
   zero(this.heap);
 
   this.heap_len = 0;               /* number of elements in the heap */
@@ -1602,7 +1603,7 @@ function DeflateState() {
    * The same heap array is used to build all trees.
    */
 
-  this.depth = utils.array16Create(2*L_CODES+1); //uch depth[2*L_CODES+1];
+  this.depth = new utils.Buf16(2*L_CODES+1); //uch depth[2*L_CODES+1];
   zero(this.depth);
   /* Depth of each subtree used as tie breaker for trees of equal frequency
    */
@@ -1664,7 +1665,7 @@ function deflateResetKeep(strm) {
   var s;
 
   if (!strm || !strm.state) {
-    return Z_STREAM_ERROR;
+    return err(strm, Z_STREAM_ERROR);
   }
 
   strm.total_in = strm.total_out = 0;
@@ -1698,7 +1699,7 @@ function deflateReset(strm) {
 
 function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   if (!strm) { // === Z_NULL
-    return Z_STREAM_ERROR;
+    return err(strm, Z_STREAM_ERROR);
   }
   var wrap = 1;
 
@@ -1720,7 +1721,7 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED ||
     windowBits < 8 || windowBits > 15 || level < 0 || level > 9 ||
     strategy < 0 || strategy > Z_FIXED) {
-    return Z_STREAM_ERROR;
+    return err(strm, Z_STREAM_ERROR);
   }
 
 
@@ -1745,16 +1746,16 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   s.hash_mask = s.hash_size - 1;
   s.hash_shift = ~~((s.hash_bits + MIN_MATCH - 1) / MIN_MATCH);
 
-  s.window = utils.arrayCreate(s.w_size * 2);
-  s.head = utils.array16Create(s.hash_size);
-  s.prev = utils.array16Create(s.w_size);
+  s.window = new utils.Buf8(s.w_size * 2);
+  s.head = new utils.Buf16(s.hash_size);
+  s.prev = new utils.Buf16(s.w_size);
 
   s.high_water = 0;  /* nothing written to s->window yet */
 
   s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
 
   s.pending_buf_size = s.lit_bufsize * 4;
-  s.pending_buf = utils.arrayCreate(s.pending_buf_size);
+  s.pending_buf = new utils.Buf8(s.pending_buf_size);
 
   s.d_buf = s.lit_bufsize >> 1;
   s.l_buf = (1 + 2) * s.lit_bufsize;
@@ -1776,7 +1777,7 @@ function deflate(strm, flush) {
 
   if (!strm || !strm.state ||
     flush > Z_BLOCK || flush < 0) {
-    return Z_STREAM_ERROR;
+    return err(strm, Z_STREAM_ERROR);
   }
 
   s = strm.state;
@@ -1784,7 +1785,7 @@ function deflate(strm, flush) {
   if (!strm.next_out ||
       (!strm.next_in && strm.avail_in !== 0) ||
       (s.status === FINISH_STATE && flush !== Z_FINISH)) {
-    return (strm.avail_out === 0) ? Z_BUF_ERROR : Z_STREAM_ERROR;
+    return err(strm, (strm.avail_out === 0) ? Z_BUF_ERROR : Z_STREAM_ERROR);
   }
 
   s.strm = strm; /* just in case */
@@ -1865,12 +1866,12 @@ function deflate(strm, flush) {
      */
   } else if (strm.avail_in === 0 && rank(flush) <= rank(old_flush) &&
     flush !== Z_FINISH) {
-    return Z_BUF_ERROR;
+    return err(strm, Z_BUF_ERROR);
   }
 
   /* User must not provide more input after the first FINISH: */
   if (s.status === FINISH_STATE && strm.avail_in !== 0) {
-    return Z_BUF_ERROR;
+    return err(strm, Z_BUF_ERROR);
   }
 
   /* Start a new block or continue the current one.
@@ -1968,12 +1969,12 @@ function deflateEnd(strm) {
     status !== BUSY_STATE &&
     status !== FINISH_STATE
   ) {
-    return Z_STREAM_ERROR;
+    return err(strm, Z_STREAM_ERROR);
   }
 
   strm.state = null;
 
-  return status === BUSY_STATE ? Z_DATA_ERROR : Z_OK;
+  return status === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK;
 }
 
 /* =========================================================================
@@ -1988,7 +1989,7 @@ exports.deflateInit2 = deflateInit2;
 exports.deflateReset = deflateReset;
 exports.deflate = deflate;
 exports.deflateEnd = deflateEnd;
-exports.deflate_info = 'pako deflate';
+exports.deflateInfo = 'pako deflate (from Nodeca project)';
 
 /* Not implemented
 exports.deflateSetDictionary = deflateSetDictionary;
@@ -1997,7 +1998,7 @@ exports.deflateSetHeader = deflateSetHeader;
 exports.deflateBound = deflateBound;
 exports.deflatePending = deflatePending;
 */
-},{"./adler32":2,"./crc32":3,"./trees":6,"./utils":7}],5:[function(_dereq_,module,exports){
+},{"./adler32":2,"./crc32":3,"./messages":5,"./trees":6,"./utils":7}],5:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = {
@@ -3212,19 +3213,7 @@ exports._tr_align = _tr_align;
 
 var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
                 (typeof Uint16Array !== 'undefined') &&
-                (typeof Uint32Array !== 'undefined');
-
-var _toString = Function.prototype.call.bind(Object.prototype.toString);
-var isArray = Array.isArray || function (obj) { return _toString(obj) === '[object Array]'; };
-
-// For debug/testing. Set true to force use untyped arrays
-exports.forceUntyped = false;
-
-function typedOk() {
-  return TYPED_OK && !exports.forceUntyped;
-}
-
-exports.typedOk = typedOk;
+                (typeof Int32Array !== 'undefined');
 
 
 exports.assign = function (obj /*from1, from2, from3, ...*/) {
@@ -3248,58 +3237,32 @@ exports.assign = function (obj /*from1, from2, from3, ...*/) {
 };
 
 
-exports.arraySet = function (dest, src, src_offs, len, dest_offs) {
-
-  // Suppose, that with typed array support destination is
-  // always typed - don't check it
-  if (typedOk() && (!isArray(src))) {
-
-    // optimize full copy
-    //if ((src_offs === 0) && (src.length === len)) {
-    //  dest.set(src, dest_offs);
-    //  return;
-    //}
-
-    dest.set(src.subarray(src_offs, src_offs+len), dest_offs);
-    return;
-  }
-
-  // Fallback to ordinary array
-  for(var i=0; i<len; i++) {
-    dest[dest_offs + i] = src[src_offs + i];
-  }
+// reduce buffer size, avoiding mem copy
+exports.shrinkBuf = function (buf, size) {
+  if (buf.length === size) { return buf; }
+  if (buf.subarray) { return buf.subarray(0, size); }
+  buf.length = size;
+  return buf;
 };
 
 
-exports.arrayCreate = function (length) {
+var fnTyped = {
+  arraySet: function (dest, src, src_offs, len, dest_offs) {
+    // Suppose, that with typed array support destination is
+    // always typed - don't check it
+    if (src.subarray) {
+      dest.set(src.subarray(src_offs, src_offs+len), dest_offs);
+      return;
+    }
+    // Fallback to ordinary array
+    for(var i=0; i<len; i++) {
+      dest[dest_offs + i] = src[src_offs + i];
+    }
+  },
+  // Join array of chunks to single array.
+  flattenChunks: function(chunks) {
+    var i, l, len, pos, chunk, result;
 
-  if (typedOk()) {
-    return new Uint8Array(length);
-  }
-
-  // Fallback to ordinary array
-  return new Array(length);
-};
-
-
-exports.array16Create = function (length) {
-
-  if (typedOk()) {
-    return new Uint16Array(length);
-  }
-
-  // Fallback to ordinary array
-  return new Array(length);
-};
-
-
-// Join array of chunks to single array.
-// Expect Array of (Array(Bytes) || Uint8Array).
-//
-exports.flattenChunks = function(chunks) {
-  var i, l, len, pos, chunk, result;
-
-  if (typedOk()) {
     // calculate data length
     len = 0;
     for (i=0, l=chunks.length; i<l; i++) {
@@ -3317,11 +3280,38 @@ exports.flattenChunks = function(chunks) {
 
     return result;
   }
-
-  // Fallback for untyped arrays
-  return [].concat.apply([], chunks);
 };
 
+var fnUntyped = {
+  arraySet: function (dest, src, src_offs, len, dest_offs) {
+    for(var i=0; i<len; i++) {
+      dest[dest_offs + i] = src[src_offs + i];
+    }
+  },
+  // Join array of chunks to single array.
+  flattenChunks: function(chunks) {
+    return [].concat.apply([], chunks);
+  }
+};
+
+
+// Enable/Disable typed arrays use, for testing
+//
+exports.setTyped = function (on) {
+  if (on) {
+    exports.Buf8  = Uint8Array;
+    exports.Buf16 = Uint16Array;
+    exports.Buf32 = Int32Array;
+    exports.assign(exports, fnTyped);
+  } else {
+    exports.Buf8  = Array;
+    exports.Buf16 = Array;
+    exports.Buf32 = Array;
+    exports.assign(exports, fnUntyped);
+  }
+};
+
+exports.setTyped(TYPED_OK);
 },{}],8:[function(_dereq_,module,exports){
 'use strict';
 
@@ -3329,18 +3319,20 @@ exports.flattenChunks = function(chunks) {
 function ZStream() {
   /* next input byte */
   this.next_in = null;
+  this.next_in_index = 0; // JS specific, offset in next_in
   /* number of bytes available at next_in */
   this.avail_in = 0;
   /* total number of input bytes read so far */
   this.total_in = 0;
   /* next output byte should be put there */
   this.next_out = null;
+  this.next_out_index = 0; // JS specific, offset in next_out
   /* remaining free space at next_out */
   this.avail_out = 0;
   /* total number of bytes output so far */
   this.total_out = 0;
   /* last error message, NULL if no error */
-  //this.msg = c.Z_NULL;
+  this.msg = ''/*Z_NULL*/;
   /* not visible by applications */
   this.state = null;
   /* best guess about the data type: binary or text */
