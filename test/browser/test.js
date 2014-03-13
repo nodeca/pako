@@ -24,17 +24,19 @@ describe('Generic', function () {
   });
 
 
-  it('levels 0-9', function() {
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 0 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 1 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 2 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 3 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 4 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 5 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 6 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 7 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 8 }))));
-    assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 9 }))));
+  describe('levels', function() {
+    it('0', function() {
+      assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 0 }))));
+    });
+    it('1', function() {
+      assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 1 }))));
+    });
+    it('4', function() {
+      assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 4 }))));
+    });
+    it('6', function() {
+      assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 6 }))));
+    });
   });
 });
 
