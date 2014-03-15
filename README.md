@@ -67,7 +67,7 @@ bower install pako
 Example & API
 -------------
 
-[Full docs](http://nodeca.github.io/pako/).
+Full docs - http://nodeca.github.io/pako/
 
 ```javascript
 var pako = require('pako');
@@ -97,7 +97,7 @@ var inflator = new pako.Inflate();
 inflator.push(chunk1, false);
 inflator.push(chunk2, false);
 ...
-inflator.push(chunkN, true); // true -> last
+inflator.push(chunkN, true); // true -> last chunk
 
 if (inflator.err) {
   console.log(inflator.msg);
@@ -111,7 +111,7 @@ var output = inflator.result;
 Notes
 -----
 
-Pako does not contains some specific zlib functions:
+Pako does not contain some specific zlib functions:
 
 - __deflate__ - writing custom gzip headers and methods `deflateSetDictionary`,
   `deflateParams`, `deflateSetHeader`, `deflateBound`, `deflatePending`.
