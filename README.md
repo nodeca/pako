@@ -111,7 +111,7 @@ var output = inflator.result;
 Notes
 -----
 
-Pako does not contains some specific zlib functions:
+Pako does not contain some specific zlib functions:
 
 - __deflate__ - writing custom gzip headers and methods `deflateSetDictionary`,
   `deflateParams`, `deflateSetHeader`, `deflateBound`, `deflatePending`.
