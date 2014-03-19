@@ -123,8 +123,29 @@ describe('Inflate strategy', function () {
 
 describe('Inflate RAW', function () {
   // Since difference is only in rwapper, test for store/fast/slow methods are enougth
+  it('level 9', function(done) {
+    testInflate(samples, { raw: true }, { level: 9, raw: true }, done);
+  });
+  it('level 8', function(done) {
+    testInflate(samples, { raw: true }, { level: 8, raw: true }, done);
+  });
+  it('level 7', function(done) {
+    testInflate(samples, { raw: true }, { level: 7, raw: true }, done);
+  });
+  it('level 6', function(done) {
+    testInflate(samples, { raw: true }, { level: 6, raw: true }, done);
+  });
+  it('level 5', function(done) {
+    testInflate(samples, { raw: true }, { level: 5, raw: true }, done);
+  });
   it('level 4', function(done) {
     testInflate(samples, { raw: true }, { level: 4, raw: true }, done);
+  });
+  it('level 3', function(done) {
+    testInflate(samples, { raw: true }, { level: 3, raw: true }, done);
+  });
+  it('level 2', function(done) {
+    testInflate(samples, { raw: true }, { level: 2, raw: true }, done);
   });
   it('level 1', function(done) {
     testInflate(samples, { raw: true }, { level: 1, raw: true }, done);

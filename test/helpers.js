@@ -137,6 +137,9 @@ function testInflate(samples, inflateOptions, deflateOptions, callback) {
   //
   for (name in samples) {
     data = samples[name];
+
+    // always use the same data type to generate sample
+    pako_utils.setTyped(true);
     deflated = pako.deflate(data, deflateOptions);
 
     // with untyped arrays
