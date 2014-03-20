@@ -150,7 +150,7 @@ describe('Deflate strategy', function () {
   it('Z_RLE', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 3 }, done);
   });
-  it.skip('Z_FIXED', function(done) {
+  it('Z_FIXED', function(done) {
     testDeflate(zlib.createDeflate, pako.deflate, samples, { strategy: 4 }, done);
   });
 

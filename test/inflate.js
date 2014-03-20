@@ -114,7 +114,7 @@ describe('Inflate strategy', function () {
   it('Z_RLE', function(done) {
     testInflate(samples, {}, { strategy: 3 }, done);
   });
-  it.skip('Z_FIXED', function(done) {
+  it('Z_FIXED', function(done) {
     testInflate(samples, {}, { strategy: 4 }, done);
   });
 
