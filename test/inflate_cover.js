@@ -3,56 +3,32 @@
 
 'use strict';
 
+
 var fs = require('fs');
 var path  = require('path');
 var assert = require('assert');
 
-var c = require('../lib/zlib/constants');
 
-var pako_utils = require('../lib/zlib/utils');
-var pako_msg = require('../lib/zlib/messages');
+var c = require('../lib/zlib/constants');
 var pako  = require('../index');
 
+
 function h2b(hex) {
-  var tmp = hex.split(' ');
-  var res = new pako_utils.Buf8(tmp.length);
-  for (var i=0; i<tmp.length; i++) {
-    res[i] = parseInt(tmp[i], 16);
-  }
-
-  return res;
+  return hex.split(' ').map(function(hex) { return parseInt(hex, 16); });
 }
 
-function testInflate(hex, wbits, err) {
-  var inflator;
-
-  var assert_fn = err === c.Z_OK ? assert.doesNotThrow : assert.throws;
-
-  assert_fn(function() {
-    inflator = new pako.Inflate({windowBits: wbits});
-    inflator.push(h2b(hex), true);
-    if (inflator.err) {
-      throw new Error(inflator.err);
-    }
-  }, pako_msg[err]);
+function a2s(array) {
+  return String.fromCharCode.apply(null, array);
 }
 
-function testInflateGzHeader(sample, field, expected) {
-  var data, actual;
-  data = new Uint8Array(fs.readFileSync(path.join(__dirname, 'fixtures/header', sample)));
-
-  var inflator = new pako.Inflate();
-  inflator.push(data, true);
-
-  actual = inflator.header[field];
-  if (actual instanceof pako_utils.Buf8) {
-    actual = String.fromCharCode.apply(null, actual);
-  }
-  assert.equal(actual, expected);
+function testInflate(hex, wbits, status) {
+  var inflator = new pako.Inflate({ windowBits: wbits });
+  inflator.push(h2b(hex), true);
+  assert.equal(inflator.err, status);
 }
 
 
-describe('Inflate coverage wrap', function() {
+describe('Inflate states', function() {
   it('bad gzip method', function() {
     testInflate('1f 8b 0 0', 31, c.Z_DATA_ERROR);
   });
@@ -88,14 +64,14 @@ describe('Inflate coverage wrap', function() {
   });
 });
 
-describe('Inflate coverage gzip header', function() {
-  it('check filename', function() {
-    testInflateGzHeader('test.gz', 'name', 'test name');
-  });
-  it('check comment', function() {
-    testInflateGzHeader('test.gz', 'comment', 'test comment');
-  });
-  it('check extra', function() {
-    testInflateGzHeader('test.gz', 'extra', 'test extra');
+describe('Inflate gzip header', function() {
+  it('Check headers content from prepared file', function() {
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures/header/test.gz'));
+    var inflator = new pako.Inflate();
+    inflator.push(data, true);
+
+    assert.equal(inflator.header.name, 'test name');
+    assert.equal(inflator.header.comment, 'test comment');
+    assert.equal(a2s(inflator.header.extra), 'test extra');
   });
 });
