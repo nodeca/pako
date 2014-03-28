@@ -17,6 +17,9 @@ function loadSamples() {
   var dir = path.join(__dirname, 'fixtures');
 
   fs.readdirSync(dir).sort().forEach(function (sample) {
+    if (fs.statSync(path.join(dir, sample)).isDirectory()) {
+      return;
+    }
     var filepath = path.join(dir, sample),
         extname  = path.extname(filepath),
         basename = path.basename(filepath, extname),

@@ -155,4 +155,3 @@ describe('Inflate RAW', function () {
   });
 
 });
-
