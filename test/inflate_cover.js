@@ -66,7 +66,7 @@ describe('Inflate states', function() {
 
 describe('Inflate gzip header', function() {
   it('Check headers content from prepared file', function() {
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/header/test.gz'));
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
     var inflator = new pako.Inflate();
     inflator.push(data, true);
 
