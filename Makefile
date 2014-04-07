@@ -31,7 +31,7 @@ test: lint
 
 test-browser: lint
 	rm -f ./test/browser/pako.js
-	browserify -r ./ -s pako > test/browser/pako.js
+	browserify --detect-globals false -r ./ -s pako > test/browser/pako.js
 	@SAUCE_PROJ=${GITHUB_PROJ} grunt test
 
 cover:
@@ -48,13 +48,13 @@ browserify:
 	mkdir dist
 	# Browserify
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./ -s pako \
+		browserify --detect-globals false -r ./ -s pako \
 		) > dist/pako.js
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./lib/deflate.js -s pako \
+		browserify --detect-globals false -r ./lib/deflate.js -s pako \
 		) > dist/pako_deflate.js
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./lib/inflate.js -s pako \
+		browserify --detect-globals false -r ./lib/inflate.js -s pako \
 		) > dist/pako_inflate.js
 	# Minify
 	uglifyjs dist/pako.js -c -m \
