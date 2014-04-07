@@ -11,6 +11,10 @@ var helpers = require('./helpers');
 var pako_utils = require('../lib/zlib/utils');
 var pako = require('../index');
 
+
+var samples = helpers.loadSamples();
+
+
 function randomBuf(size) {
   var buf = pako_utils.Buf8(size);
   for (var i = 0; i < size; i++) {
@@ -61,6 +65,31 @@ describe('Small input chunks', function () {
     var buf = randomBuf(8000);
     var deflated = pako.deflate(buf);
     testChunk(deflated, buf, new pako.Inflate(), 10);
+  });
+
+});
+
+
+describe('Dummy push (force end)', function () {
+
+  it('deflate end', function () {
+    var data = samples.lorem_utf_100k;
+
+    var deflator = new pako.Deflate();
+    deflator.push(data);
+    deflator.push([], true);
+
+    assert(helpers.cmpBuf(deflator.result, pako.deflate(data)));
+  });
+
+  it('inflate end', function () {
+    var data = pako.deflate(samples.lorem_utf_100k);
+
+    var inflator = new pako.Inflate();
+    inflator.push(data);
+    inflator.push([], true);
+
+    assert(helpers.cmpBuf(inflator.result, pako.inflate(data)));
   });
 
 });
