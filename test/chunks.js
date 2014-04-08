@@ -24,7 +24,15 @@ function randomBuf(size) {
 }
 
 function testChunk(buf, expected, packer, chunkSize) {
-  var i, _in, count, pos, size;
+  var i, _in, count, pos, size, expFlushCount;
+
+  var onData = packer.onData;
+  var flushCount = 0;
+
+  packer.onData = function() {
+    flushCount++;
+    onData.apply(this, arguments);
+  };
 
   count = Math.ceil(buf.length / chunkSize);
   pos = 0;
@@ -36,9 +44,12 @@ function testChunk(buf, expected, packer, chunkSize) {
     pos += chunkSize;
   }
 
-  assert(!packer.err, 'Packer error: ' + packer.err);
+  //expected count of onData calls. 16384 output chunk size
+  expFlushCount = Math.ceil(packer.result.length / 16384);
 
+  assert(!packer.err, 'Packer error: ' + packer.err);
   assert(helpers.cmpBuf(packer.result, expected), 'Result is different');
+  assert.equal(flushCount, expFlushCount, 'onData called ' + flushCount + 'times, expected: ' + expFlushCount);
 }
 
 describe('Small input chunks', function () {
@@ -49,8 +60,8 @@ describe('Small input chunks', function () {
     testChunk(buf, deflated, new pako.Deflate(), 1);
   });
 
-  it('deflate 8000b by 10b chunk', function () {
-    var buf = randomBuf(8000);
+  it('deflate 20000b by 10b chunk', function () {
+    var buf = randomBuf(20000);
     var deflated = pako.deflate(buf);
     testChunk(buf, deflated, new pako.Deflate(), 10);
   });
@@ -61,8 +72,8 @@ describe('Small input chunks', function () {
     testChunk(deflated, buf, new pako.Inflate(), 1);
   });
 
-  it('inflate 8000b result by 10b chunk', function () {
-    var buf = randomBuf(8000);
+  it('inflate 20000b result by 10b chunk', function () {
+    var buf = randomBuf(20000);
     var deflated = pako.deflate(buf);
     testChunk(deflated, buf, new pako.Inflate(), 10);
   });
