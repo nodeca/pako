@@ -8,9 +8,13 @@ var fs = require('fs');
 var path  = require('path');
 var assert = require('assert');
 
-
 var c = require('../lib/zlib/constants');
-var pako_utils = require('../lib/zlib/utils');
+var msg = require('../lib/zlib/messages');
+var zlib_stream = require('../lib/zlib/zstream');
+var zlib_inflate = require('../lib/zlib/inflate.js');
+var inflate_table = require('../lib/zlib/inftrees');
+
+var pako_utils  = require('../lib/zlib/utils');
 var pako  = require('../index');
 
 
@@ -22,14 +26,36 @@ function a2s(array) {
   return String.fromCharCode.apply(null, array);
 }
 
+//step argument from original tests is missing because it have no effect
+//we have similar behavior in chunks.js tests
 function testInflate(hex, wbits, status) {
-  var inflator = new pako.Inflate({ windowBits: wbits });
+  var inflator;
+  try {
+    inflator= new pako.Inflate({ windowBits: wbits });
+  } catch (e) {
+    assert(e === msg[status]);
+    return;
+  }
   inflator.push(h2b(hex), true);
   assert.equal(inflator.err, status);
 }
 
 
 describe('Inflate states', function() {
+//  //in port checking input parameters was removed
+//  it.skip('inflate bad parameters', function() {
+//    var ret;
+//
+//    ret = zlib_inflate.inflate(null, 0);
+//    assert(ret == c.Z_STREAM_ERROR);
+//
+//    ret = zlib_inflate.inflateEnd(null);
+//    assert(ret == c.Z_STREAM_ERROR);
+//
+//    //skip: inflateCopy is not implemented
+//    //ret = zlib_inflate.inflateCopy(null, null);
+//    //assert(ret == c.Z_STREAM_ERROR);
+//  });
   it('bad gzip method', function() {
     testInflate('1f 8b 0 0', 31, c.Z_DATA_ERROR);
   });
@@ -135,6 +161,27 @@ describe('Inflate cover', function() {
   });
 });
 
+describe('cover trees', function() {
+  it('inflate_table not enough errors', function() {
+    var ret, bits, next, table = [], lens = [], work = [];
+    var DISTS = 2;
+    /* we need to call inflate_table() directly in order to manifest not-
+     enough errors, since zlib insures that enough is always enough */
+    for (bits = 0; bits < 15; bits++) {
+      lens[bits] = bits + 1;
+    }
+    lens[15] = 15;
+    next = table;
+
+    ret = inflate_table(DISTS, lens, 0, 16, next, 0, work, {bits: 15});
+    assert(ret === 1);
+
+    next = table;
+    ret = inflate_table(DISTS, lens, 0, 16, next, 0, work, {bits: 1});
+    assert(ret === 1);
+  });
+});
+
 describe('Inflate fast', function() {
   it('fast length extra bits', function() {
     testInflate('e5 e0 81 ad 6d cb b2 2c c9 01 1e 59 63 ae 7d ee fb 4d fd b5 35 41 68' +
@@ -162,6 +209,28 @@ describe('Inflate fast', function() {
 });
 
 describe('Inflate support', function() {
+  it('prime', function() {
+    var ret;
+    var strm = new zlib_stream();
+    strm.avail_in = 0;
+    strm.next_in = null;
+
+    ret = zlib_inflate.inflateInit(strm);
+    assert(ret === c.Z_OK);
+
+    ret = zlib_inflate.inflatePrime(strm, 5, 31);
+    assert(ret === c.Z_OK);
+
+    ret = zlib_inflate.inflatePrime(strm, -1, 0);
+    assert(ret === c.Z_OK);
+
+//    skipped: inflateSetDictionary is not implemented
+//    ret = inflateSetDictionary(strm, null, 0);
+//    assert(ret === c.Z_STREAM_ERROR);
+
+    ret = zlib_inflate.inflateEnd(strm);
+    assert(ret === c.Z_OK);
+  });
   it('force window allocation', function() {
     testInflate('63 0', -15, c.Z_OK);
   });
@@ -173,6 +242,9 @@ describe('Inflate support', function() {
   });
   it('use fixed blocks', function() {
     testInflate('3 0', -15, c.Z_OK);
+  });
+  it('bad window size', function() {
+    testInflate('', -15, c.Z_OK);
   });
 });
 
