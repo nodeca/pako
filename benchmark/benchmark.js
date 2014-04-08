@@ -43,9 +43,11 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
   content.buffer = fs.readFileSync(filepath);
   content.typed  = new Uint8Array(content.buffer);
+  content.string = fs.readFileSync(filepath, 'utf8');
 
   content.deflateTyped = pako.deflate(content.typed, { level: LEVEL });
   content.deflateBuffer = new Buffer(content.deflateTyped);
+  content.deflateString = pako.deflate(content.typed, { level: LEVEL, to: 'string' });
 
   content.deflateRawTyped = pako.deflateRaw(content.typed, { level: LEVEL });
   content.deflateRawBuffer = new Buffer(content.deflateRawTyped);

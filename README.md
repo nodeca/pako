@@ -107,6 +107,24 @@ var output = inflator.result;
 
 ```
 
+Sometime you can with to work with strings. For example, to send
+big objects as json to server. Pako detects input data type. You can
+force output to be string with option `{ to: 'string' }`.
+
+```javascript
+var pako = require('pako');
+
+var test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+
+var binaryString = pako.deflate(JSON.stringify(test), { to: 'string' });
+
+//
+// Here you can do base64 encode, make xhr requests and so on.
+//
+
+var restored = JSON.parse(pako.inflate(binaryString, { to: 'string' }));
+```
+
 
 Notes
 -----

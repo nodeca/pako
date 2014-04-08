@@ -1,9 +1,10 @@
-0.x.x / WIP
+0.2.0 / WIP
 -------------------
 
-- Added custom gzip headers support
-- Improved memory allocations for small chunks
-- More coverate tests
+- Added custom gzip headers support.
+- Added strings support.
+- Improved memory allocations for small chunks.
+- More coverate tests.
 
 
 0.1.1 / 2014-03-20
