@@ -16,7 +16,7 @@ var samples = helpers.loadSamples();
 
 
 function randomBuf(size) {
-  var buf = pako_utils.Buf8(size);
+  var buf = new pako_utils.Buf8(size);
   for (var i = 0; i < size; i++) {
     buf[i] = Math.round(Math.random() * 256);
   }
