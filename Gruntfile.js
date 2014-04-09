@@ -60,6 +60,7 @@ module.exports = function(grunt) {
           urls: ['http://127.0.0.1:9999/test/browser/test.html'],
           build: process.env.TRAVIS_JOB_ID || ('local' + ~~(Math.random()*1000)),
           browsers: browsers,
+          concurrency: 3,
           testname: process.env.SAUCE_PROJ || 'mocha tests'
         }
       }
