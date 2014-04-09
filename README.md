@@ -7,11 +7,19 @@ __Why pako is cool:__
 
 - Almost as fast in modern JS engines as C implementation (see benchmarks).
 - Works in browsers, you can browserify any separate component.
-- Both Sync & streamable (for big blobs) interfaces.
-- It's fresh - ports the latest zlib version (now 1.2.8), results are binary equal.
+- Chunking support for big blobs.
+- Results are binary equal to well known [zlib](http://www.zlib.net/) (now v1.2.8 ported).
 
 This project was done to understand how fast JS can be and is it necessary to
 develop native C modules for CPU-intensive tasks. Enjoy the result!
+
+
+__Famous projects, using pako:__
+
+- [browserify](http://browserify.org/) (via [browserify-zlib](https://github.com/devongovett/browserify-zlib))
+- [JSZip](http://stuk.github.io/jszip/)
+- [mincer](https://github.com/nodeca/mincer)
+
 
 __Benchmarks:__
 
@@ -107,7 +115,7 @@ var output = inflator.result;
 
 ```
 
-Sometime you can with to work with strings. For example, to send
+Sometime you can wish to work with strings. For example, to send
 big objects as json to server. Pako detects input data type. You can
 force output to be string with option `{ to: 'string' }`.
 
