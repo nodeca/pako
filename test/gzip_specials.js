@@ -17,8 +17,9 @@ function a2s(array) {
 }
 
 
-describe('Inflate gzip header', function() {
-  it('Check headers content from prepared file', function() {
+describe('Gzip special cases', function() {
+
+  it('Read custom headers', function() {
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
     var inflator = new pako.Inflate();
     inflator.push(data, true);
@@ -27,10 +28,8 @@ describe('Inflate gzip header', function() {
     assert.equal(inflator.header.comment, 'test comment');
     assert.equal(a2s(inflator.header.extra), 'test extra');
   });
-});
 
-describe('Inflate gzip joined', function() {
-  it('Check content from prepared file', function() {
+  it('Read stream with SYNC marks', function() {
     var inflator, strm, _in, len, pos = 0, i = 0;
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
@@ -51,4 +50,5 @@ describe('Inflate gzip joined', function() {
 
     assert(i === 2, 'invalid blobs count');
   });
+
 });

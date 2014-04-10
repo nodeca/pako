@@ -1,3 +1,5 @@
+// This tests are ported from original zlib
+
 /*global describe, it*/
 
 
@@ -8,7 +10,7 @@ var assert = require('assert');
 
 var c = require('../lib/zlib/constants');
 var msg = require('../lib/zlib/messages');
-var zlib_stream = require('../lib/zlib/zstream');
+//var zlib_stream = require('../lib/zlib/zstream');
 var zlib_inflate = require('../lib/zlib/inflate.js');
 var inflate_table = require('../lib/zlib/inftrees');
 
@@ -36,20 +38,20 @@ function testInflate(hex, wbits, status) {
 
 
 describe('Inflate states', function() {
-//  //in port checking input parameters was removed
-//  it.skip('inflate bad parameters', function() {
-//    var ret;
-//
-//    ret = zlib_inflate.inflate(null, 0);
-//    assert(ret == c.Z_STREAM_ERROR);
-//
-//    ret = zlib_inflate.inflateEnd(null);
-//    assert(ret == c.Z_STREAM_ERROR);
-//
-//    //skip: inflateCopy is not implemented
-//    //ret = zlib_inflate.inflateCopy(null, null);
-//    //assert(ret == c.Z_STREAM_ERROR);
-//  });
+  //in port checking input parameters was removed
+  it('inflate bad parameters', function() {
+    var ret;
+
+    ret = zlib_inflate.inflate(null, 0);
+    assert(ret === c.Z_STREAM_ERROR);
+
+    ret = zlib_inflate.inflateEnd(null);
+    assert(ret === c.Z_STREAM_ERROR);
+
+    //skip: inflateCopy is not implemented
+    //ret = zlib_inflate.inflateCopy(null, null);
+    //assert(ret == c.Z_STREAM_ERROR);
+  });
   it('bad gzip method', function() {
     testInflate('1f 8b 0 0', 31, c.Z_DATA_ERROR);
   });
@@ -203,7 +205,8 @@ describe('Inflate fast', function() {
 });
 
 describe('Inflate support', function() {
-  it('prime', function() {
+  // `inflatePrime` not implemented
+  /*it('prime', function() {
     var ret;
     var strm = new zlib_stream();
     strm.avail_in = 0;
@@ -218,13 +221,13 @@ describe('Inflate support', function() {
     ret = zlib_inflate.inflatePrime(strm, -1, 0);
     assert(ret === c.Z_OK);
 
-//    skipped: inflateSetDictionary is not implemented
-//    ret = inflateSetDictionary(strm, null, 0);
-//    assert(ret === c.Z_STREAM_ERROR);
+    // `inflateSetDictionary` not implemented
+    // ret = zlib_inflate.inflateSetDictionary(strm, null, 0);
+    // assert(ret === c.Z_STREAM_ERROR);
 
     ret = zlib_inflate.inflateEnd(strm);
     assert(ret === c.Z_OK);
-  });
+  });*/
   it('force window allocation', function() {
     testInflate('63 0', -15, c.Z_OK);
   });
