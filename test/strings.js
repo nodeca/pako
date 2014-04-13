@@ -50,7 +50,7 @@ describe('Inflate strings', function () {
     var data = pako.inflate(deflatedArray, { to: 'string', chunkSize: 99 });
 
     assert.equal(typeof data, 'string');
-    assert.equal(data, sampleString);
+    assert(data === sampleString);
   });
 
 });
