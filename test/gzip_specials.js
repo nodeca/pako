@@ -4,12 +4,13 @@
 'use strict';
 
 
-var fs = require('fs');
-var path  = require('path');
-var assert = require('assert');
+var fs      = require('fs');
+var path    = require('path');
+var assert  = require('assert');
 
 var pako_utils = require('../lib/utils/common');
-var pako  = require('../index');
+var pako    = require('../index');
+var cmp     = require('./helpers').cmpBuf;
 
 
 function a2s(array) {
@@ -27,6 +28,36 @@ describe('Gzip special cases', function() {
     assert.equal(inflator.header.name, 'test name');
     assert.equal(inflator.header.comment, 'test comment');
     assert.equal(a2s(inflator.header.extra), 'test extra');
+  });
+
+  it('Write custom headers', function() {
+    var data = '           ';
+
+    var deflator = new pako.Deflate({
+      gzip: true,
+      header: {
+        hcrc: true,
+        time: 1234567,
+        os: 15,
+        name: 'test name',
+        comment: 'test comment',
+        extra: [4,5,6]
+      }
+    });
+    deflator.push(data, true);
+
+    var inflator = new pako.Inflate({ to: 'string' });
+    inflator.push(deflator.result, true);
+
+    assert.equal(inflator.err, 0);
+    assert.equal(inflator.result, data);
+
+    var header = inflator.header;
+    assert.equal(header.time, 1234567);
+    assert.equal(header.os, 15);
+    assert.equal(header.name, 'test name');
+    assert.equal(header.comment, 'test comment');
+    assert(cmp(header.extra, [4,5,6]));
   });
 
   it('Read stream with SYNC marks', function() {
