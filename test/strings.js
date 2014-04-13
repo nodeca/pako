@@ -8,7 +8,6 @@ var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
 
-var pako_utils = require('../lib/zlib/utils');
 var pako    = require('../index');
 
 var helpers = require('./helpers');
@@ -31,7 +30,7 @@ describe('Deflate strings', function () {
 
   it('Deflate with binary string output', function () {
     assert.ok(cmp(
-      pako_utils.binstring2buf(pako.deflate(sampleArray, { to: 'string', chunkSize: 99 })),
+      new Buffer(pako.deflate(sampleArray, { to: 'string', chunkSize: 99 }), 'binary'),
       pako.deflate(sampleArray)
     ));
   });

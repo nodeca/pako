@@ -6,7 +6,7 @@ var path  = require('path');
 var _     = require('lodash');
 var async = require('async');
 
-var pako_utils = require('../lib/zlib/utils');
+var pako_utils = require('../lib/utils/common');
 var pako  = require('../index');
 
 // Load fixtures to test
