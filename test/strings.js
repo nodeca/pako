@@ -29,10 +29,10 @@ describe('Deflate strings', function () {
   });
 
   it('Deflate with binary string output', function () {
-    assert.ok(cmp(
-      new Buffer(pako.deflate(sampleArray, { to: 'string', chunkSize: 99 }), 'binary'),
-      pako.deflate(sampleArray)
-    ));
+    var data = pako.deflate(sampleArray, { to: 'string', chunkSize: 99 });
+
+    assert.equal(typeof data, 'string');
+    assert.ok(cmp(new Buffer(data, 'binary'), pako.deflate(sampleArray)));
   });
 
 });
@@ -43,17 +43,14 @@ describe('Inflate strings', function () {
   var deflatedArray  = pako.deflate(sampleArray);
 
   it('Inflate binary string input', function () {
-    assert.ok(cmp(
-      pako.inflate(deflatedString),
-      pako.inflate(deflatedArray)
-    ));
+    assert.ok(cmp(pako.inflate(deflatedString), pako.inflate(deflatedArray)));
   });
 
   it('Inflate with javascript string (utf16) output', function () {
-    assert.ok(
-      pako.inflate(deflatedArray, { to: 'string', chunkSize: 99 }),
-      sampleString
-    );
+    var data = pako.inflate(deflatedArray, { to: 'string', chunkSize: 99 });
+
+    assert.equal(typeof data, 'string');
+    assert.equal(data, sampleString);
   });
 
 });
