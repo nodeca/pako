@@ -40,11 +40,40 @@ function a2utf16(arr) {
 
 describe('Encode/Decode', function () {
 
-  var utf16sample = a2utf16([0x1f3b5, 'abcd', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff]);
+  // Create sample, that contains all types of utf8 (1-4byte) after conversion
+  var utf16sample = a2utf16([0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff]);
+  // use node Buffer internal conversion as "done right"
   var utf8sample = new Uint8Array(new Buffer(utf16sample));
 
-  console.log(utf16sample, utf16sample.length);
-  console.log(new Buffer(utf16sample));
+  it('utf-8 border detect', function () {
+    var ub = strings.utf8border;
+    assert.equal(ub(utf8sample, 1), 1);
+    assert.equal(ub(utf8sample, 2), 2);
+    assert.equal(ub(utf8sample, 3), 3);
+    assert.equal(ub(utf8sample, 4), 4);
+
+    assert.equal(ub(utf8sample, 5), 5);
+
+    assert.equal(ub(utf8sample, 6), 5);
+    assert.equal(ub(utf8sample, 7), 5);
+    assert.equal(ub(utf8sample, 8), 8);
+
+    assert.equal(ub(utf8sample, 9), 9);
+
+    assert.equal(ub(utf8sample, 10), 9);
+    assert.equal(ub(utf8sample, 11), 9);
+    assert.equal(ub(utf8sample, 12), 12);
+
+    assert.equal(ub(utf8sample, 13), 12);
+    assert.equal(ub(utf8sample, 14), 12);
+    assert.equal(ub(utf8sample, 15), 12);
+    assert.equal(ub(utf8sample, 16), 16);
+
+    assert.equal(ub(utf8sample, 17), 16);
+    assert.equal(ub(utf8sample, 18), 16);
+    assert.equal(ub(utf8sample, 19), 16);
+    assert.equal(ub(utf8sample, 20), 20);
+  });
 
   it('Encode string to utf8 buf', function () {
     assert.ok(cmp(
