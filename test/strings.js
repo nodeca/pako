@@ -9,17 +9,62 @@ var path    = require('path');
 var assert  = require('assert');
 
 var pako    = require('../index');
+var cmp     = require('./helpers').cmpBuf;
+var strings = require('../lib/utils/strings');
 
-var helpers = require('./helpers');
-var cmp     = helpers.cmpBuf;
+// fromCharCode, but understands right > 0xffff values
+function fixedFromCharCode(code) {
+  /*jshint bitwise: false*/
+  if (code > 0xffff) {
+    code -= 0x10000;
+
+    var surrogate1 = 0xd800 + (code >> 10)
+      , surrogate2 = 0xdc00 + (code & 0x3ff);
+
+    return String.fromCharCode(surrogate1, surrogate2);
+  } else {
+    return String.fromCharCode(code);
+  }
+}
+
+// Converts array of codes / chars / strings to utf16 string
+function a2utf16(arr) {
+  var result = '';
+  arr.forEach(function (item) {
+    if (typeof item === 'string') { result += item; return; }
+    result += fixedFromCharCode(item);
+  });
+  return result;
+}
 
 
-var file = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
-var sampleString = fs.readFileSync(file, 'utf8');
-var sampleArray  = new Uint8Array(fs.readFileSync(file));
+describe('Encode/Decode', function () {
+
+  var utf16sample = a2utf16([0x1f3b5, 'abcd', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff]);
+  var utf8sample = new Uint8Array(new Buffer(utf16sample));
+
+  console.log(utf16sample, utf16sample.length);
+  console.log(new Buffer(utf16sample));
+
+  it('Encode string to utf8 buf', function () {
+    assert.ok(cmp(
+      strings.string2buf(utf16sample),
+      utf8sample
+    ));
+  });
+
+  it('Decode utf8 buf to string', function () {
+    assert.ok(strings.buf2string(utf8sample), utf16sample);
+  });
+
+});
 
 
-describe('Deflate strings', function () {
+describe('Deflate/Inflate strings', function () {
+
+  var file = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
+  var sampleString = fs.readFileSync(file, 'utf8');
+  var sampleArray  = new Uint8Array(fs.readFileSync(file));
 
   it('Deflate javascript string (utf16) on input', function () {
     assert.ok(cmp(
@@ -35,22 +80,18 @@ describe('Deflate strings', function () {
     assert.ok(cmp(new Buffer(data, 'binary'), pako.deflate(sampleArray)));
   });
 
-});
-
-
-describe('Inflate strings', function () {
-  var deflatedString = pako.deflate(sampleArray, { to: 'string' });
-  var deflatedArray  = pako.deflate(sampleArray);
-
   it('Inflate binary string input', function () {
+    var deflatedString = pako.deflate(sampleArray, { to: 'string' });
+    var deflatedArray  = pako.deflate(sampleArray);
     assert.ok(cmp(pako.inflate(deflatedString), pako.inflate(deflatedArray)));
   });
 
   it('Inflate with javascript string (utf16) output', function () {
+    var deflatedArray  = pako.deflate(sampleArray);
     var data = pako.inflate(deflatedArray, { to: 'string', chunkSize: 99 });
 
     assert.equal(typeof data, 'string');
-    assert(data === sampleString);
+    assert.equal(data, sampleString);
   });
 
 });
