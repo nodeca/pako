@@ -36,7 +36,7 @@ node v0.10.26, 1mb sample:
    inflate-dankogai x 32.16 ops/sec ±0.13% (56 runs sampled)
    inflate-imaya x 30.35 ops/sec ±0.92% (53 runs sampled)
  ! inflate-pako x 69.89 ops/sec ±1.46% (71 runs sampled)
-   inflate-pako-string x 12.46 ops/sec ±5.65% (36 runs sampled)
+   inflate-pako-string x 19.22 ops/sec ±1.86% (49 runs sampled)
    inflate-pako-untyped x 17.19 ops/sec ±0.85% (32 runs sampled)
  * inflate-zlib x 70.03 ops/sec ±1.64% (81 runs sampled)
 
@@ -52,7 +52,7 @@ node v0.11.12, 1mb sample:
    inflate-dankogai x 42.19 ops/sec ±0.09% (56 runs sampled)
    inflate-imaya x 79.68 ops/sec ±1.07% (68 runs sampled)
  ! inflate-pako x 97.52 ops/sec ±0.83% (80 runs sampled)
-   inflate-pako-string x 19.07 ops/sec ±12.67% (32 runs sampled)
+   inflate-pako-string x 45.19 ops/sec ±1.69% (57 runs sampled)
    inflate-pako-untyped x 24.35 ops/sec ±2.59% (40 runs sampled)
  * inflate-zlib x 60.32 ops/sec ±1.36% (69 runs sampled)
 ```
