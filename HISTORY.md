@@ -4,7 +4,8 @@
 - Added custom gzip headers support.
 - Added strings support.
 - Improved memory allocations for small chunks.
-- More coverate tests.
+- ZStream properties rename/cleanup.
+- More coverage tests.
 
 
 0.1.1 / 2014-03-20

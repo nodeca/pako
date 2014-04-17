@@ -143,11 +143,11 @@ Notes
 
 Pako does not contain some specific zlib functions:
 
-- __deflate__ - writing custom gzip headers and methods `deflateSetDictionary`,
-  `deflateParams`, `deflateSetHeader`, `deflateBound`, `deflatePending`.
-- __inflate__ - getting custom gzip headers and methods `inflateGetDictionary`,
-  `inflateGetHeader`, `inflateSetDictionary`, `inflateSync`, `inflateSyncPoint`,
-  `inflateCopy`, `inflateUndermine`, `inflateMark`.
+- __deflate__ -  methods `deflateCopy`, `deflateBound`, `deflateParams`,
+  `deflatePending`, `deflatePrime`, `deflateSetDictionary`, `deflateTune`.
+- __inflate__ - `inflateGetDictionary`, `inflateCopy`, `inflateMark`,
+  `inflatePrime`, `inflateSetDictionary`, `inflateSync`, `inflateSyncPoint`,
+  `inflateUndermine`.
 
 
 Authors
