@@ -75,7 +75,7 @@ describe('Gzip special cases', function() {
 
       assert(!inflator.err, inflator.msg);
 
-      pos += strm.next_in_index;
+      pos += strm.next_in;
       i++;
     } while (strm.avail_in);
 

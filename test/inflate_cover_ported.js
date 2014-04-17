@@ -210,7 +210,7 @@ describe('Inflate support', function() {
     var ret;
     var strm = new zlib_stream();
     strm.avail_in = 0;
-    strm.next_in = null;
+    strm.input = null;
 
     ret = zlib_inflate.inflateInit(strm);
     assert(ret === c.Z_OK);
