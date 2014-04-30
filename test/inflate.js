@@ -24,7 +24,7 @@ describe('Inflate defaults', function () {
     testInflate(samples, { raw: true }, { raw: true }, done);
   });
 
-  it.skip('inflate raw from compressed samples', function(done) {
+  it('inflate raw from compressed samples', function(done) {
     var compressed_samples = helpers.loadSamples('samples_deflated_raw');
     helpers.testSamples(zlib.createInflateRaw, pako.inflateRaw, compressed_samples, {}, done);
   });
