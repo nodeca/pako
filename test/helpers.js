@@ -49,10 +49,10 @@ function cmpBuf(a, b) {
 }
 
 
-// Helper to test deflate/deflateRaw with different options.
+// Helper to test deflate/inflate with different options.
 // Use zlib streams, because it's the only way to define options.
 //
-function testDeflateSingle(zlib_factory, pako_deflate, data, options, callback) {
+function testSingle(zlib_factory, pako_deflate, data, options, callback) {
 
   var zlib_options = _.clone(options);
 
@@ -95,7 +95,7 @@ function testDeflateSingle(zlib_factory, pako_deflate, data, options, callback) 
   zlibStream.end();
 }
 
-function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
+function testSamples(zlib_factory, pako_deflate, samples, options, callback) {
   var queue = [];
 
   _.forEach(samples, function(data, name) {
@@ -103,7 +103,7 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
     queue.push(function (done) {
       pako_utils.setTyped(false);
 
-      testDeflateSingle(zlib_factory, pako_deflate, data, options, function (err) {
+      testSingle(zlib_factory, pako_deflate, data, options, function (err) {
         if (err) {
           done('Error in "' + name + '" - zlib result != pako result');
           return;
@@ -116,7 +116,7 @@ function testDeflate(zlib_factory, pako_deflate, samples, options, callback) {
     queue.push(function (done) {
       pako_utils.setTyped(true);
 
-      testDeflateSingle(zlib_factory, pako_deflate, data, options, function (err) {
+      testSingle(zlib_factory, pako_deflate, data, options, function (err) {
         if (err) {
           done('Error in "' + name + '" - zlib result != pako result');
           return;
@@ -166,6 +166,6 @@ function testInflate(samples, inflateOptions, deflateOptions, callback) {
 
 
 exports.cmpBuf = cmpBuf;
-exports.testDeflate = testDeflate;
+exports.testSamples = testSamples;
 exports.testInflate = testInflate;
 exports.loadSamples = loadSamples;
