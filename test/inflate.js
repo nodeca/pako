@@ -4,6 +4,9 @@
 'use strict';
 
 
+var zlib = require('zlib');
+
+var pako    = require('../index');
 var helpers = require('./helpers');
 var testInflate = helpers.testInflate;
 
@@ -21,6 +24,10 @@ describe('Inflate defaults', function () {
     testInflate(samples, { raw: true }, { raw: true }, done);
   });
 
+  it.skip('inflate raw from compressed samples', function(done) {
+    var compressed_samples = helpers.loadSamples('samples_deflated_raw');
+    helpers.testDeflate(zlib.createInflateRaw, pako.inflateRaw, compressed_samples, {}, done);
+  });
 });
 
 

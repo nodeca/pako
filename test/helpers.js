@@ -12,9 +12,9 @@ var pako  = require('../index');
 // Load fixtures to test
 // return: { 'filename1': content1, 'filename2': content2, ...}
 //
-function loadSamples() {
+function loadSamples(subdir) {
   var result = {};
-  var dir = path.join(__dirname, 'fixtures/samples');
+  var dir = path.join(__dirname, 'fixtures', subdir || 'samples');
 
   fs.readdirSync(dir).sort().forEach(function (sample) {
     var filepath = path.join(dir, sample),
