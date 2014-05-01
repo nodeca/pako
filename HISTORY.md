@@ -1,3 +1,9 @@
+0.2.1 / 2014-05-01
+------------------
+
+- Fixed collision on switch dynamic/fixed tables.
+
+
 0.2.0 / 2014-04-18
 ------------------
 
