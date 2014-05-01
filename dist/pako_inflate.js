@@ -1,4 +1,4 @@
-/* pako 0.2.0 nodeca/pako */!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.pako=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+/* pako 0.2.1 nodeca/pako */!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.pako=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
 
@@ -1228,7 +1228,7 @@ var    SYNC = 32;      /* looking for synchronization bytes to restart inflate()
 
 var ENOUGH_LENS = 852;
 var ENOUGH_DISTS = 592;
-var ENOUGH =  (ENOUGH_LENS+ENOUGH_DISTS);
+//var ENOUGH =  (ENOUGH_LENS+ENOUGH_DISTS);
 
 var MAX_WBITS = 15;
 /* 32K LZ77 window */
@@ -1286,12 +1286,16 @@ function InflateState() {
   this.have = 0;              /* number of code lengths in lens[] */
   this.next = null;              /* next available space in codes[] */
 
-  //unsigned short array
-  //todo: test later with Uint16Array
   this.lens = new utils.Buf16(320); /* temporary storage for code lengths */
   this.work = new utils.Buf16(288); /* work area for code table building */
 
-  this.codes = new utils.Buf32(ENOUGH);       /* space for code tables */
+  /*
+   because we don't have pointers in js, we use lencode and distcode directly
+   as buffers so we don't need codes
+  */
+  //this.codes = new utils.Buf32(ENOUGH);       /* space for code tables */
+  this.lendyn = null;              /* dynamic table for length/literal codes (JS specific) */
+  this.distdyn = null;             /* dynamic table for distance codes (JS specific) */
   this.sane = 0;                   /* if false, allow invalid distance too far */
   this.back = 0;                   /* bits back of last unprocessed length/lit */
   this.was = 0;                    /* initial length of match */
@@ -1315,8 +1319,8 @@ function inflateResetKeep(strm) {
   state.hold = 0;
   state.bits = 0;
   //state.lencode = state.distcode = state.next = state.codes;
-  state.lencode = new utils.Buf32(ENOUGH);
-  state.distcode = new utils.Buf32(ENOUGH);
+  state.lencode = state.lendyn = new utils.Buf32(ENOUGH_LENS);
+  state.distcode = state.distdyn = new utils.Buf32(ENOUGH_DISTS);
 
   state.sane = 1;
   state.back = -1;
@@ -2050,7 +2054,8 @@ function inflate(strm, flush) {
       // We have separate tables & no pointers. 2 commented lines below not needed.
       //state.next = state.codes;
       //state.lencode = state.next;
-      utils.arraySet(state.lencode, state.codes, 0, state.codes.length, 0);
+      // Switch to use dynamic table
+      state.lencode = state.lendyn;
       state.lenbits = 7;
 
       opts = {bits: state.lenbits};
@@ -2182,8 +2187,6 @@ function inflate(strm, flush) {
       /* build code tables -- note: do not change the lenbits or distbits
          values here (9 and 6) without reading the comments in inftrees.h
          concerning the ENOUGH constants, which depend on those values */
-      //state.lencode.copy(state.codes);
-      utils.arraySet(state.lencode, state.codes, 0, state.codes.length, 0);
       state.lenbits = 9;
 
       opts = {bits: state.lenbits};
@@ -2201,7 +2204,8 @@ function inflate(strm, flush) {
 
       state.distbits = 6;
       //state.distcode.copy(state.codes);
-      utils.arraySet(state.distcode, state.codes, 0, state.codes.length, 0);
+      // Switch to use dynamic table
+      state.distcode = state.distdyn;
       opts = {bits: state.distbits};
       ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
       // We have separate tables & no pointers. 2 commented lines below not needed.
