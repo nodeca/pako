@@ -19,7 +19,11 @@ __Famous projects, using pako:__
 - [browserify](http://browserify.org/) (via [browserify-zlib](https://github.com/devongovett/browserify-zlib))
 - [JSZip](http://stuk.github.io/jszip/)
 - [mincer](https://github.com/nodeca/mincer)
+- [JS-Git](https://github.com/creationix/js-git) and
+  [Tedit](https://chrome.google.com/webstore/detail/tedit-development-environ/ooekdijbnbbjdfjocaiflnjgoohnblgf)
+  by [@creatronix](https://github.com/creationix)
 
+ 
 
 __Benchmarks:__
 
