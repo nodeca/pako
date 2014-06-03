@@ -1,3 +1,9 @@
+0.2.2 / WIP
+------------------
+
+- Fixed iOS 5.1 Safary issue with `apply(typed_array)`, #26.
+
+
 0.2.1 / 2014-05-01
 ------------------
 
