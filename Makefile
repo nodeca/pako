@@ -67,9 +67,9 @@ browserify:
 		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
 		> dist/pako_inflate.min.js
 	# Update bower package
-	sed -i -r -e \
-		"s/(\"version\":\s*)\"[0-9]+[.][0-9]+[.][0-9]+\"/\1\"${NPM_VERSION}\"/" \
-		bower.json
+	#sed -i -r -e \
+	#	"s/(\"version\":\s*)\"[0-9]+[.][0-9]+[.][0-9]+\"/\1\"${NPM_VERSION}\"/" \
+	#	bower.json
 
 
 gh-pages:

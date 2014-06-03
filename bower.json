@@ -1,7 +1,6 @@
 {
   "name": "pako",
   "main": "dist/pako.js",
-  "version": "0.2.1",
   "homepage": "https://github.com/nodeca/pako",
   "authors": [
     "Andrei Tuputcyn <Andrew.Tupitsin@gmail.com>",
