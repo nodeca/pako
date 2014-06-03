@@ -1,4 +1,4 @@
-/* pako 0.2.1 nodeca/pako */!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.pako=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+/* pako 0.2.1 nodeca/pako */!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.pako=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
 
@@ -285,7 +285,7 @@ Inflate.prototype.onEnd = function(status) {
 
 /**
  * inflate(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to compress.
+ * - data (Uint8Array|Array|String): input data to decompress.
  * - options (Object): zlib inflate options.
  *
  * Decompress `data` with inflate/ungzip and `options`. Autodetect
@@ -336,7 +336,7 @@ function inflate(input, options) {
 
 /**
  * inflateRaw(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to compress.
+ * - data (Uint8Array|Array|String): input data to decompress.
  * - options (Object): zlib inflate options.
  *
  * The same as [[inflate]], but creates raw data, without wrapper
@@ -351,7 +351,7 @@ function inflateRaw(input, options) {
 
 /**
  * ungzip(data[, options]) -> Uint8Array|Array|String
- * - data (Uint8Array|Array|String): input data to compress.
+ * - data (Uint8Array|Array|String): input data to decompress.
  * - options (Object): zlib inflate options.
  *
  * Just shortcut to [[inflate]], because it autodetects format
@@ -476,8 +476,15 @@ var utils = _dereq_('./common');
 
 
 // Quick check if we can use fast array to bin string conversion
+//
+// - apply(Array) can fail on Android 2.2
+// - apply(Uint8Array) can fail on iOS 5.1 Safary
+//
 var STR_APPLY_OK = true;
+var STR_APPLY_UIA_OK = true;
+
 try { String.fromCharCode.apply(null, [0]); } catch(__) { STR_APPLY_OK = false; }
+try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch(__) { STR_APPLY_UIA_OK = false; }
 
 
 // Table with utf8 lengths (calculated by first byte of sequence)
@@ -544,19 +551,26 @@ exports.string2buf = function (str) {
   return buf;
 };
 
-
-// Convert byte array to binary string
-exports.buf2binstring = function(buf) {
+// Helper (used in 2 places)
+function buf2binstring(buf, len) {
   // use fallback for big arrays to avoid stack overflow
-  if (STR_APPLY_OK && buf.length < 65537) {
-    return String.fromCharCode.apply(null, buf);
+  if (len < 65537) {
+    if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
+      return String.fromCharCode.apply(null, utils.shrinkBuf(buf, len));
+    }
   }
 
   var result = '';
-  for(var i=0, len=buf.length; i < len; i++) {
+  for(var i=0; i < len; i++) {
     result += String.fromCharCode(buf[i]);
   }
   return result;
+}
+
+
+// Convert byte array to binary string
+exports.buf2binstring = function(buf) {
+  return buf2binstring(buf, buf.length);
 };
 
 
@@ -572,7 +586,7 @@ exports.binstring2buf = function(str) {
 
 // convert array to string
 exports.buf2string = function (buf, max) {
-  var str, i, out, c, c_len;
+  var i, out, c, c_len;
   var len = max || buf.length;
 
   // Reserve max possible length (2 words per char)
@@ -609,16 +623,7 @@ exports.buf2string = function (buf, max) {
     }
   }
 
-  if (STR_APPLY_OK) {
-    return String.fromCharCode.apply(null, utils.shrinkBuf(utf16buf, out));
-  }
-
-  // Fallback, when String.fromCharCode.apply not available
-  str = '';
-  for (i=0, len=out; i<len; i++) {
-    str += String.fromCharCode(utf16buf[i]);
-  }
-  return str;
+  return buf2binstring(utf16buf, out);
 };
 
 
