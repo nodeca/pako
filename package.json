@@ -16,7 +16,6 @@
 
   "devDependencies" : {
                         "mocha":     "*",
-                        "chai":      "*",
                         "benchmark": "*",
                         "ansi":      "*",
                         "browserify":"*",
@@ -24,12 +23,12 @@
                         "jshint":    "*",
                         "istanbul":  "*",
                         "ndoc":      "*",
-                        "lodash":    "2.4.1",
-                        "async":     "0.2.10",
+                        "lodash":    "*",
+                        "async":     "*",
 
                         "grunt": "~0.4.4",
                         "grunt-cli": "~0.1.13",
-                        "grunt-saucelabs": "~5.1.1",
+                        "grunt-saucelabs": "~8.0.2",
                         "grunt-contrib-connect": "~0.7.1"
                       }
 }
