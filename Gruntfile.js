@@ -58,9 +58,9 @@ module.exports = function(grunt) {
       all: {
         options: {
           urls: ['http://127.0.0.1:9999/test/browser/test.html'],
-          build: process.env.TRAVIS_JOB_ID || ('local' + ~~(Math.random()*1000)),
+          build: process.env.TRAVIS_JOB_NUMBER || ('local' + ~~(Math.random()*1000)),
           browsers: browsers,
-          concurrency: 3,
+          throttled: 3,
           testname: process.env.SAUCE_PROJ || 'mocha tests'
         }
       }
