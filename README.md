@@ -1,7 +1,8 @@
 pako - zlib port to javascript, very fast!
 ==========================================
 
-[![Build Status](https://travis-ci.org/nodeca/pako.png?branch=master)](https://travis-ci.org/nodeca/pako)
+[![Build Status](https://travis-ci.org/nodeca/pako.svg?branch=master)](https://travis-ci.org/nodeca/pako)
+[![NPM version](https://img.shields.io/npm/v/pako.svg)](https://www.npmjs.org/package/pako)
 
 __Why pako is cool:__
 
