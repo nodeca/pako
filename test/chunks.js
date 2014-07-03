@@ -104,3 +104,31 @@ describe('Dummy push (force end)', function () {
   });
 
 });
+
+
+describe('Edge condition', function () {
+
+  it.skip('should be ok on buffer border', function () {
+    var i;
+    var data = new Uint8Array(1024 * 16 + 1);
+
+    for (i = 0; i < data.length; i++) {
+      data[i] = Math.floor(Math.random() * 255.999);
+    }
+
+    var deflated = pako.deflate(data);
+
+    var inflator = new pako.Inflate();
+
+    for (i = 0; i < deflated.length; i++) {
+      inflator.push(deflated.subarray(i, i+1), false);
+      assert.ok(!inflator.err, 'Inflate failed with status ' + inflator.err);
+    }
+
+    inflator.push(new Uint8Array(0), true);
+
+    assert.ok(!inflator.err, 'Inflate failed with status ' + inflator.err);
+    assert(helpers.cmpBuf(data, inflator.result));
+  });
+
+});
