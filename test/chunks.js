@@ -108,7 +108,7 @@ describe('Dummy push (force end)', function () {
 
 describe('Edge condition', function () {
 
-  it.skip('should be ok on buffer border', function () {
+  it('should be ok on buffer border', function () {
     var i;
     var data = new Uint8Array(1024 * 16 + 1);
 
