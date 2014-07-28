@@ -1,6 +1,6 @@
 {
     "name": "pako",
-    "repo": "johntron/pako",
+    "repo": "nodeca/pako",
     "description": "zlib library for browser",
     "version": "0.2.5",
     "keywords": [],
