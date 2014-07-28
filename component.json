@@ -1,0 +1,29 @@
+{
+    "name": "pako",
+    "repo": "johntron/pako",
+    "description": "zlib library for browser",
+    "version": "0.2.5",
+    "keywords": [],
+    "dependencies": {},
+    "development": {},
+    "license": "MIT",
+    "main": "index.js",
+    "scripts": [
+        "index.js",
+        "lib/deflate.js",
+        "lib/inflate.js",
+        "lib/utils/common.js",
+        "lib/utils/strings.js",
+        "lib/zlib/adler32.js",
+        "lib/zlib/constants.js",
+        "lib/zlib/crc32.js",
+        "lib/zlib/deflate.js",
+        "lib/zlib/gzheader.js",
+        "lib/zlib/inffast.js",
+        "lib/zlib/inflate.js",
+        "lib/zlib/inftrees.js",
+        "lib/zlib/messages.js",
+        "lib/zlib/trees.js",
+        "lib/zlib/zstream.js"
+    ]
+}
