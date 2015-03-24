@@ -18,7 +18,7 @@ var pako  = require('../index');
 
 
 function h2b(hex) {
-  return hex.split(' ').map(function(hex) { return parseInt(hex, 16); });
+  return hex.split(' ').map(function(hx) { return parseInt(hx, 16); });
 }
 
 

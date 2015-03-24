@@ -20,8 +20,8 @@ var IMPLS = [];
 
 
 fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
-  var file = path.join(IMPLS_DIRECTORY, name),
-      code = require(file);
+  var file = path.join(IMPLS_DIRECTORY, name);
+  var code = require(file);
 
   IMPLS_PATHS[name] = file;
   IMPLS.push({
@@ -85,7 +85,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
       defer: !!impl.code.async,
 
       fn: function (deferred) {
-        if (!!impl.code.async) {
+        if (impl.code.async) {
           impl.code.run(content, LEVEL, function() {
             deferred.resolve();
             return;

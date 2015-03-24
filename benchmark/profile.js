@@ -1,9 +1,10 @@
 'use strict';
 
 var fs   = require('fs');
+var path = require('path');
 var pako = require('../index.js');
 
-var data = new Uint8Array(fs.readFileSync(__dirname +'/samples/lorem_1mb.txt'));
+var data = new Uint8Array(fs.readFileSync(path.join(__dirname, '/samples/lorem_1mb.txt')));
 
 var deflated = pako.deflate(data, { level: 6/*, to: 'string'*/ });
 
