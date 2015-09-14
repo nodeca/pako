@@ -160,9 +160,13 @@ Authors
 - Andrey Tupitsin [@anrd83](https://github.com/andr83)
 - Vitaly Puzrin [@puzrin](https://github.com/puzrin)
 
-Personal thanks to Vyacheslav Egorov ([@mraleph](https://github.com/mraleph))
-for his awesome tutoruals about optimising JS code for v8,
-[IRHydra](http://mrale.ph/irhydra/) tool and his advices.
+Personal thanks to:
+
+- Vyacheslav Egorov ([@mraleph](https://github.com/mraleph)) for his awesome
+  tutoruals about optimising JS code for v8, [IRHydra](http://mrale.ph/irhydra/)
+  tool and his advices.
+- David Duponchel ([@dduponchel](https://github.com/dduponchel)) for help with
+  testing.
 
 
 License

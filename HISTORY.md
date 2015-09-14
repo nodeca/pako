@@ -1,3 +1,10 @@
+0.2.8 / 2015-09-14
+------------------
+
+- Fixed regression after 0.2.4 for edge conditions in inflate wrapper (#65).
+  Added more tests to cover possible cases.
+
+
 0.2.7 / 2015-06-09
 ------------------
 
