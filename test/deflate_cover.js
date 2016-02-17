@@ -12,7 +12,7 @@ var path  = require('path');
 
 var c = require('../lib/zlib/constants');
 var msg = require('../lib/zlib/messages');
-var zlib_deflate = require('../lib/zlib/deflate.js');
+var zlib_deflate = require('../lib/zlib/deflate');
 var ZStream = require('../lib/zlib/zstream');
 
 var pako  = require('../index');

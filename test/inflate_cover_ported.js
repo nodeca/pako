@@ -11,7 +11,7 @@ var assert = require('assert');
 var c = require('../lib/zlib/constants');
 var msg = require('../lib/zlib/messages');
 //var zlib_stream = require('../lib/zlib/zstream');
-var zlib_inflate = require('../lib/zlib/inflate.js');
+var zlib_inflate = require('../lib/zlib/inflate');
 var inflate_table = require('../lib/zlib/inftrees');
 
 var pako  = require('../index');

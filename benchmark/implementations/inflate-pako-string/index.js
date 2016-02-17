@@ -1,6 +1,6 @@
 'use strict'
 
-var pako = require('../../../index.js');
+var pako = require('../../../');
 
 exports.run = function(data) {
   return pako.inflate(data.deflateString, {
