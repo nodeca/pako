@@ -34,14 +34,14 @@ module.exports = function (grunt) {
     browserName: 'internet explorer',
     platform: 'WIN7',
     version: '8'
-  }, {
+  /*}, {
     browserName: 'internet explorer',
     platform: 'XP',
     version: '7'
   }, {
     browserName: 'internet explorer',
     platform: 'XP',
-    version: '6'
+    version: '6'*/
   }, {
     browserName: 'safari',
     platform: 'OS X 10.8',
