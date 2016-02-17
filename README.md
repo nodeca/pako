@@ -152,6 +152,8 @@ Pako does not contain some specific zlib functions:
 - __inflate__ - `inflateGetDictionary`, `inflateCopy`, `inflateMark`,
   `inflatePrime`, `inflateSetDictionary`, `inflateSync`, `inflateSyncPoint`,
   `inflateUndermine`.
+- High level inflate/deflate wrappers (classes) may not support some flush
+  modes. Those should work: Z_NO_FLUSH, Z_FINISH, Z_SYNC_FLUSH.
 
 
 Authors
