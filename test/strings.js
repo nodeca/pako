@@ -40,7 +40,7 @@ function a2utf16(arr) {
 describe('Encode/Decode', function () {
 
   // Create sample, that contains all types of utf8 (1-4byte) after conversion
-  var utf16sample = a2utf16([0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff]);
+  var utf16sample = a2utf16([ 0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff ]);
   // use node Buffer internal conversion as "done right"
   var utf8sample = new Uint8Array(new Buffer(utf16sample));
 

@@ -23,24 +23,24 @@ help:
 
 
 lint:
-	eslint --reset .
+	./node_modules/.bin/eslint .
 
 
 test: lint
-	mocha
+	./node_modules/.bin/mocha
 
 test-browser: lint
 	rm -f ./test/browser/pako.js
-	browserify -r ./ -s pako > test/browser/pako.js
+	./node_modules/.bin/browserify -r ./ -s pako > test/browser/pako.js
 	@SAUCE_PROJ=${GITHUB_PROJ} grunt test
 
 cover:
 	rm -rf cover
-	istanbul cover node_modules/.bin/_mocha
+	./node_modules/.bin/istanbul cover node_modules/.bin/_mocha
 
 doc:
 	rm -rf ./doc
-	ndoc --link-format "{package.homepage}/blob/${CURR_HEAD}/{file}#L{line}"
+	./node_modules/.bin/ndoc --link-format "{package.homepage}/blob/${CURR_HEAD}/{file}#L{line}"
 
 
 browserify:
@@ -48,22 +48,22 @@ browserify:
 	mkdir dist
 	# Browserify
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./ -s pako \
+		./node_modules/.bin/browserify -r ./ -s pako \
 		) > dist/pako.js
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./lib/deflate.js -s pako \
+		./node_modules/.bin/browserify -r ./lib/deflate.js -s pako \
 		) > dist/pako_deflate.js
 	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		browserify -r ./lib/inflate.js -s pako \
+		./node_modules/.bin/browserify -r ./lib/inflate.js -s pako \
 		) > dist/pako_inflate.js
 	# Minify
-	uglifyjs dist/pako.js -c -m \
+	./node_modules/.bin/uglifyjs dist/pako.js -c -m \
 		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
 		> dist/pako.min.js
-	uglifyjs dist/pako_deflate.js -c -m \
+	./node_modules/.bin/uglifyjs dist/pako_deflate.js -c -m \
 		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
 		> dist/pako_deflate.min.js
-	uglifyjs dist/pako_inflate.js -c -m \
+	./node_modules/.bin/uglifyjs dist/pako_inflate.js -c -m \
 		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
 		> dist/pako_inflate.min.js
 	# Update bower package

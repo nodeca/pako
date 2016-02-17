@@ -18,9 +18,9 @@ function a2s(array) {
 }
 
 
-describe('Gzip special cases', function() {
+describe('Gzip special cases', function () {
 
-  it('Read custom headers', function() {
+  it('Read custom headers', function () {
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
     var inflator = new pako.Inflate();
     inflator.push(data, true);
@@ -30,7 +30,7 @@ describe('Gzip special cases', function() {
     assert.equal(a2s(inflator.header.extra), 'test extra');
   });
 
-  it('Write custom headers', function() {
+  it('Write custom headers', function () {
     var data = '           ';
 
     var deflator = new pako.Deflate({
@@ -41,7 +41,7 @@ describe('Gzip special cases', function() {
         os: 15,
         name: 'test name',
         comment: 'test comment',
-        extra: [4,5,6]
+        extra: [ 4, 5, 6 ]
       }
     });
     deflator.push(data, true);
@@ -57,10 +57,10 @@ describe('Gzip special cases', function() {
     assert.equal(header.os, 15);
     assert.equal(header.name, 'test name');
     assert.equal(header.comment, 'test comment');
-    assert(cmp(header.extra, [4,5,6]));
+    assert(cmp(header.extra, [ 4, 5, 6 ]));
   });
 
-  it('Read stream with SYNC marks', function() {
+  it('Read stream with SYNC marks', function () {
     var inflator, strm, _in, len, pos = 0, i = 0;
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 

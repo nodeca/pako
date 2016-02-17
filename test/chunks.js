@@ -29,7 +29,7 @@ function testChunk(buf, expected, packer, chunkSize) {
   var onData = packer.onData;
   var flushCount = 0;
 
-  packer.onData = function() {
+  packer.onData = function () {
     flushCount++;
     onData.apply(this, arguments);
   };
@@ -121,7 +121,7 @@ describe('Edge condition', function () {
     var inflator = new pako.Inflate();
 
     for (i = 0; i < deflated.length; i++) {
-      inflator.push(deflated.subarray(i, i+1), false);
+      inflator.push(deflated.subarray(i, i + 1), false);
       assert.ok(!inflator.err, 'Inflate failed with status ' + inflator.err);
     }
 

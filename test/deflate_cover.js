@@ -13,7 +13,7 @@ var path  = require('path');
 var c = require('../lib/zlib/constants');
 var msg = require('../lib/zlib/messages');
 var zlib_deflate = require('../lib/zlib/deflate.js');
-var zstream = require('../lib/zlib/zstream');
+var ZStream = require('../lib/zlib/zstream');
 
 var pako  = require('../index');
 
@@ -29,33 +29,33 @@ function testDeflate(data, opts, flush) {
   assert.equal(deflator.err, false, msg[deflator.err]);
 }
 
-describe('Deflate support', function() {
-  it('stored', function() {
-    testDeflate(short_sample, {level: 0, chunkSize: 200}, 0);
-    testDeflate(short_sample, {level: 0, chunkSize: 10}, 5);
+describe('Deflate support', function () {
+  it('stored', function () {
+    testDeflate(short_sample, { level: 0, chunkSize: 200 }, 0);
+    testDeflate(short_sample, { level: 0, chunkSize: 10 }, 5);
   });
-  it('fast', function() {
-    testDeflate(short_sample, {level: 1, chunkSize: 10}, 5);
-    testDeflate(long_sample, {level: 1, memLevel: 1, chunkSize: 10}, 0);
+  it('fast', function () {
+    testDeflate(short_sample, { level: 1, chunkSize: 10 }, 5);
+    testDeflate(long_sample, { level: 1, memLevel: 1, chunkSize: 10 }, 0);
   });
-  it('slow', function() {
-    testDeflate(short_sample, {level: 4, chunkSize: 10}, 5);
-    testDeflate(long_sample, {level: 9, memLevel: 1, chunkSize: 10}, 0);
+  it('slow', function () {
+    testDeflate(short_sample, { level: 4, chunkSize: 10 }, 5);
+    testDeflate(long_sample, { level: 9, memLevel: 1, chunkSize: 10 }, 0);
   });
-  it('rle', function() {
-    testDeflate(short_sample, {strategy: 3}, 0);
-    testDeflate(short_sample, {strategy: 3, chunkSize: 10}, 5);
-    testDeflate(long_sample, {strategy: 3, chunkSize: 10}, 0);
+  it('rle', function () {
+    testDeflate(short_sample, { strategy: 3 }, 0);
+    testDeflate(short_sample, { strategy: 3, chunkSize: 10 }, 5);
+    testDeflate(long_sample, { strategy: 3, chunkSize: 10 }, 0);
   });
-  it('huffman', function() {
-    testDeflate(short_sample, {strategy: 2}, 0);
-    testDeflate(short_sample, {strategy: 2, chunkSize: 10}, 5);
-    testDeflate(long_sample, {strategy: 2, chunkSize: 10}, 0);
+  it('huffman', function () {
+    testDeflate(short_sample, { strategy: 2 }, 0);
+    testDeflate(short_sample, { strategy: 2, chunkSize: 10 }, 5);
+    testDeflate(long_sample, { strategy: 2, chunkSize: 10 }, 0);
 
   });
 });
 
-describe('Deflate states', function() {
+describe('Deflate states', function () {
   //in port checking input parameters was removed
   it('inflate bad parameters', function () {
     var ret, strm;
@@ -63,7 +63,7 @@ describe('Deflate states', function() {
     ret = zlib_deflate.deflate(null, 0);
     assert(ret === c.Z_STREAM_ERROR);
 
-    strm = new zstream();
+    strm = new ZStream();
 
     ret = zlib_deflate.deflateInit(null);
     assert(ret === c.Z_STREAM_ERROR);

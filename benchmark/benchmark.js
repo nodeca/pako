@@ -30,6 +30,7 @@ fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
   });
 });
 
+/* eslint-disable no-console */
 
 var SAMPLES_DIRECTORY = path.join(__dirname, 'samples');
 var SAMPLES = [];
@@ -86,7 +87,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
       fn: function (deferred) {
         if (impl.code.async) {
-          impl.code.run(content, LEVEL, function() {
+          impl.code.run(content, LEVEL, function () {
             deferred.resolve();
             return;
           });

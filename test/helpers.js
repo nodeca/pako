@@ -38,7 +38,7 @@ function cmpBuf(a, b) {
     return false;
   }
 
-  for (var i=0, l=a.length; i<l; i++) {
+  for (var i = 0, l = a.length; i < l; i++) {
     if (a[i] !== b[i]) {
       //console.log('pos: ' +i+ ' - ' + a[i].toString(16) + '/' + b[i].toString(16));
       return false;
@@ -63,20 +63,20 @@ function testSingle(zlib_factory, pako_deflate, data, options, callback) {
   var buffers = [], nread = 0;
 
 
-  zlibStream.on('error', function(err) {
+  zlibStream.on('error', function (err) {
     zlibStream.removeAllListeners();
-    zlibStream=null;
+    zlibStream = null;
     callback(err);
   });
 
-  zlibStream.on('data', function(chunk) {
+  zlibStream.on('data', function (chunk) {
     buffers.push(chunk);
     nread += chunk.length;
   });
 
-  zlibStream.on('end', function() {
+  zlibStream.on('end', function () {
     zlibStream.removeAllListeners();
-    zlibStream=null;
+    zlibStream = null;
 
     var buffer = Buffer.concat(buffers);
 
@@ -98,7 +98,7 @@ function testSingle(zlib_factory, pako_deflate, data, options, callback) {
 function testSamples(zlib_factory, pako_deflate, samples, options, callback) {
   var queue = [];
 
-  _.forEach(samples, function(data, name) {
+  _.forEach(samples, function (data, name) {
     // with untyped arrays
     queue.push(function (done) {
       pako_utils.setTyped(false);
@@ -136,6 +136,7 @@ function testInflate(samples, inflateOptions, deflateOptions, callback) {
   // inflate options have windowBits = 0 to force autodetect window size
   //
   for (name in samples) {
+    if (!samples.hasOwnProperty(name)) continue;
     data = samples[name];
 
     // always use the same data type to generate sample
