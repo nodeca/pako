@@ -1,5 +1,3 @@
-PATH        := ./node_modules/.bin:${PATH}
-
 NPM_PACKAGE := $(shell node -e 'process.stdout.write(require("./package.json").name)')
 NPM_VERSION := $(shell node -e 'process.stdout.write(require("./package.json").version)')
 
