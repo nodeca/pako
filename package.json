@@ -13,6 +13,11 @@
     "Andrei Tuputcyn (https://github.com/andr83)",
     "Vitaly Puzrin (https://github.com/puzrin)"
   ],
+  "files": [
+    "index.js",
+    "dist/",
+    "lib/"
+  ],
   "license": "MIT",
   "repository": "nodeca/pako",
   "devDependencies": {
