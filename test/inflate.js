@@ -13,7 +13,6 @@ var testInflate = helpers.testInflate;
 
 var samples = helpers.loadSamples();
 
-
 describe('Inflate defaults', function () {
 
   it('inflate, no options', function (done) {
@@ -28,6 +27,7 @@ describe('Inflate defaults', function () {
     var compressed_samples = helpers.loadSamples('samples_deflated_raw');
     helpers.testSamples(zlib.createInflateRaw, pako.inflateRaw, compressed_samples, {}, done);
   });
+
 });
 
 
@@ -159,6 +159,35 @@ describe('Inflate RAW', function () {
   });
   it('level 0', function (done) {
     testInflate(samples, { raw: true }, { level: 0, raw: true }, done);
+  });
+
+});
+
+describe('Inflate with dictionary', function () {
+  it('should throw on the wrong dictionary', function () {
+    // var zCompressed = helpers.deflateSync('world', { dictionary: new Buffer('hello') });
+    var zCompressed = new Buffer([ 120, 187, 6, 44, 2, 21, 43, 207, 47, 202, 73, 1, 0, 6, 166, 2, 41 ]);
+
+    try {
+      pako.inflate(zCompressed, { dictionary: new Buffer('world') });
+    } catch (err) {
+      if (err.message === 'stream error') {
+        return;
+      }
+
+      throw err;
+    }
+
+    throw new Error('Did not throw');
+  });
+
+  it('trivial dictionary', function (done) {
+    var dict = new Buffer('abcdefghijklmnoprstuvwxyz');
+    testInflate(samples, { dictionary: dict }, { dictionary: dict }, done);
+  });
+
+  it('spdy dictionary', function (done) {
+    testInflate(samples, { dictionary: helpers.spdyDict }, { dictionary: helpers.spdyDict }, done);
   });
 
 });
