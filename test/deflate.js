@@ -170,3 +170,31 @@ describe('Deflate RAW', function () {
   });
 
 });
+
+describe('Deflate dictionary', function () {
+  it('trivial dictionary', function (done) {
+    var dict = new Buffer('abcdefghijklmnoprstuvwxyz');
+    testSamples(zlib.createDeflate, pako.deflate, samples, { dictionary: dict }, done);
+  });
+
+  it('spdy dictionary', function (done) {
+    testSamples(zlib.createDeflate, pako.deflate, samples, { dictionary: helpers.spdyDict }, done);
+  });
+
+  it('handles multiple pushes', function () {
+    var dict = new Buffer('abcd');
+    var deflate = new pako.Deflate({ dictionary: dict });
+
+    deflate.push(new Buffer('hello'), false);
+    deflate.push(new Buffer('hello'), false);
+    deflate.push(new Buffer(' world'), true);
+
+    if (deflate.err) { throw new Error(deflate.err); }
+
+    var uncompressed = pako.inflate(new Buffer(deflate.result), { dictionary: dict });
+
+    if (!helpers.cmpBuf(new Buffer('hellohello world'), uncompressed)) {
+      throw new Error('Result not equal for p -> z');
+    }
+  });
+});

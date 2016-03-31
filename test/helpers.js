@@ -165,8 +165,11 @@ function testInflate(samples, inflateOptions, deflateOptions, callback) {
   callback();
 }
 
+var spdyDict = new Buffer(fs.readFileSync(path.join(__dirname, 'fixtures', 'spdy_dict.txt')));
+
 
 exports.cmpBuf = cmpBuf;
 exports.testSamples = testSamples;
 exports.testInflate = testInflate;
 exports.loadSamples = loadSamples;
+exports.spdyDict = spdyDict;
