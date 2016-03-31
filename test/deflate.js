@@ -171,14 +171,18 @@ describe('Deflate RAW', function () {
 
 });
 
+
 describe('Deflate dictionary', function () {
+
   it('trivial dictionary', function (done) {
     var dict = new Buffer('abcdefghijklmnoprstuvwxyz');
     testSamples(zlib.createDeflate, pako.deflate, samples, { dictionary: dict }, done);
   });
 
   it('spdy dictionary', function (done) {
-    testSamples(zlib.createDeflate, pako.deflate, samples, { dictionary: helpers.spdyDict }, done);
+    var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
+
+    testSamples(zlib.createDeflate, pako.deflate, samples, { dictionary: spdyDict }, done);
   });
 
   it('handles multiple pushes', function () {

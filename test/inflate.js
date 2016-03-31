@@ -163,7 +163,9 @@ describe('Inflate RAW', function () {
 
 });
 
+
 describe('Inflate with dictionary', function () {
+
   it('should throw on the wrong dictionary', function () {
     // var zCompressed = helpers.deflateSync('world', { dictionary: new Buffer('hello') });
     var zCompressed = new Buffer([ 120, 187, 6, 44, 2, 21, 43, 207, 47, 202, 73, 1, 0, 6, 166, 2, 41 ]);
@@ -187,7 +189,9 @@ describe('Inflate with dictionary', function () {
   });
 
   it('spdy dictionary', function (done) {
-    testInflate(samples, { dictionary: helpers.spdyDict }, { dictionary: helpers.spdyDict }, done);
+    var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
+
+    testInflate(samples, { dictionary: spdyDict }, { dictionary: helpers.spdyDict }, done);
   });
 
 });
