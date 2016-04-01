@@ -1,3 +1,9 @@
+1.0.1 / 2016-04-01
+------------------
+
+- Added dictionary support. Thanks to @dignifiedquire.
+
+
 1.0.0 / 2016-02-17
 ------------------
 
