@@ -9,6 +9,10 @@ var zlib = require('zlib');
 var pako    = require('../index');
 var helpers = require('./helpers');
 var testSamples = helpers.testSamples;
+var assert  = require('assert');
+var fs      = require('fs');
+var path    = require('path');
+
 
 
 var samples = helpers.loadSamples();
@@ -200,5 +204,19 @@ describe('Deflate dictionary', function () {
     if (!helpers.cmpBuf(new Buffer('hellohello world'), uncompressed)) {
       throw new Error('Result not equal for p -> z');
     }
+  });
+});
+
+
+describe('Deflate issues', function () {
+
+  it('#78', function () {
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures', 'issue_78.bin'));
+    var options = { level: 6, memLevel: 1 };
+
+    var deflatedPakoData = pako.deflate(data, options);
+    var deflatedZlibData = zlib.deflateSync(data, options);
+
+    assert.equal(deflatedPakoData.length, deflatedZlibData.length);
   });
 });
