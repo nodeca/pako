@@ -45,13 +45,13 @@ browserify:
 	rm -rf ./dist
 	mkdir dist
 	# Browserify
-	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
 		./node_modules/.bin/browserify -r ./ -s pako \
 		) > dist/pako.js
-	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
 		./node_modules/.bin/browserify -r ./lib/deflate.js -s pako \
 		) > dist/pako_deflate.js
-	( echo -n "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
+	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
 		./node_modules/.bin/browserify -r ./lib/inflate.js -s pako \
 		) > dist/pako_inflate.js
 	# Minify
