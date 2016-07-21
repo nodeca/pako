@@ -212,11 +212,9 @@ describe('Deflate issues', function () {
 
   it('#78', function () {
     var data = fs.readFileSync(path.join(__dirname, 'fixtures', 'issue_78.bin'));
-    var options = { level: 6, memLevel: 1 };
+    var deflatedPakoData = pako.deflate(data, { memLevel: 1 });
+    var inflatedPakoData = pako.inflate(deflatedPakoData);
 
-    var deflatedPakoData = pako.deflate(data, options);
-    var deflatedZlibData = zlib.deflateSync(data, options);
-
-    assert.equal(deflatedPakoData.length, deflatedZlibData.length);
+    assert.equal(data.length, inflatedPakoData.length);
   });
 });
