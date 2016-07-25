@@ -1,3 +1,10 @@
+1.0.3 / 2016-07-25
+------------------
+
+- Maintenance: re-release to properly display latest version in npm registry
+  and badges. Because `npm publish` timestamp used instead of versions.
+
+
 1.0.2 / 2016-07-21
 ------------------
 
