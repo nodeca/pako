@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/pako/1.0.3/pako.min.js"></script>
+<script>
+'use strict';
+
+var pako = window.pako;
+
+// In browser
+
+// Initial object //////////////////////////////////////////////////////////////
+
+var obj = new Array(10);
+
+for (var i = 0; i < obj.length; i++) {
+  obj[i] = { foo: 'bar', baz: 'БАТ' }
+}
+
+// Convert /////////////////////////////////////////////////////////////////////
+
+var str = JSON.stringify(obj);
+
+//
+// Now `str` is standard utf16 (16-bit) string. But we need 8-bit data
+//
+
+// Let's reencode to utf8
+// This method is dirty, but simple and ok for example.
+var data = unescape(encodeURIComponent(str));
+
+
+// Compress ////////////////////////////////////////////////////////////////////
+
+//
+// After compression we have binary data (typed array here).
+//
+// `XMLHttpRequest.send` accepts typed arrays in modern browsers.
+// For ancient ones - more work needed.
+//
+
+var result = pako.deflate(data);
+
+
+// Send data to server /////////////////////////////////////////////////////////
+
+function send() {
+  var xhr = new XMLHttpRequest;
+
+  console.log('Sending data...');
+
+  xhr.open('POST', 'http://localhost:8000/', true);
+
+  // Modern browsers support sending typed array directly
+  xhr.send(result);
+
+  setTimeout(send, 2000);
+}
+
+send();
+
+</script>
+</html>
+<body>
+Sending objects to server, run server code to see result.
+</body>
