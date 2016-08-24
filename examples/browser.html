@@ -39,25 +39,41 @@ var data = unescape(encodeURIComponent(str));
 // For ancient ones - more work needed.
 //
 
-var result = pako.deflate(data);
+var resultAsUint8Array = pako.deflate(data);
+var resultAsBinString  = pako.deflate(data, { to: 'string' });
 
 
 // Send data to server /////////////////////////////////////////////////////////
 
-function send() {
+function sendModern() {
   var xhr = new XMLHttpRequest;
 
-  console.log('Sending data...');
+  console.log('Sending data in modern browsers...');
 
   xhr.open('POST', 'http://localhost:8000/', true);
 
-  // Modern browsers support sending typed array directly
-  xhr.send(result);
+  // We could make this work everywhere, if send data as base64 string.
+  // But that will add 25% of size.
+  xhr.send(resultAsUint8Array);
 
-  setTimeout(send, 2000);
+  setTimeout(sendModern, 2000);
 }
 
-send();
+function sendAncient() {
+  var xhr = new XMLHttpRequest;
+
+  console.log('Sending data in ancient browsers...');
+
+  xhr.open('POST', 'http://localhost:8000/', true);
+  // Kludge to send binary strings as is.
+  xhr.overrideMimeType('text/plain; charset=x-user-defined');
+  xhr.send(resultAsBinString);
+
+  setTimeout(sendAncient, 2000);
+}
+
+sendModern();
+sendAncient();
 
 </script>
 </html>
