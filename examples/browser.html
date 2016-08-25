@@ -65,8 +65,6 @@ function sendAncient() {
   console.log('Sending data in ancient browsers...');
 
   xhr.open('POST', 'http://localhost:8000/', true);
-  // Kludge to send binary strings as is.
-  xhr.overrideMimeType('text/plain; charset=x-user-defined');
   xhr.send(resultAsBinString);
 
   setTimeout(sendAncient, 2000);

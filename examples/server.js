@@ -30,9 +30,7 @@ const server = http.createServer((req, res) => {
     // needs more libraries for old browsers (for unsupported `window.btoa()`).
     //
     // If you don't need IE8/9 support - just drop this part.
-    if (req.headers['content-type'] &&
-        /text\/plain/i.test(req.headers['content-type']) &&
-        /UTF-8/i.test(req.headers['content-type'])) {
+    if (/UTF-8/i.test(String(req.headers['content-type']))) {
       console.log('--- data has utf-8 encoding');
 
       bin = Buffer.from(bin.toString(), 'binary');
