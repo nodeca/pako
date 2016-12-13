@@ -32,7 +32,7 @@
     "ndoc": "*",
     "lodash": "*",
     "async": "*",
-    "grunt": "~0.4.4",
+    "grunt": ">=0.4.0",
     "grunt-cli": "~0.1.13",
     "grunt-saucelabs": "~8.6.0",
     "grunt-contrib-connect": "~0.9.0"
