@@ -60,7 +60,7 @@ function testSingle(zlib_factory, pako_deflate, data, options, callback) {
   if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
 
   var zlibStream = zlib_factory(zlib_options);
-  var buffers = [], nread = 0;
+  var buffers = [];
 
 
   zlibStream.on('error', function (err) {
@@ -71,7 +71,6 @@ function testSingle(zlib_factory, pako_deflate, data, options, callback) {
 
   zlibStream.on('data', function (chunk) {
     buffers.push(chunk);
-    nread += chunk.length;
   });
 
   zlibStream.on('end', function () {
