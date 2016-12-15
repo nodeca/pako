@@ -1,3 +1,11 @@
+1.0.4 / 2016-12-15
+------------------
+
+- Bump dev dependencies.
+- Make sure `err.message` is filled on throw.
+- Code examples for utf-16 string encoding & object compression.
+
+
 1.0.3 / 2016-07-25
 ------------------
 
