@@ -1,9 +1,16 @@
 env:
   node:     true
-  es6:      true
+
+parserOptions:
+  ecmaVersion: 5
+
+globals:
+  Uint8Array:  false
+  Uint16Array: false
+  Int32Array:  false
 
 plugins:
-    - nodeca
+  - nodeca
 
 rules:
   accessor-pairs:         2
