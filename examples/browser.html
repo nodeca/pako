@@ -43,7 +43,14 @@ var resultAsUint8Array = pako.deflate(data);
 var resultAsBinString  = pako.deflate(data, { to: 'string' });
 
 
-// Send data to server /////////////////////////////////////////////////////////
+// Send data to server
+//
+// Use multipart/form-data:
+//
+// - small overhead
+// - well known format, easy to process anywhere
+//
+/////////////////////////////////////////////////////////
 
 function sendModern() {
   var xhr = new XMLHttpRequest;
@@ -52,11 +59,13 @@ function sendModern() {
 
   xhr.open('POST', 'http://localhost:8000/', true);
 
-  // We could make this work everywhere, if send data as base64 string.
-  // But that will add 25% of size.
-  xhr.send(resultAsUint8Array);
+  var formData = new FormData(document.forms.person);
+  var blob     = new Blob([ resultAsUint8Array ], { type: 'application/octet-stream'});
 
-  setTimeout(sendModern, 2000);
+  formData.append('binson', blob);
+  xhr.send(formData);
+
+  setTimeout(sendModern, 5000);
 }
 
 function sendAncient() {
@@ -64,10 +73,26 @@ function sendAncient() {
 
   console.log('Sending data in ancient browsers...');
 
-  xhr.open('POST', 'http://localhost:8000/', true);
-  xhr.send(resultAsBinString);
+  // Emulate form body. But since we can send intact only 7-bit
+  // characters, wrap binary data to base64. That will add 30% of size.
+  var boundary = '----' + String(Math.random()).slice(2);
 
-  setTimeout(sendAncient, 2000);
+  var data = '';
+
+  data += '--' + boundary + '\r\n';
+  data += 'Content-Disposition: form-data; name="binson"; filename="blob"\r\n';
+  data += 'Content-Type: application/octet-stream\r\n';
+  data += 'Content-Transfer-Encoding: base64\r\n'
+  data += '\r\n';
+  data += btoa(resultAsBinString) + '\r\n';
+  data += '--' + boundary + '--\r\n';
+
+
+  xhr.open('POST', 'http://localhost:8000/');
+  xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+  xhr.send(data);
+
+  setTimeout(sendAncient, 5000);
 }
 
 sendModern();
