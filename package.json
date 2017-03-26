@@ -31,7 +31,6 @@
     "bluebird": "^3.5.0",
     "browserify": "*",
     "eslint": "^3.12.2",
-    "eslint-plugin-nodeca": "~1.0.3",
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-connect": "^1.0.2",

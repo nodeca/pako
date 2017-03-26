@@ -9,9 +9,6 @@ globals:
   Uint16Array: false
   Int32Array:  false
 
-plugins:
-  - nodeca
-
 rules:
   accessor-pairs:         2
   array-bracket-spacing:  [ 2, "always", { "singleValue": true, "objectsInArrays": true, "arraysInArrays": true } ]
@@ -33,7 +30,7 @@ rules:
   func-style:             [ 2, declaration ]
   guard-for-in:           2
   handle-callback-err:    2
-  #indent:                 [ 2, 2, { VariableDeclarator: { var: 2, let: 2, const: 3 }, SwitchCase: 1 } ]
+  indent:                 [ 2, 2, { VariableDeclarator: { var: 2, let: 2, const: 3 }, SwitchCase: 1 } ]
   # key-spacing:            [ 2, { "align": "value" } ]
   keyword-spacing:        2
   linebreak-style:        2
@@ -134,5 +131,3 @@ rules:
   use-isnan:              2
   valid-typeof:           2
   yoda:                   [ 2, never, { "exceptRange": true } ]
-
-  nodeca/indent:          [2, spaces, 2]
