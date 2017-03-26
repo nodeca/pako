@@ -11,14 +11,18 @@
   "homepage": "https://github.com/nodeca/pako",
   "contributors": [
     "Andrei Tuputcyn (https://github.com/andr83)",
-    "Vitaly Puzrin (https://github.com/puzrin)"
+    "Vitaly Puzrin (https://github.com/puzrin)",
+    "Friedel Ziegelmayer (https://github.com/dignifiedquire)",
+    "Kirill Efimov (https://github.com/Kirill89)",
+    "Jean-loup Gailly",
+    "Mark Adler"
   ],
   "files": [
     "index.js",
     "dist/",
     "lib/"
   ],
-  "license": "MIT",
+  "license": "(MIT AND ZLIB)",
   "repository": "nodeca/pako",
   "devDependencies": {
     "ansi": "*",

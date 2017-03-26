@@ -1,3 +1,10 @@
+1.0.5 / 2017-03-17
+------------------
+
+- Maintenance. More formal `zlib` attribution and related
+  changes, #93. Thanks to @bastien-roucaries for the help.
+
+
 1.0.4 / 2016-12-15
 ------------------
 
