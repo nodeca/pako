@@ -1,6 +1,6 @@
 'use strict'
 
-var deflateSync = require('./node-zlib').deflateSync;
+var deflateSync = require('zlibjs').deflateSync;
 
 exports.run = function(data, level) {
   // Compression levels not supported. Use unknown defaults always

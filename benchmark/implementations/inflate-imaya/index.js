@@ -1,6 +1,6 @@
 'use strict'
 
-var inflateSync = require('./node-zlib').inflateSync;
+var inflateSync = require('zlibjs').inflateSync;
 
 exports.run = function(data, level) {
   // Compression levels not supported. Use unknown defaults always
