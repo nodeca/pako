@@ -61,7 +61,7 @@ node v0.11.12, 1mb sample:
  * inflate-zlib x 60.32 ops/sec ±1.36% (69 runs sampled)
 ```
 
-zlib's test is partialy afferted by marshling (that make sense for inflate only).
+zlib's test is partially affected by marshalling (that make sense for inflate only).
 You can change deflate level to 0 in benchmark source, to investigate details.
 For deflate level 6 results can be considered as correct.
 
