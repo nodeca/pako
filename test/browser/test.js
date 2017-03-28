@@ -38,5 +38,16 @@ describe('Generic', function () {
       assert(cmp(data_bin, pako.inflate(pako.deflate(data_bin, { level: 6 }))));
     });
   });
+
+  it('should fail on ArrayBuffers', function() {
+    var ok = false;
+    try {
+      pako.inflate(new ArrayBuffer());
+    } catch(e) {
+      ok = true;
+      assert(/Uint8Array/.exec(e), 'Error should mention Uint8Array');
+    }
+    assert(ok, 'Inflating an ArrayBuffer should throw');
+  });
 });
 
