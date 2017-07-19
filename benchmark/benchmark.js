@@ -24,7 +24,7 @@ fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
   if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) <= 0.1 && (name === 'deflate-zlib' || name === 'inflate-zlib')) {
     return;
   }
-  if(Number(process.version.match(/^v(\d+\.\d+)/)[1]) > 0.1 && (name === 'deflate-zlib-async' || name === 'inflate-zlib-async')){
+  if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) > 0.1 && (name === 'deflate-zlib-async' || name === 'inflate-zlib-async')) {
     return;
   }
 
