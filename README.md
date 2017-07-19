@@ -29,41 +29,50 @@ __Benchmarks:__
 
 ```
 node v0.10.26, 1mb sample:
-
-   deflate-dankogai x 4.73 ops/sec ±0.82% (15 runs sampled)
-   deflate-gildas x 4.58 ops/sec ±2.33% (15 runs sampled)
-   deflate-imaya x 3.22 ops/sec ±3.95% (12 runs sampled)
- ! deflate-pako x 6.99 ops/sec ±0.51% (21 runs sampled)
-   deflate-pako-string x 5.89 ops/sec ±0.77% (18 runs sampled)
-   deflate-pako-untyped x 4.39 ops/sec ±1.58% (14 runs sampled)
- * deflate-zlib x 14.71 ops/sec ±4.23% (59 runs sampled)
-   inflate-dankogai x 32.16 ops/sec ±0.13% (56 runs sampled)
-   inflate-imaya x 30.35 ops/sec ±0.92% (53 runs sampled)
- ! inflate-pako x 69.89 ops/sec ±1.46% (71 runs sampled)
-   inflate-pako-string x 19.22 ops/sec ±1.86% (49 runs sampled)
-   inflate-pako-untyped x 17.19 ops/sec ±0.85% (32 runs sampled)
- * inflate-zlib x 70.03 ops/sec ±1.64% (81 runs sampled)
+   deflate-imaya x 4.06 ops/sec ±2.89% (14 runs sampled)
+ ! deflate-pako x 8.91 ops/sec ±0.62% (25 runs sampled)
+   deflate-pako-string x 7.34 ops/sec ±1.04% (22 runs sampled)
+   deflate-pako-untyped x 5.30 ops/sec ±1.28% (17 runs sampled)
+ * deflate-zlib-async x 14.18 ops/sec ±4.62% (69 runs sampled)
+   inflate-imaya x 38.80 ops/sec ±2.43% (65 runs sampled)
+ ! inflate-pako x 86.23 ops/sec ±1.61% (70 runs sampled)
+   inflate-pako-string x 22.23 ops/sec ±0.72% (40 runs sampled)
+   inflate-pako-untyped x 22.67 ops/sec ±0.35% (41 runs sampled)
+ * inflate-zlib-async x 218 ops/sec ±6.72% (62 runs sampled)
 
 node v0.11.12, 1mb sample:
 
-   deflate-dankogai x 5.60 ops/sec ±0.49% (17 runs sampled)
-   deflate-gildas x 5.06 ops/sec ±6.00% (16 runs sampled)
-   deflate-imaya x 3.52 ops/sec ±3.71% (13 runs sampled)
- ! deflate-pako x 11.52 ops/sec ±0.22% (32 runs sampled)
-   deflate-pako-string x 9.53 ops/sec ±1.12% (27 runs sampled)
-   deflate-pako-untyped x 5.44 ops/sec ±0.72% (17 runs sampled)
- * deflate-zlib x 14.05 ops/sec ±3.34% (63 runs sampled)
-   inflate-dankogai x 42.19 ops/sec ±0.09% (56 runs sampled)
-   inflate-imaya x 79.68 ops/sec ±1.07% (68 runs sampled)
- ! inflate-pako x 97.52 ops/sec ±0.83% (80 runs sampled)
-   inflate-pako-string x 45.19 ops/sec ±1.69% (57 runs sampled)
-   inflate-pako-untyped x 24.35 ops/sec ±2.59% (40 runs sampled)
- * inflate-zlib x 60.32 ops/sec ±1.36% (69 runs sampled)
+   deflate-imaya x 4.24 ops/sec ±3.39% (14 runs sampled)
+ ! deflate-pako x 14.11 ops/sec ±0.35% (37 runs sampled)
+   deflate-pako-string x 11.29 ops/sec ±1.71% (31 runs sampled)
+   deflate-pako-untyped x 6.40 ops/sec ±1.04% (20 runs sampled)
+ * deflate-zlib x 19.26 ops/sec ±0.22% (49 runs sampled)
+   inflate-imaya x 93.92 ops/sec ±0.45% (71 runs sampled)
+ ! inflate-pako x 111 ops/sec ±0.88% (70 runs sampled)
+   inflate-pako-string x 46.76 ops/sec ±1.96% (64 runs sampled)
+   inflate-pako-untyped x 27.50 ops/sec ±0.29% (48 runs sampled)
+ * inflate-zlib x 258 ops/sec ±2.50% (70 runs sampled)
+
+node v8.1.3, 1mb sample:
+
+   deflate-imaya x 4.73 ops/sec ±1.78% (16 runs sampled)
+ ! deflate-pako x 12.34 ops/sec ±0.23% (33 runs sampled)
+   deflate-pako-string x 10.42 ops/sec ±0.46% (29 runs sampled)
+   deflate-pako-untyped x 7.13 ops/sec ±0.66% (21 runs sampled)
+ * deflate-zlib x 20.14 ops/sec ±0.46% (42 runs sampled)
+   inflate-imaya x 73.29 ops/sec ±1.93% (68 runs sampled)
+ ! inflate-pako x 116 ops/sec ±1.86% (70 runs sampled)
+   inflate-pako-string x 60.04 ops/sec ±1.16% (59 runs sampled)
+   inflate-pako-untyped x 22.81 ops/sec ±1.03% (39 runs sampled)
+ * inflate-zlib x 281 ops/sec ±2.33% (78 runs sampled)
 ```
 
 zlib's test is partially affected by marshalling (that make sense for inflate only).
 You can change deflate level to 0 in benchmark source, to investigate details.
 For deflate level 6 results can be considered as correct.
+
+Also ther was no Sync functions in zlib before node v0.11.12, so for v0.10.11
+benchmark async calls was used.
 
 __Install:__
 
