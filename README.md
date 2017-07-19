@@ -29,6 +29,7 @@ __Benchmarks:__
 
 ```
 node v0.10.26, 1mb sample:
+
    deflate-imaya x 4.06 ops/sec ±2.89% (14 runs sampled)
  ! deflate-pako x 8.91 ops/sec ±0.62% (25 runs sampled)
    deflate-pako-string x 7.34 ops/sec ±1.04% (22 runs sampled)
