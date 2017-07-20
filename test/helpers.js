@@ -1,10 +1,9 @@
 'use strict';
 
 
-var fs    = require('fs');
-var path  = require('path');
-var _     = require('lodash');
-var async = require('async');
+var fs     = require('fs');
+var path   = require('path');
+var assert = require('assert');
 
 var pako_utils = require('../lib/utils/common');
 var pako  = require('../index');
@@ -49,87 +48,42 @@ function cmpBuf(a, b) {
 }
 
 
+function toBuffer(src) { return Buffer.from ? Buffer.from(src) : new Buffer(src); }
+
+
 // Helper to test deflate/inflate with different options.
 // Use zlib streams, because it's the only way to define options.
 //
-function testSingle(zlib_factory, pako_deflate, data, options, callback) {
-
-  var zlib_options = _.clone(options);
+function testSingle(zlib_method, pako_method, data, options) {
+  var zlib_options = Object.assign({}, options);
 
   // hack for testing negative windowBits
   if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
 
-  var zlibStream = zlib_factory(zlib_options);
-  var buffers = [];
+  var zlib_result = zlib_method(toBuffer(data), zlib_options);
+  var pako_result = pako_method(data, options);
 
-
-  zlibStream.on('error', function (err) {
-    zlibStream.removeAllListeners();
-    zlibStream = null;
-    callback(err);
-  });
-
-  zlibStream.on('data', function (chunk) {
-    buffers.push(chunk);
-  });
-
-  zlibStream.on('end', function () {
-    zlibStream.removeAllListeners();
-    zlibStream = null;
-
-    var buffer = Buffer.concat(buffers);
-
-    var pako_result = pako_deflate(data, options);
-
-    if (!cmpBuf(buffer, pako_result)) {
-      callback(new Error('zlib result != pako result'));
-      return;
-    }
-
-    callback(null);
-  });
-
-
-  zlibStream.write(new Buffer(data));
-  zlibStream.end();
+  assert.deepEqual(zlib_result, pako_result);
 }
 
-function testSamples(zlib_factory, pako_deflate, samples, options, callback) {
-  var queue = [];
 
-  _.forEach(samples, function (data, name) {
+function testSamples(zlib_method, pako_method, samples, options) {
+
+  Object.keys(samples).forEach(function (name) {
+    var data = samples[name];
+
     // with untyped arrays
-    queue.push(function (done) {
-      pako_utils.setTyped(false);
-
-      testSingle(zlib_factory, pako_deflate, data, options, function (err) {
-        if (err) {
-          done('Error in "' + name + '" - zlib result != pako result');
-          return;
-        }
-        done();
-      });
-    });
+    pako_utils.setTyped(false);
+    testSingle(zlib_method, pako_method, data, options);
 
     // with typed arrays
-    queue.push(function (done) {
-      pako_utils.setTyped(true);
-
-      testSingle(zlib_factory, pako_deflate, data, options, function (err) {
-        if (err) {
-          done('Error in "' + name + '" - zlib result != pako result');
-          return;
-        }
-        done();
-      });
-    });
+    pako_utils.setTyped(true);
+    testSingle(zlib_method, pako_method, data, options);
   });
-
-  async.series(queue, callback);
 }
 
 
-function testInflate(samples, inflateOptions, deflateOptions, callback) {
+function testInflate(samples, inflateOptions, deflateOptions) {
   var name, data, deflated, inflated;
 
   // inflate options have windowBits = 0 to force autodetect window size
@@ -147,21 +101,13 @@ function testInflate(samples, inflateOptions, deflateOptions, callback) {
     inflated = pako.inflate(deflated, inflateOptions);
     pako_utils.setTyped(true);
 
-    if (!cmpBuf(inflated, data)) {
-      callback('Error in "' + name + '" - inflate result != original');
-      return;
-    }
+    assert.deepEqual(inflated, data);
 
     // with typed arrays
     inflated = pako.inflate(deflated, inflateOptions);
 
-    if (!cmpBuf(inflated, data)) {
-      callback('Error in "' + name + '" - inflate result != original');
-      return;
-    }
+    assert.deepEqual(inflated, data);
   }
-
-  callback();
 }
 
 
