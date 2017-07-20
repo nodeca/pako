@@ -20,14 +20,6 @@ var IMPLS = [];
 
 
 fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
-  // there is no Sync methods in older node.js
-  if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) <= 0.1 && (name === 'deflate-zlib' || name === 'inflate-zlib')) {
-    return;
-  }
-  if (Number(process.version.match(/^v(\d+\.\d+)/)[1]) > 0.1 && (name === 'deflate-zlib-async' || name === 'inflate-zlib-async')) {
-    return;
-  }
-
   var file = path.join(IMPLS_DIRECTORY, name);
   var code = require(file);
 
