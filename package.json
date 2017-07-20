@@ -24,6 +24,9 @@
   ],
   "license": "(MIT AND Zlib)",
   "repository": "nodeca/pako",
+  "scripts": {
+    "test": "make test"
+  },
   "devDependencies": {
     "ansi": "^0.3.1",
     "benchmark": "^2.1.4",
