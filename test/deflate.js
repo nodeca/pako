@@ -28,10 +28,9 @@ describe('Deflate defaults', function () {
     testSamples(zlib.deflateRawSync, pako.deflateRaw, samples, {});
   });
 
-  // OS_CODE can differ. Probably should add param to compare function
-  // to ignore some buffer positions
+  // OS code in header can vary. Use hack flag to ignore it.
   it('gzip, no options', function () {
-    testSamples(zlib.gzipSync, pako.gzip, samples, {});
+    testSamples(zlib.gzipSync, pako.gzip, samples, { ignore_os: true });
   });
 });
 
