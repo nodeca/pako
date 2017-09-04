@@ -161,7 +161,7 @@ describe('Deflate strategy', function () {
 
 
 describe('Deflate RAW', function () {
-  // Since difference is only in rwapper, test for store/fast/slow methods are enougth
+  // Since difference is only in rwapper, test for store/fast/slow methods are enough
   it('level 4', function () {
     testSamples(zlib.deflateRawSync, pako.deflateRaw, samples, { level: 4 });
   });

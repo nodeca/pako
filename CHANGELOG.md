@@ -81,7 +81,7 @@
 0.2.2 / 2014-06-04
 ------------------
 
-- Fixed iOS 5.1 Safary issue with `apply(typed_array)`, #26.
+- Fixed iOS 5.1 Safari issue with `apply(typed_array)`, #26.
 
 
 0.2.1 / 2014-05-01
