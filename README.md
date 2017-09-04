@@ -24,7 +24,7 @@ __Famous projects, using pako:__
 - [mincer](https://github.com/nodeca/mincer)
 - [JS-Git](https://github.com/creationix/js-git) and
   [Tedit](https://chrome.google.com/webstore/detail/tedit-development-environ/ooekdijbnbbjdfjocaiflnjgoohnblgf)
-  by [@creatronix](https://github.com/creationix)
+  by [@creationix](https://github.com/creationix)
 
 
 __Benchmarks:__
