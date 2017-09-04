@@ -6,7 +6,7 @@
     "Andrei Tuputcyn <Andrew.Tupitsin@gmail.com>",
     "Vitaly Puzrin <vitaly@rcdesign.ru>"
   ],
-  "description": "deflate / inflate / gzip for bworser - very fast zlib port",
+  "description": "deflate / inflate / gzip for browser - very fast zlib port",
   "keywords": ["zlib", "deflate", "inflate", "gzip"],
   "license": "MIT",
   "ignore": [
