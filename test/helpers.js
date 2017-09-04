@@ -64,7 +64,7 @@ function testSingle(zlib_method, pako_method, data, options) {
   var pako_result = pako_method(data, options);
 
   // One more hack: gzip header contains OS code, that can vary.
-  // Override OS code if requested. For simplisity, we assume it on fixed
+  // Override OS code if requested. For simplicity, we assume it on fixed
   // position (= no additional gzip headers used)
   if (options.ignore_os) zlib_result[9] = pako_result[9];
 
