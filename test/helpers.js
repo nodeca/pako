@@ -94,7 +94,7 @@ function testInflate(samples, inflateOptions, deflateOptions) {
   // inflate options have windowBits = 0 to force autodetect window size
   //
   for (name in samples) {
-    if (!samples.hasOwnProperty(name)) continue;
+    if (!Object.prototype.hasOwnProperty.call(samples, name)) continue;
     data = samples[name];
 
     // always use the same data type to generate sample
