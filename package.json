@@ -1,7 +1,7 @@
 {
   "name": "pako",
   "description": "zlib port to javascript - fast, modularized, with browser support",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "keywords": [
     "zlib",
     "deflate",
@@ -43,5 +43,6 @@
     "ndoc": "^5.0.1",
     "uglify-js": "^3.0.25",
     "zlibjs": "^0.3.1"
-  }
+  },
+  "dependencies": {}
 }
