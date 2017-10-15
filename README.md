@@ -3,6 +3,7 @@ pako
 
 [![Build Status](https://travis-ci.org/nodeca/pako.svg?branch=master)](https://travis-ci.org/nodeca/pako)
 [![NPM version](https://img.shields.io/npm/v/pako.svg)](https://www.npmjs.org/package/pako)
+[![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/pako/badge?style=rounded)](https://www.jsdelivr.com/package/npm/pako)
 
 > zlib port to javascript, very fast!
 
