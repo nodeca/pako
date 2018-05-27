@@ -156,6 +156,12 @@ Pako does not contain some specific zlib functions:
 - High level inflate/deflate wrappers (classes) may not support some flush
   modes. Those should work: Z_NO_FLUSH, Z_FINISH, Z_SYNC_FLUSH.
 
+Other Javascript-based fast (de)compression projects
+----------------------------------------------------
+
+- jslzjb-k https://github.com/copy/jslzjb-k
+- compressjs https://github.com/cscott/compressjs
+- UZIP.js https://github.com/photopea/UZIP.js
 
 Authors
 -------
