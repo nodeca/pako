@@ -86,4 +86,17 @@ describe('Gzip special cases', function () {
     assert.deepEqual(inflator.result, expectedDataArray, 'inflator produced expected data');
   });
 
+  it('Read bgzipped file 1', function () {
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
+    var result = pako.inflate(data);
+
+    assert.equal(result.length, 65569);
+  });
+
+  it('Read bgzipped file 2', function () {
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-2.txt.gz'));
+    var result = pako.inflate(data);
+
+    assert.equal(result.length, 1922918);
+  });
 });
