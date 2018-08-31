@@ -60,7 +60,7 @@ describe('Gzip special cases', function () {
     assert(cmp(header.extra, [ 4, 5, 6 ]));
   });
 
-  it.skip('Read stream with SYNC marks', function () {
+  it('Read stream with SYNC marks', function () {
     var inflator, strm, _in, len, pos = 0, i = 0;
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
