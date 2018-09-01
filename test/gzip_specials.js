@@ -7,6 +7,7 @@
 var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
+var zlib    = require('zlib');
 
 var pako_utils = require('../lib/utils/common');
 var pako    = require('../index');
@@ -62,12 +63,15 @@ describe('Gzip special cases', function () {
 
   it('Read stream with SYNC marks', function () {
     var inflator, strm, _in, len, pos = 0, i = 0;
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
+    var expectedData = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined'));
+    var expectedDataArray = new pako_utils.Buf8(expectedData.length);
+    pako_utils.arraySet(expectedDataArray, expectedData, 0, expectedData.length, 0);
 
     do {
-      len = data.length - pos;
+      len = inputData.length - pos;
       _in = new pako_utils.Buf8(len);
-      pako_utils.arraySet(_in, data, pos, len, 0);
+      pako_utils.arraySet(_in, inputData, pos, len, 0);
 
       inflator = new pako.Inflate();
       strm = inflator.strm;
@@ -79,7 +83,22 @@ describe('Gzip special cases', function () {
       i++;
     } while (strm.avail_in);
 
-    assert(i === 2, 'invalid blobs count');
+    assert.equal(i, 1, 'should take it all in one blob');
+    assert.deepEqual(inflator.result, expectedDataArray, 'inflator produced expected data');
   });
 
+  it('Read bgzipped file 1', function () {
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
+    var expectedData = zlib.gunzipSync(inputData, { finishFlush: (zlib.constants || zlib).Z_SYNC_FLUSH });
+    var result = pako.inflate(inputData);
+
+    assert.deepEqual(result, expectedData, 'must get the exact right inflated result');
+  });
+
+  it('Read bgzipped file 2', function () {
+    var data = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-2.txt.gz'));
+
+    var all = pako.inflate(data);
+    assert.equal(all.length, 1922918, 'decompressed full data');
+  });
 });
