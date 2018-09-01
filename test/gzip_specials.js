@@ -87,16 +87,17 @@ describe('Gzip special cases', function () {
   });
 
   it('Read bgzipped file 1', function () {
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
-    var result = pako.inflate(data);
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
+    var expectedData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt'));
+    var result = pako.inflate(inputData);
 
-    assert.equal(result.length, 65569);
+    assert.deepEqual(result, expectedData, 'must get the exact right inflated result');
   });
 
   it('Read bgzipped file 2', function () {
     var data = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-2.txt.gz'));
-    var result = pako.inflate(data);
 
-    assert.equal(result.length, 1922918);
+    var all = pako.inflate(data);
+    assert.equal(all.length, 1922918, 'decompressed full data');
   });
 });
