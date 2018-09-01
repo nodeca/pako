@@ -7,6 +7,7 @@
 var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
+var zlib    = require('zlib');
 
 var pako_utils = require('../lib/utils/common');
 var pako    = require('../index');
@@ -88,7 +89,7 @@ describe('Gzip special cases', function () {
 
   it('Read bgzipped file 1', function () {
     var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
-    var expectedData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt'));
+    var expectedData = zlib.gunzipSync(inputData, { finishFlush: (zlib.constants || zlib).Z_SYNC_FLUSH });
     var result = pako.inflate(inputData);
 
     assert.deepEqual(result, expectedData, 'must get the exact right inflated result');
