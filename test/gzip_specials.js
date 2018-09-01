@@ -7,16 +7,48 @@
 var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
+var zlib    = require('zlib');
 
 var pako_utils = require('../lib/utils/common');
 var pako    = require('../index');
 var cmp     = require('./helpers').cmpBuf;
+var constants = require('../lib/zlib/constants');
+
 
 
 function a2s(array) {
   return String.fromCharCode.apply(null, array);
 }
 
+function readMultiMemberStream(inputData) {
+  var inflator, strm, _in, len, pos = 0, i = 0, totalLength = 0;
+  var chunks = [], result;
+  do {
+    len = inputData.length - pos;
+    _in = new pako_utils.Buf8(len);
+    pako_utils.arraySet(_in, inputData, pos, len, 0);
+
+    inflator = new pako.Inflate();
+    strm = inflator.strm;
+    inflator.push(_in, constants.Z_SYNC_FLUSH);
+    assert(!inflator.err, inflator.msg);
+
+    pos += strm.next_in;
+    chunks[i] = inflator.result;
+    totalLength += inflator.result.length;
+    i++;
+  } while (strm.avail_in);
+
+  inflator.push([], constants.Z_FINISH);
+
+  result = new pako_utils.Buf8(totalLength);
+
+  for (i = 0, pos = 0; i < chunks.length; i++) {
+    pako_utils.arraySet(result, chunks[i], 0, chunks[i].length, pos);
+    pos += chunks[i].length;
+  }
+  return result;
+}
 
 describe('Gzip special cases', function () {
 
@@ -60,26 +92,33 @@ describe('Gzip special cases', function () {
     assert(cmp(header.extra, [ 4, 5, 6 ]));
   });
 
-  it('Read stream with SYNC marks', function () {
-    var inflator, strm, _in, len, pos = 0, i = 0;
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
-    do {
-      len = data.length - pos;
-      _in = new pako_utils.Buf8(len);
-      pako_utils.arraySet(_in, data, pos, len, 0);
+  it('Read multi-member stream with SYNC marks', function () {
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
+    var expectedData = zlib.gunzipSync(inputData, { finishFlush: (zlib.constants || zlib).Z_SYNC_FLUSH });
+    var expectedDataArray = new pako_utils.Buf8(expectedData.length);
+    pako_utils.arraySet(expectedDataArray, expectedData, 0, expectedData.length, 0);
 
-      inflator = new pako.Inflate();
-      strm = inflator.strm;
-      inflator.push(_in, true);
+    var result = readMultiMemberStream(inputData);
 
-      assert(!inflator.err, inflator.msg);
-
-      pos += strm.next_in;
-      i++;
-    } while (strm.avail_in);
-
-    assert(i === 2, 'invalid blobs count');
+    assert.equal(result.length, expectedData.length, 'produces the right amount of data');
+    assert.deepEqual(result, expectedDataArray, 'inflator produced expected data');
   });
 
+  it('Read multi-member bgzipped file 1', function () {
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-1.txt.gz'));
+    var expectedData = zlib.gunzipSync(inputData, { finishFlush: (zlib.constants || zlib).Z_SYNC_FLUSH });
+    var result = readMultiMemberStream(inputData);
+
+    assert.equal(result.length, 65569, 'decompressed full data');
+    assert.deepEqual(result, expectedData, 'get same data as node zlib');
+  });
+
+  it('Read multi-member bgzipped file 2', function () {
+    var inputData = fs.readFileSync(path.join(__dirname, 'fixtures/bgzip-2.txt.gz'));
+    var expectedData = zlib.gunzipSync(inputData, { finishFlush: (zlib.constants || zlib).Z_SYNC_FLUSH });
+    var result = readMultiMemberStream(inputData);
+    assert.equal(result.length, 1922918, 'decompressed full data');
+    assert.deepEqual(result, expectedData, 'get same data as node zlib');
+  });
 });
