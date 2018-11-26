@@ -9,7 +9,7 @@ var assert = require('assert');
 var helpers = require('./helpers');
 
 var pako_utils = require('../lib/utils/common');
-var pako = require('../index');
+var pako = require('../lib/pako');
 
 
 var samples = helpers.loadSamples();

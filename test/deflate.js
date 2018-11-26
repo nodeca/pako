@@ -6,7 +6,7 @@
 
 var zlib = require('zlib');
 
-var pako    = require('../index');
+var pako    = require('../lib/pako');
 var helpers = require('./helpers');
 var testSamples = helpers.testSamples;
 var assert  = require('assert');

@@ -7,7 +7,7 @@
 var zlib        = require('zlib');
 var assert      = require('assert');
 
-var pako        = require('../index');
+var pako        = require('../lib/pako');
 var helpers     = require('./helpers');
 var testInflate = helpers.testInflate;
 

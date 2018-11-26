@@ -8,7 +8,7 @@ var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
 
-var pako    = require('../index');
+var pako    = require('../lib/pako');
 var cmp     = require('./helpers').cmpBuf;
 var strings = require('../lib/utils/strings');
 

@@ -5,3 +5,4 @@ node_modules
 support/demo_template/sample.js
 benchmark/implementations/
 test/browser
+rollup.config.js

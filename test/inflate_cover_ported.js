@@ -14,7 +14,7 @@ var msg = require('../lib/zlib/messages');
 var zlib_inflate = require('../lib/zlib/inflate');
 var inflate_table = require('../lib/zlib/inftrees');
 
-var pako  = require('../index');
+var pako  = require('../lib/pako');
 
 
 function h2b(hex) {

@@ -15,7 +15,7 @@ var msg = require('../lib/zlib/messages');
 var zlib_deflate = require('../lib/zlib/deflate');
 var ZStream = require('../lib/zlib/zstream');
 
-var pako  = require('../index');
+var pako  = require('../lib/pako');
 
 
 var short_sample = 'hello world';

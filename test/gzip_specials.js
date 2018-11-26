@@ -9,7 +9,7 @@ var path    = require('path');
 var assert  = require('assert');
 
 var pako_utils = require('../lib/utils/common');
-var pako    = require('../index');
+var pako    = require('../lib/pako');
 var cmp     = require('./helpers').cmpBuf;
 
 
