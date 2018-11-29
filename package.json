@@ -32,7 +32,7 @@
     "benchmark": "^2.1.4",
     "bluebird": "^3.5.0",
     "browserify": "^14.4.0",
-    "eslint": "^3.12.2",
+    "eslint": "^5.9.0",
     "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
     "multiparty": "^4.1.3",
