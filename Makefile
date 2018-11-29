@@ -27,11 +27,6 @@ lint:
 test: lint
 	./node_modules/.bin/mocha
 
-test-browser: lint
-	rm -f ./test/browser/pako.js
-	./node_modules/.bin/browserify -r ./ -s pako > test/browser/pako.js
-	@SAUCE_PROJ=${GITHUB_PROJ} grunt test
-
 cover:
 	rm -rf cover
 	./node_modules/.bin/istanbul cover node_modules/.bin/_mocha
