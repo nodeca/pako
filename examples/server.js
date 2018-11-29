@@ -5,7 +5,6 @@
 const http       = require('http');
 const pako       = require('../');
 const multiparty = require('multiparty');
-const Promise    = require('bluebird');
 const fs         = require('fs');
 
 
@@ -22,7 +21,7 @@ function error(msg) {
 
 
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
 
   console.log('--- received request');
 
@@ -30,7 +29,7 @@ const server = http.createServer((req, res) => {
   // file system. Don't do such things on production.
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  Promise.coroutine(function* () {
+  try {
     //
     // Check request size early by header and terminate immediately for big data
     //
@@ -49,7 +48,7 @@ const server = http.createServer((req, res) => {
       maxFilesSize: MAX_FILES_SIZE
     });
 
-    let files = yield new Promise(resolve => {
+    let files = await new Promise(resolve => {
       form.parse(req, function (e, fields, files) {
         if (e) err = e;
         resolve(files);
@@ -66,9 +65,7 @@ const server = http.createServer((req, res) => {
     //
     // But that's just a quick sample to explain data reencoding steps from
     // browser to server. Feel free to improve.
-    let bin = yield Promise.fromCallback(cb => {
-      fs.readFile(files.binson[0].path, cb);
-    });
+    let bin = fs.readFileSync(files.binson[0].path);
 
     // Kludge - here we should cleanup all files
     fs.unlinkSync(files.binson[0].path);
@@ -86,12 +83,12 @@ const server = http.createServer((req, res) => {
 
     console.log('--- received object is: ', obj);
     res.end('ok');
-  })()
-  .catch(err => {
+  }
+  catch (err) {
     console.log(err);
     res.statusCode = err.statusCode || 400;
     res.end(err.message);
-  });
+  }
 
 });
 

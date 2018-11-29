@@ -30,7 +30,6 @@
   "devDependencies": {
     "ansi": "^0.3.1",
     "benchmark": "^2.1.4",
-    "bluebird": "^3.5.0",
     "browserify": "^16.2.3",
     "eslint": "^5.9.0",
     "istanbul": "^0.4.5",
