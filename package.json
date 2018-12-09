@@ -22,9 +22,9 @@
     "dist/",
     "lib/"
   ],
-  "main": "dist/pako.cjs.js",
-  "module": "dist/pako.esm.js",
-  "browser": "dist/pako.umd.js",
+  "main": "lib/pako.js",
+  "module": "dist/pako.mjs",
+  "browser": "dist/pako.js",
   "license": "(MIT AND Zlib)",
   "repository": "nodeca/pako",
   "scripts": {

@@ -5,8 +5,21 @@ export default [
   {
     input: 'lib/pako.js',
     output: [
-      { file: pkg.main, format: 'cjs' },
       { file: pkg.browser, format: 'umd', name: 'pako' }
+    ],
+    plugins: [commonjs()]
+  },
+  {
+    input: 'lib/inflate.js',
+    output: [
+      { file: 'dist/inflate.js', format: 'umd', name: 'pako', exports: 'named' }
+    ],
+    plugins: [commonjs()]
+  },
+  {
+    input: 'lib/deflate.js',
+    output: [
+      { file: 'dist/deflate.js', format: 'umd', name: 'pako', exports: 'named' }
     ],
     plugins: [commonjs()]
   },
@@ -54,5 +67,19 @@ export default [
         'Z_DEFLATED'
          ] }
     })]
+  },
+  {
+    input: 'lib/inflate.js',
+    output: [
+      { file: 'dist/inflate.mjs', format: 'es' }
+    ],
+    plugins: [commonjs()]
+  },
+  {
+    input: 'lib/deflate.js',
+    output: [
+      { file: 'dist/deflate.mjs', format: 'es' }
+    ],
+    plugins: [commonjs()]
   }
 ];
