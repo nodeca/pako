@@ -3,3 +3,4 @@ env:
 
 parserOptions:
   ecmaVersion: 2017
+  sourceType: "commonjs"

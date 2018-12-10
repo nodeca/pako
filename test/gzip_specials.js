@@ -1,16 +1,12 @@
 /*global describe, it*/
 
+import { readFileSync } from 'fs';
+import path from 'path';
+import assert from 'assert';
 
-'use strict';
-
-
-var fs      = require('fs');
-var path    = require('path');
-var assert  = require('assert');
-
-var pako_utils = require('../lib/utils/common');
-var pako    = require('../lib/pako');
-var cmp     = require('./helpers').cmpBuf;
+import { cmpBuf } from './helpers';
+import { Deflate, Inflate } from '../lib/pako';
+import { arraySet } from '../lib/utils/common';
 
 
 function a2s(array) {
@@ -21,8 +17,8 @@ function a2s(array) {
 describe('Gzip special cases', function () {
 
   it('Read custom headers', function () {
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
-    var inflator = new pako.Inflate();
+    var data = readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
+    var inflator = new Inflate();
     inflator.push(data, true);
 
     assert.equal(inflator.header.name, 'test name');
@@ -33,7 +29,7 @@ describe('Gzip special cases', function () {
   it('Write custom headers', function () {
     var data = '           ';
 
-    var deflator = new pako.Deflate({
+    var deflator = new Deflate({
       gzip: true,
       header: {
         hcrc: true,
@@ -46,7 +42,7 @@ describe('Gzip special cases', function () {
     });
     deflator.push(data, true);
 
-    var inflator = new pako.Inflate({ to: 'string' });
+    var inflator = new Inflate({ to: 'string' });
     inflator.push(deflator.result, true);
 
     assert.equal(inflator.err, 0);
@@ -57,19 +53,19 @@ describe('Gzip special cases', function () {
     assert.equal(header.os, 15);
     assert.equal(header.name, 'test name');
     assert.equal(header.comment, 'test comment');
-    assert(cmp(header.extra, [ 4, 5, 6 ]));
+    assert(cmpBuf(header.extra, [ 4, 5, 6 ]));
   });
 
   it('Read stream with SYNC marks', function () {
     var inflator, strm, _in, len, pos = 0, i = 0;
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
+    var data = readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
     do {
       len = data.length - pos;
-      _in = new pako_utils.Buf8(len);
-      pako_utils.arraySet(_in, data, pos, len, 0);
+      _in = new Uint8Array(len);
+      arraySet(_in, data, pos, len, 0);
 
-      inflator = new pako.Inflate();
+      inflator = new Inflate();
       strm = inflator.strm;
       inflator.push(_in, true);
 

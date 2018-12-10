@@ -1,18 +1,14 @@
 /*global describe, it*/
 
+import { readFileSync } from 'fs';
+import path from 'path';
+import zlib from 'zlib';
+import assert from 'assert';
 
-'use strict';
+import { inflateRaw, inflate } from '../lib/pako';
+import { loadSamples, testInflate, testSamples, spdyDict } from './helpers';
 
-
-var zlib        = require('zlib');
-var assert      = require('assert');
-
-var pako        = require('../lib/pako');
-var helpers     = require('./helpers');
-var testInflate = helpers.testInflate;
-
-
-var samples = helpers.loadSamples();
+var samples = loadSamples();
 
 describe('Inflate defaults', function () {
 
@@ -25,8 +21,8 @@ describe('Inflate defaults', function () {
   });
 
   it('inflate raw from compressed samples', function () {
-    var compressed_samples = helpers.loadSamples('samples_deflated_raw');
-    helpers.testSamples(zlib.inflateRawSync, pako.inflateRaw, compressed_samples, {});
+    var compressed_samples = loadSamples('samples_deflated_raw');
+    testSamples(zlib.inflateRawSync, inflateRaw, compressed_samples, {});
   });
 
 });
@@ -168,11 +164,11 @@ describe('Inflate RAW', function () {
 describe('Inflate with dictionary', function () {
 
   it('should throw on the wrong dictionary', function () {
-    // var zCompressed = helpers.deflateSync('world', { dictionary: new Buffer('hello') });
+    // var zCompressed = testSamplesdeflateSync('world', { dictionary: new Buffer('hello') });
     var zCompressed = new Buffer([ 120, 187, 6, 44, 2, 21, 43, 207, 47, 202, 73, 1, 0, 6, 166, 2, 41 ]);
 
     assert.throws(function () {
-      pako.inflate(zCompressed, { dictionary: new Buffer('world') });
+      inflate(zCompressed, { dictionary: new Buffer('world') });
     }, /data error/);
   });
 
@@ -182,9 +178,9 @@ describe('Inflate with dictionary', function () {
   });
 
   it('spdy dictionary', function () {
-    var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
+    var fixtureSpdyDict = readFileSync(path.join(__dirname, 'fixtures', 'spdy_dict.txt'));
 
-    testInflate(samples, { dictionary: spdyDict }, { dictionary: helpers.spdyDict });
+    testInflate(samples, { dictionary: fixtureSpdyDict }, { dictionary: spdyDict });
   });
 
 });

@@ -2,27 +2,23 @@
 
 /*global describe, it*/
 
+import { readFileSync } from 'fs';
+import path from 'path';
+import assert from 'assert';
 
-'use strict';
+import { Z_OK, Z_STREAM_ERROR, Z_BUF_ERROR, Z_FINISH } from '../lib/zlib/constants';
+import msg from '../lib/zlib/messages';
+import { deflate, deflateInit, deflateSetHeader, deflateEnd } from '../lib/zlib/deflate';
+import ZStream from '../lib/zlib/zstream';
 
-
-var assert = require('assert');
-var fs = require('fs');
-var path  = require('path');
-
-var c = require('../lib/zlib/constants');
-var msg = require('../lib/zlib/messages');
-var zlib_deflate = require('../lib/zlib/deflate');
-var ZStream = require('../lib/zlib/zstream');
-
-var pako  = require('../lib/pako');
+import { Deflate } from '../lib/pako';
 
 
 var short_sample = 'hello world';
-var long_sample = fs.readFileSync(path.join(__dirname, 'fixtures/samples/lorem_en_100k.txt'));
+var long_sample = readFileSync(path.join(__dirname, 'fixtures/samples/lorem_en_100k.txt'));
 
 function testDeflate(data, opts, flush) {
-  var deflator = new pako.Deflate(opts);
+  var deflator = new Deflate(opts);
   deflator.push(data, flush);
   deflator.push(data, true);
 
@@ -60,37 +56,37 @@ describe('Deflate states', function () {
   it('inflate bad parameters', function () {
     var ret, strm;
 
-    ret = zlib_deflate.deflate(null, 0);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflate(null, 0);
+    assert(ret === Z_STREAM_ERROR);
 
     strm = new ZStream();
 
-    ret = zlib_deflate.deflateInit(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflateInit(null);
+    assert(ret === Z_STREAM_ERROR);
 
-    ret = zlib_deflate.deflateInit(strm, 6);
-    assert(ret === c.Z_OK);
+    ret = deflateInit(strm, 6);
+    assert(ret === Z_OK);
 
-    ret = zlib_deflate.deflateSetHeader(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflateSetHeader(null);
+    assert(ret === Z_STREAM_ERROR);
 
     strm.state.wrap = 1;
-    ret = zlib_deflate.deflateSetHeader(strm, null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflateSetHeader(strm, null);
+    assert(ret === Z_STREAM_ERROR);
 
     strm.state.wrap = 2;
-    ret = zlib_deflate.deflateSetHeader(strm, null);
-    assert(ret === c.Z_OK);
+    ret = deflateSetHeader(strm, null);
+    assert(ret === Z_OK);
 
-    ret = zlib_deflate.deflate(strm, c.Z_FINISH);
-    assert(ret === c.Z_BUF_ERROR);
+    ret = deflate(strm, Z_FINISH);
+    assert(ret === Z_BUF_ERROR);
 
-    ret = zlib_deflate.deflateEnd(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflateEnd(null);
+    assert(ret === Z_STREAM_ERROR);
 
     //BS_NEED_MORE
     strm.state.status = 5;
-    ret = zlib_deflate.deflateEnd(strm);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = deflateEnd(strm);
+    assert(ret === Z_STREAM_ERROR);
   });
 });

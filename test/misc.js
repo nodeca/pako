@@ -1,27 +1,24 @@
 /*global describe, it*/
 
 
-'use strict';
+import { readFileSync } from 'fs';
+import path from 'path';
+import assert from 'assert';
 
-
-var fs      = require('fs');
-var path    = require('path');
-var assert  = require('assert');
-
-var pako    = require('../lib/pako');
-var cmp     = require('./helpers').cmpBuf;
+import { cmpBuf } from './helpers';
+import { deflate, inflate } from '../lib/pako';
 
 describe('ArrayBuffer', function () {
 
   var file   = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
-  var sample = new Uint8Array(fs.readFileSync(file));
-  var deflated = pako.deflate(sample);
+  var sample = new Uint8Array(readFileSync(file));
+  var deflated = deflate(sample);
 
   it('Deflate ArrayBuffer', function () {
-    assert.ok(cmp(deflated, pako.deflate(sample.buffer)));
+    assert.ok(cmpBuf(deflated, deflate(sample.buffer)));
   });
 
   it('Inflate ArrayBuffer', function () {
-    assert.ok(cmp(sample, pako.inflate(deflated.buffer)));
+    assert.ok(cmpBuf(sample, inflate(deflated.buffer)));
   });
 });

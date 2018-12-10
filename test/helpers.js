@@ -1,25 +1,21 @@
-'use strict';
+import { readdirSync, readFileSync } from 'fs';
+import path from 'path';
+import assert from 'assert';
 
-
-var fs     = require('fs');
-var path   = require('path');
-var assert = require('assert');
-
-var pako_utils = require('../lib/utils/common');
-var pako  = require('../lib/pako');
+import { inflate, deflate } from '../lib/pako';
 
 // Load fixtures to test
 // return: { 'filename1': content1, 'filename2': content2, ...}
 //
-function loadSamples(subdir) {
+export function loadSamples(subdir) {
   var result = {};
   var dir = path.join(__dirname, 'fixtures', subdir || 'samples');
 
-  fs.readdirSync(dir).sort().forEach(function (sample) {
+  readdirSync(dir).sort().forEach(function (sample) {
     var filepath = path.join(dir, sample),
         extname  = path.extname(filepath),
         basename = path.basename(filepath, extname),
-        content  = new Uint8Array(fs.readFileSync(filepath));
+        content  = new Uint8Array(readFileSync(filepath));
 
     if (basename[0] === '_') { return; } // skip files with name, started with dash
 
@@ -32,7 +28,7 @@ function loadSamples(subdir) {
 
 // Compare 2 buffers (can be Array, Uint8Array, Buffer).
 //
-function cmpBuf(a, b) {
+export function cmpBuf(a, b) {
   if (a.length !== b.length) {
     return false;
   }
@@ -72,23 +68,23 @@ function testSingle(zlib_method, pako_method, data, options) {
 }
 
 
-function testSamples(zlib_method, pako_method, samples, options) {
+export function testSamples(zlib_method, pako_method, samples, options) {
 
   Object.keys(samples).forEach(function (name) {
     var data = samples[name];
 
-    // with untyped arrays
-    pako_utils.setTyped(false);
-    testSingle(zlib_method, pako_method, data, options);
+    // // with untyped arrays
+    // pako_utils.setTyped(false);
+    // testSingle(zlib_method, pako_method, data, options);
 
-    // with typed arrays
-    pako_utils.setTyped(true);
+    // // with typed arrays
+    // pako_utils.setTyped(true);
     testSingle(zlib_method, pako_method, data, options);
   });
 }
 
 
-function testInflate(samples, inflateOptions, deflateOptions) {
+export function testInflate(samples, inflateOptions, deflateOptions) {
   var name, data, deflated, inflated;
 
   // inflate options have windowBits = 0 to force autodetect window size
@@ -97,26 +93,20 @@ function testInflate(samples, inflateOptions, deflateOptions) {
     if (!samples.hasOwnProperty(name)) continue;
     data = samples[name];
 
-    // always use the same data type to generate sample
-    pako_utils.setTyped(true);
-    deflated = pako.deflate(data, deflateOptions);
+    // // always use the same data type to generate sample
+    // pako_utils.setTyped(true);
+    deflated = deflate(data, deflateOptions);
 
-    // with untyped arrays
-    pako_utils.setTyped(false);
-    inflated = pako.inflate(deflated, inflateOptions);
-    pako_utils.setTyped(true);
+    // // with untyped arrays
+    // pako_utils.setTyped(false);
+    // inflated = pako.inflate(deflated, inflateOptions);
+    // pako_utils.setTyped(true);
 
-    assert.deepEqual(inflated, data);
+    // assert.deepEqual(inflated, data);
 
     // with typed arrays
-    inflated = pako.inflate(deflated, inflateOptions);
+    inflated = inflate(deflated, inflateOptions);
 
     assert.deepEqual(inflated, data);
   }
 }
-
-
-exports.cmpBuf = cmpBuf;
-exports.testSamples = testSamples;
-exports.testInflate = testInflate;
-exports.loadSamples = loadSamples;

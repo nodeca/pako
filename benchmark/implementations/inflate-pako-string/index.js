@@ -1,6 +1,6 @@
 'use strict'
 
-var pako = require('../../../');
+var pako = require('../../../dist/pako.cjs');
 
 exports.run = function(data) {
   return pako.inflate(data.deflateString, {

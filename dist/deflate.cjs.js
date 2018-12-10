@@ -1,19 +1,12 @@
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
+'use strict';
 
-var common = createCommonjsModule(function (module, exports) {
-
-
-var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
-                (typeof Uint16Array !== 'undefined') &&
-                (typeof Int32Array !== 'undefined');
+Object.defineProperty(exports, '__esModule', { value: true });
 
 function _has(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
-exports.assign = function (obj /*from1, from2, from3, ...*/) {
+function assign(obj /*from1, from2, from3, ...*/) {
   var sources = Array.prototype.slice.call(arguments, 1);
   while (sources.length) {
     var source = sources.shift();
@@ -31,89 +24,158 @@ exports.assign = function (obj /*from1, from2, from3, ...*/) {
   }
 
   return obj;
-};
+}
 
 
 // reduce buffer size, avoiding mem copy
-exports.shrinkBuf = function (buf, size) {
+function shrinkBuf(buf, size) {
   if (buf.length === size) { return buf; }
   if (buf.subarray) { return buf.subarray(0, size); }
   buf.length = size;
   return buf;
-};
+}
 
-
-var fnTyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    if (src.subarray && dest.subarray) {
-      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
-      return;
-    }
-    // Fallback to ordinary array
+function arraySet(dest, src, src_offs, len, dest_offs) {
+  // Fallback to ordinary array
+  if (!src.subarray || !dest.subarray) {
     for (var i = 0; i < len; i++) {
       dest[dest_offs + i] = src[src_offs + i];
     }
-  },
-  // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
-    var i, l, len, pos, chunk, result;
-
-    // calculate data length
-    len = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
-      len += chunks[i].length;
-    }
-
-    // join chunks
-    result = new Uint8Array(len);
-    pos = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
-      chunk = chunks[i];
-      result.set(chunk, pos);
-      pos += chunk.length;
-    }
-
-    return result;
+    return;
   }
-};
 
-var fnUntyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    for (var i = 0; i < len; i++) {
-      dest[dest_offs + i] = src[src_offs + i];
-    }
-  },
+  dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
+}
+
   // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
+function flattenChunks(chunks) {
+  // Fallback to ordinary array
+  if (!Uint8Array) {
     return [].concat.apply([], chunks);
   }
-};
 
+  var i, l, len, pos, chunk, result;
 
-// Enable/Disable typed arrays use, for testing
-//
-exports.setTyped = function (on) {
-  if (on) {
-    exports.Buf8  = Uint8Array;
-    exports.Buf16 = Uint16Array;
-    exports.Buf32 = Int32Array;
-    exports.assign(exports, fnTyped);
-  } else {
-    exports.Buf8  = Array;
-    exports.Buf16 = Array;
-    exports.Buf32 = Array;
-    exports.assign(exports, fnUntyped);
+  // calculate data length
+  len = 0;
+  for (i = 0, l = chunks.length; i < l; i++) {
+    len += chunks[i].length;
   }
-};
 
-exports.setTyped(TYPED_OK);
-});
-var common_1 = common.assign;
-var common_2 = common.shrinkBuf;
-var common_3 = common.setTyped;
-var common_4 = common.Buf8;
-var common_5 = common.Buf16;
-var common_6 = common.Buf32;
+  // join chunks
+  result = new Uint8Array(len);
+  pos = 0;
+  for (i = 0, l = chunks.length; i < l; i++) {
+    chunk = chunks[i];
+    result.set(chunk, pos);
+    pos += chunk.length;
+  }
+
+  return result;
+}
+
+// String encode/decode helpers
+
+
+// Quick check if we can use fast array to bin string conversion
+//
+// - apply(Array) can fail on Android 2.2
+// - apply(Uint8Array) can fail on iOS 5.1 Safari
+//
+var STR_APPLY_OK = true;
+var STR_APPLY_UIA_OK = true;
+
+try { String.fromCharCode.apply(null, [ 0 ]); } catch (__) { STR_APPLY_OK = false; }
+try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch (__) { STR_APPLY_UIA_OK = false; }
+
+
+// Table with utf8 lengths (calculated by first byte of sequence)
+// Note, that 5 & 6-byte values and some 4-byte values can not be represented in JS,
+// because max possible codepoint is 0x10ffff
+var _utf8len = new Uint8Array(256);
+for (var q = 0; q < 256; q++) {
+  _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
+}
+_utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
+
+
+// convert string to array (typed, when possible)
+function string2buf(str) {
+  var buf, c, c2, m_pos, i, str_len = str.length, buf_len = 0;
+
+  // count binary size
+  for (m_pos = 0; m_pos < str_len; m_pos++) {
+    c = str.charCodeAt(m_pos);
+    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+      c2 = str.charCodeAt(m_pos + 1);
+      if ((c2 & 0xfc00) === 0xdc00) {
+        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+        m_pos++;
+      }
+    }
+    buf_len += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
+  }
+
+  // allocate buffer
+  buf = new Uint8Array(buf_len);
+
+  // convert
+  for (i = 0, m_pos = 0; i < buf_len; m_pos++) {
+    c = str.charCodeAt(m_pos);
+    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
+      c2 = str.charCodeAt(m_pos + 1);
+      if ((c2 & 0xfc00) === 0xdc00) {
+        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+        m_pos++;
+      }
+    }
+    if (c < 0x80) {
+      /* one byte */
+      buf[i++] = c;
+    } else if (c < 0x800) {
+      /* two bytes */
+      buf[i++] = 0xC0 | (c >>> 6);
+      buf[i++] = 0x80 | (c & 0x3f);
+    } else if (c < 0x10000) {
+      /* three bytes */
+      buf[i++] = 0xE0 | (c >>> 12);
+      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+      buf[i++] = 0x80 | (c & 0x3f);
+    } else {
+      /* four bytes */
+      buf[i++] = 0xf0 | (c >>> 18);
+      buf[i++] = 0x80 | (c >>> 12 & 0x3f);
+      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
+      buf[i++] = 0x80 | (c & 0x3f);
+    }
+  }
+
+  return buf;
+}
+
+// Helper (used in 2 places)
+function _buf2binstring(buf, len) {
+  // On Chrome, the arguments in a function call that are allowed is `65534`.
+  // If the length of the buffer is smaller than that, we can use this optimization,
+  // otherwise we will take a slower path.
+  if (len < 65534) {
+    if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
+      return String.fromCharCode.apply(null, shrinkBuf(buf, len));
+    }
+  }
+
+  var result = '';
+  for (var i = 0; i < len; i++) {
+    result += String.fromCharCode(buf[i]);
+  }
+  return result;
+}
+
+
+// Convert byte array to binary string
+function buf2binstring(buf) {
+  return _buf2binstring(buf, buf.length);
+}
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
 // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
@@ -134,28 +196,43 @@ var common_6 = common.Buf32;
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-/* eslint-disable space-unary-ops */
+/* Allowed flush values; see deflate() and inflate() below for details */
+var Z_NO_FLUSH =          0;
+var Z_PARTIAL_FLUSH =     1;
+var Z_SYNC_FLUSH =        2;
+var Z_FULL_FLUSH =        3;
+var Z_FINISH =            4;
+var Z_BLOCK =             5;
+
+/* Return codes for the compression/decompression functions. Negative values
+* are errors, positive values are used for special but normal events.
+*/
+var Z_OK =                0;
+var Z_STREAM_END =        1;
+var Z_STREAM_ERROR =     -2;
+var Z_DATA_ERROR =       -3;
+//export var Z_MEM_ERROR =      -4;
+var Z_BUF_ERROR =        -5;
+var Z_DEFAULT_COMPRESSION =    -1;
 
 
-
-/* Public constants ==========================================================*/
-/* ===========================================================================*/
-
-
-//var Z_FILTERED          = 1;
-//var Z_HUFFMAN_ONLY      = 2;
-//var Z_RLE               = 3;
-var Z_FIXED               = 4;
-//var Z_DEFAULT_STRATEGY  = 0;
+var Z_FILTERED =                1;
+var Z_HUFFMAN_ONLY =            2;
+var Z_RLE =                     3;
+var Z_FIXED =                   4;
+var Z_DEFAULT_STRATEGY =        0;
 
 /* Possible values of the data_type field (though see inflate()) */
-var Z_BINARY              = 0;
-var Z_TEXT                = 1;
-//var Z_ASCII             = 1; // = Z_TEXT
-var Z_UNKNOWN             = 2;
+var Z_BINARY =                  0;
+var Z_TEXT =                    1;
+//export var Z_ASCII =                 1; // = Z_TEXT (deprecated)
+var Z_UNKNOWN =                 2;
 
-/*============================================================================*/
+/* The deflate compression method */
+var Z_DEFLATED =                8;
+//export var Z_NULL =                  null // Use -1 or null inline; depending on var type
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
 
 function zero(buf) { var len = buf.length; while (--len >= 0) { buf[len] = 0; } }
 
@@ -675,7 +752,7 @@ function copy_block(s, buf, len, header)
 //  while (len--) {
 //    put_byte(s, *buf++);
 //  }
-  common.arraySet(s.pending_buf, s.window, buf, len, s.pending);
+  arraySet(s.pending_buf, s.window, buf, len, s.pending);
   s.pending += len;
 }
 
@@ -1136,8 +1213,7 @@ var static_init_done = false;
 /* ===========================================================================
  * Initialize the tree data structures for a new zlib stream.
  */
-function _tr_init(s)
-{
+function _tr_init(s) {
 
   if (!static_init_done) {
     tr_static_init();
@@ -1159,12 +1235,11 @@ function _tr_init(s)
 /* ===========================================================================
  * Send a stored block
  */
-function _tr_stored_block(s, buf, stored_len, last)
-//DeflateState *s;
-//charf *buf;       /* input block */
-//ulg stored_len;   /* length of input block */
-//int last;         /* one if this is the last block for a file */
-{
+function _tr_stored_block(s, buf, stored_len, last) {
+  //DeflateState *s;
+  //charf *buf;       /* input block */
+  //ulg stored_len;   /* length of input block */
+  //int last;         /* one if this is the last block for a file */
   send_bits(s, (STORED_BLOCK << 1) + (last ? 1 : 0), 3);    /* send block type */
   copy_block(s, buf, stored_len, true); /* with header */
 }
@@ -1185,12 +1260,11 @@ function _tr_align(s) {
  * Determine the best encoding for the current block: dynamic trees, static
  * trees or store, and output the encoded block to the zip file.
  */
-function _tr_flush_block(s, buf, stored_len, last)
-//DeflateState *s;
-//charf *buf;       /* input block, or NULL if too old */
-//ulg stored_len;   /* length of input block */
-//int last;         /* one if this is the last block for a file */
-{
+function _tr_flush_block(s, buf, stored_len, last) {
+  //DeflateState *s;
+  //charf *buf;       /* input block, or NULL if too old */
+  //ulg stored_len;   /* length of input block */
+  //int last;         /* one if this is the last block for a file */
   var opt_lenb, static_lenb;  /* opt_len and static_len in bytes */
   var max_blindex = 0;        /* index of last bit length code of non zero freq */
 
@@ -1272,11 +1346,10 @@ function _tr_flush_block(s, buf, stored_len, last)
  * Save the match info and tally the frequency counts. Return true if
  * the current block must be flushed.
  */
-function _tr_tally(s, dist, lc)
-//    deflate_state *s;
-//    unsigned dist;  /* distance of matched string */
-//    unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
-{
+function _tr_tally(s, dist, lc) {
+  //    deflate_state *s;
+  //    unsigned dist;  /* distance of matched string */
+  //    unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
   //var out_length, in_length, dcode;
 
   s.pending_buf[s.d_buf + s.last_lit * 2]     = (dist >>> 8) & 0xff;
@@ -1330,20 +1403,6 @@ function _tr_tally(s, dist, lc)
    */
 }
 
-var _tr_init_1  = _tr_init;
-var _tr_stored_block_1 = _tr_stored_block;
-var _tr_flush_block_1  = _tr_flush_block;
-var _tr_tally_1 = _tr_tally;
-var _tr_align_1 = _tr_align;
-
-var trees = {
-	_tr_init: _tr_init_1,
-	_tr_stored_block: _tr_stored_block_1,
-	_tr_flush_block: _tr_flush_block_1,
-	_tr_tally: _tr_tally_1,
-	_tr_align: _tr_align_1
-};
-
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
 // It isn't worth it to make additional optimizations as in original.
 // Small size is preferable.
@@ -1390,9 +1449,6 @@ function adler32(adler, buf, len, pos) {
 
   return (s1 | (s2 << 16)) |0;
 }
-
-
-var adler32_1 = adler32;
 
 // Note: we can't get significant speed boost here.
 // So write code to minimize size - no pregenerated tables
@@ -1449,9 +1505,6 @@ function crc32(crc, buf, len, pos) {
   return (crc ^ (-1)); // >>> 0;
 }
 
-
-var crc32_1 = crc32;
-
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
 // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
 //
@@ -1471,7 +1524,7 @@ var crc32_1 = crc32;
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-var messages = {
+var msg = {
   2:      'need dictionary',     /* Z_NEED_DICT       2  */
   1:      'stream end',          /* Z_STREAM_END      1  */
   0:      '',                    /* Z_OK              0  */
@@ -1484,89 +1537,8 @@ var messages = {
 };
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
-// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
-//
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-//
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-//
-// 1. The origin of this software must not be misrepresented; you must not
-//   claim that you wrote the original software. If you use this software
-//   in a product, an acknowledgment in the product documentation would be
-//   appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-//   misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-
-
-
-
-
-
-
-/* Public constants ==========================================================*/
-/* ===========================================================================*/
-
-
-/* Allowed flush values; see deflate() and inflate() below for details */
-var Z_NO_FLUSH      = 0;
-var Z_PARTIAL_FLUSH = 1;
-//var Z_SYNC_FLUSH    = 2;
-var Z_FULL_FLUSH    = 3;
-var Z_FINISH        = 4;
-var Z_BLOCK         = 5;
-//var Z_TREES         = 6;
-
-
-/* Return codes for the compression/decompression functions. Negative values
- * are errors, positive values are used for special but normal events.
- */
-var Z_OK            = 0;
-var Z_STREAM_END    = 1;
-//var Z_NEED_DICT     = 2;
-//var Z_ERRNO         = -1;
-var Z_STREAM_ERROR  = -2;
-var Z_DATA_ERROR    = -3;
-//var Z_MEM_ERROR     = -4;
-var Z_BUF_ERROR     = -5;
-//var Z_VERSION_ERROR = -6;
-
-
-/* compression levels */
-//var Z_NO_COMPRESSION      = 0;
-//var Z_BEST_SPEED          = 1;
-//var Z_BEST_COMPRESSION    = 9;
-var Z_DEFAULT_COMPRESSION = -1;
-
-
-var Z_FILTERED            = 1;
-var Z_HUFFMAN_ONLY        = 2;
-var Z_RLE                 = 3;
-var Z_FIXED$1               = 4;
-var Z_DEFAULT_STRATEGY    = 0;
-
-/* Possible values of the data_type field (though see inflate()) */
-//var Z_BINARY              = 0;
-//var Z_TEXT                = 1;
-//var Z_ASCII               = 1; // = Z_TEXT
-var Z_UNKNOWN$1             = 2;
-
-
-/* The deflate compression method */
-var Z_DEFLATED  = 8;
-
-/*============================================================================*/
-
 
 var MAX_MEM_LEVEL = 9;
-/* Maximum value for memLevel in deflateInit2 */
-var MAX_WBITS = 15;
-/* 32K LZ77 window */
-var DEF_MEM_LEVEL = 8;
 
 
 var LENGTH_CODES$1  = 29;
@@ -1606,7 +1578,7 @@ var BS_FINISH_DONE    = 4; /* finish done, accept no more input or output */
 var OS_CODE = 0x03; // Unix :) . Don't detect, use this default.
 
 function err(strm, errorCode) {
-  strm.msg = messages[errorCode];
+  strm.msg = msg[errorCode];
   return errorCode;
 }
 
@@ -1633,7 +1605,7 @@ function flush_pending(strm) {
   }
   if (len === 0) { return; }
 
-  common.arraySet(strm.output, s.pending_buf, s.pending_out, len, strm.next_out);
+  arraySet(strm.output, s.pending_buf, s.pending_out, len, strm.next_out);
   strm.next_out += len;
   s.pending_out += len;
   strm.total_out += len;
@@ -1646,7 +1618,7 @@ function flush_pending(strm) {
 
 
 function flush_block_only(s, last) {
-  trees._tr_flush_block(s, (s.block_start >= 0 ? s.block_start : -1), s.strstart - s.block_start, last);
+  _tr_flush_block(s, (s.block_start >= 0 ? s.block_start : -1), s.strstart - s.block_start, last);
   s.block_start = s.strstart;
   flush_pending(s.strm);
 }
@@ -1686,13 +1658,13 @@ function read_buf(strm, buf, start, size) {
   strm.avail_in -= len;
 
   // zmemcpy(buf, strm->next_in, len);
-  common.arraySet(buf, strm.input, strm.next_in, len, start);
+  arraySet(buf, strm.input, strm.next_in, len, start);
   if (strm.state.wrap === 1) {
-    strm.adler = adler32_1(strm.adler, buf, len, start);
+    strm.adler = adler32(strm.adler, buf, len, start);
   }
 
   else if (strm.state.wrap === 2) {
-    strm.adler = crc32_1(strm.adler, buf, len, start);
+    strm.adler = crc32(strm.adler, buf, len, start);
   }
 
   strm.next_in += len;
@@ -1853,7 +1825,7 @@ function fill_window(s) {
      */
     if (s.strstart >= _w_size + (_w_size - MIN_LOOKAHEAD)) {
 
-      common.arraySet(s.window, s.window, _w_size, _w_size, 0);
+      arraySet(s.window, s.window, _w_size, _w_size, 0);
       s.match_start -= _w_size;
       s.strstart -= _w_size;
       /* we now have strstart >= MAX_DIST */
@@ -2126,7 +2098,7 @@ function deflate_fast(s, flush) {
 
       /*** _tr_tally_dist(s, s.strstart - s.match_start,
                      s.match_length - MIN_MATCH, bflush); ***/
-      bflush = trees._tr_tally(s, s.strstart - s.match_start, s.match_length - MIN_MATCH$1);
+      bflush = _tr_tally(s, s.strstart - s.match_start, s.match_length - MIN_MATCH$1);
 
       s.lookahead -= s.match_length;
 
@@ -2166,7 +2138,7 @@ function deflate_fast(s, flush) {
       /* No match, output a literal byte */
       //Tracevv((stderr,"%c", s.window[s.strstart]));
       /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
-      bflush = trees._tr_tally(s, 0, s.window[s.strstart]);
+      bflush = _tr_tally(s, 0, s.window[s.strstart]);
 
       s.lookahead--;
       s.strstart++;
@@ -2274,7 +2246,7 @@ function deflate_slow(s, flush) {
 
       /***_tr_tally_dist(s, s.strstart - 1 - s.prev_match,
                      s.prev_length - MIN_MATCH, bflush);***/
-      bflush = trees._tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH$1);
+      bflush = _tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH$1);
       /* Insert in hash table all strings up to the end of the match.
        * strstart-1 and strstart are already inserted. If there is not
        * enough lookahead, the last two strings are not inserted in
@@ -2311,7 +2283,7 @@ function deflate_slow(s, flush) {
        */
       //Tracevv((stderr,"%c", s->window[s->strstart-1]));
       /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-      bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
+      bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
 
       if (bflush) {
         /*** FLUSH_BLOCK_ONLY(s, 0) ***/
@@ -2336,7 +2308,7 @@ function deflate_slow(s, flush) {
   if (s.match_available) {
     //Tracevv((stderr,"%c", s->window[s->strstart-1]));
     /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-    bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
+    bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
 
     s.match_available = 0;
   }
@@ -2415,7 +2387,7 @@ function deflate_rle(s, flush) {
       //check_match(s, s.strstart, s.strstart - 1, s.match_length);
 
       /*** _tr_tally_dist(s, 1, s.match_length - MIN_MATCH, bflush); ***/
-      bflush = trees._tr_tally(s, 1, s.match_length - MIN_MATCH$1);
+      bflush = _tr_tally(s, 1, s.match_length - MIN_MATCH$1);
 
       s.lookahead -= s.match_length;
       s.strstart += s.match_length;
@@ -2424,7 +2396,7 @@ function deflate_rle(s, flush) {
       /* No match, output a literal byte */
       //Tracevv((stderr,"%c", s->window[s->strstart]));
       /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
-      bflush = trees._tr_tally(s, 0, s.window[s.strstart]);
+      bflush = _tr_tally(s, 0, s.window[s.strstart]);
 
       s.lookahead--;
       s.strstart++;
@@ -2482,7 +2454,7 @@ function deflate_huff(s, flush) {
     s.match_length = 0;
     //Tracevv((stderr,"%c", s->window[s->strstart]));
     /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
-    bflush = trees._tr_tally(s, 0, s.window[s.strstart]);
+    bflush = _tr_tally(s, 0, s.window[s.strstart]);
     s.lookahead--;
     s.strstart++;
     if (bflush) {
@@ -2675,9 +2647,9 @@ function DeflateState() {
 
   // Use flat array of DOUBLE size, with interleaved fata,
   // because JS does not support effective
-  this.dyn_ltree  = new common.Buf16(HEAP_SIZE$1 * 2);
-  this.dyn_dtree  = new common.Buf16((2 * D_CODES$1 + 1) * 2);
-  this.bl_tree    = new common.Buf16((2 * BL_CODES$1 + 1) * 2);
+  this.dyn_ltree  = new Uint16Array(HEAP_SIZE$1 * 2);
+  this.dyn_dtree  = new Uint16Array((2 * D_CODES$1 + 1) * 2);
+  this.bl_tree    = new Uint16Array((2 * BL_CODES$1 + 1) * 2);
   zero$1(this.dyn_ltree);
   zero$1(this.dyn_dtree);
   zero$1(this.bl_tree);
@@ -2687,11 +2659,11 @@ function DeflateState() {
   this.bl_desc  = null;         /* desc. for bit length tree */
 
   //ush bl_count[MAX_BITS+1];
-  this.bl_count = new common.Buf16(MAX_BITS$1 + 1);
+  this.bl_count = new Uint16Array(MAX_BITS$1 + 1);
   /* number of codes at each bit length for an optimal tree */
 
   //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
-  this.heap = new common.Buf16(2 * L_CODES$1 + 1);  /* heap used to build the Huffman trees */
+  this.heap = new Uint16Array(2 * L_CODES$1 + 1);  /* heap used to build the Huffman trees */
   zero$1(this.heap);
 
   this.heap_len = 0;               /* number of elements in the heap */
@@ -2700,7 +2672,7 @@ function DeflateState() {
    * The same heap array is used to build all trees.
    */
 
-  this.depth = new common.Buf16(2 * L_CODES$1 + 1); //uch depth[2*L_CODES+1];
+  this.depth = new Uint16Array(2 * L_CODES$1 + 1); //uch depth[2*L_CODES+1];
   zero$1(this.depth);
   /* Depth of each subtree used as tie breaker for trees of equal frequency
    */
@@ -2769,7 +2741,7 @@ function deflateResetKeep(strm) {
   }
 
   strm.total_in = strm.total_out = 0;
-  strm.data_type = Z_UNKNOWN$1;
+  strm.data_type = Z_UNKNOWN;
 
   s = strm.state;
   s.pending = 0;
@@ -2785,7 +2757,7 @@ function deflateResetKeep(strm) {
   :
     1; // adler32(0, Z_NULL, 0)
   s.last_flush = Z_NO_FLUSH;
-  trees._tr_init(s);
+  _tr_init(s);
   return Z_OK;
 }
 
@@ -2830,7 +2802,7 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
 
   if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED ||
     windowBits < 8 || windowBits > 15 || level < 0 || level > 9 ||
-    strategy < 0 || strategy > Z_FIXED$1) {
+    strategy < 0 || strategy > Z_FIXED) {
     return err(strm, Z_STREAM_ERROR);
   }
 
@@ -2856,9 +2828,9 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   s.hash_mask = s.hash_size - 1;
   s.hash_shift = ~~((s.hash_bits + MIN_MATCH$1 - 1) / MIN_MATCH$1);
 
-  s.window = new common.Buf8(s.w_size * 2);
-  s.head = new common.Buf16(s.hash_size);
-  s.prev = new common.Buf16(s.w_size);
+  s.window = new Uint8Array(s.w_size * 2);
+  s.head = new Uint16Array(s.hash_size);
+  s.prev = new Uint16Array(s.w_size);
 
   // Don't need mem init magic for JS.
   //s.high_water = 0;  /* nothing written to s->window yet */
@@ -2869,7 +2841,7 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
 
   //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
   //s->pending_buf = (uchf *) overlay;
-  s.pending_buf = new common.Buf8(s.pending_buf_size);
+  s.pending_buf = new Uint8Array(s.pending_buf_size);
 
   // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
   //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
@@ -2883,10 +2855,6 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   s.method = method;
 
   return deflateReset(strm);
-}
-
-function deflateInit(strm, level) {
-  return deflateInit2(strm, level, Z_DEFLATED, MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY);
 }
 
 
@@ -2951,7 +2919,7 @@ function deflate(strm, flush) {
           put_byte(s, (s.gzhead.extra.length >> 8) & 0xff);
         }
         if (s.gzhead.hcrc) {
-          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending, 0);
+          strm.adler = crc32(strm.adler, s.pending_buf, s.pending, 0);
         }
         s.gzindex = 0;
         s.status = EXTRA_STATE;
@@ -2995,7 +2963,7 @@ function deflate(strm, flush) {
       while (s.gzindex < (s.gzhead.extra.length & 0xffff)) {
         if (s.pending === s.pending_buf_size) {
           if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
           }
           flush_pending(strm);
           beg = s.pending;
@@ -3007,7 +2975,7 @@ function deflate(strm, flush) {
         s.gzindex++;
       }
       if (s.gzhead.hcrc && s.pending > beg) {
-        strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
       }
       if (s.gzindex === s.gzhead.extra.length) {
         s.gzindex = 0;
@@ -3026,7 +2994,7 @@ function deflate(strm, flush) {
       do {
         if (s.pending === s.pending_buf_size) {
           if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
           }
           flush_pending(strm);
           beg = s.pending;
@@ -3045,7 +3013,7 @@ function deflate(strm, flush) {
       } while (val !== 0);
 
       if (s.gzhead.hcrc && s.pending > beg) {
-        strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
       }
       if (val === 0) {
         s.gzindex = 0;
@@ -3064,7 +3032,7 @@ function deflate(strm, flush) {
       do {
         if (s.pending === s.pending_buf_size) {
           if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
           }
           flush_pending(strm);
           beg = s.pending;
@@ -3083,7 +3051,7 @@ function deflate(strm, flush) {
       } while (val !== 0);
 
       if (s.gzhead.hcrc && s.pending > beg) {
-        strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        strm.adler = crc32(strm.adler, s.pending_buf, s.pending - beg, beg);
       }
       if (val === 0) {
         s.status = HCRC_STATE;
@@ -3166,11 +3134,11 @@ function deflate(strm, flush) {
     }
     if (bstate === BS_BLOCK_DONE) {
       if (flush === Z_PARTIAL_FLUSH) {
-        trees._tr_align(s);
+        _tr_align(s);
       }
       else if (flush !== Z_BLOCK) { /* FULL_FLUSH or SYNC_FLUSH */
 
-        trees._tr_stored_block(s, 0, 0, false);
+        _tr_stored_block(s, 0, 0, false);
         /* For a full flush, this empty block will be recognized
          * as a special marker by inflate_sync().
          */
@@ -3278,7 +3246,7 @@ function deflateSetDictionary(strm, dictionary) {
   /* when using zlib wrappers, compute Adler-32 for provided dictionary */
   if (wrap === 1) {
     /* adler32(strm->adler, dictionary, dictLength); */
-    strm.adler = adler32_1(strm.adler, dictionary, dictLength, 0);
+    strm.adler = adler32(strm.adler, dictionary, dictLength, 0);
   }
 
   s.wrap = 0;   /* avoid computing Adler-32 in read_buf */
@@ -3294,8 +3262,8 @@ function deflateSetDictionary(strm, dictionary) {
     }
     /* use the tail */
     // dictionary = dictionary.slice(dictLength - s.w_size);
-    tmpDict = new common.Buf8(s.w_size);
-    common.arraySet(tmpDict, dictionary, dictLength - s.w_size, s.w_size, 0);
+    tmpDict = new Uint8Array(s.w_size);
+    arraySet(tmpDict, dictionary, dictLength - s.w_size, s.w_size, 0);
     dictionary = tmpDict;
     dictLength = s.w_size;
   }
@@ -3336,17 +3304,6 @@ function deflateSetDictionary(strm, dictionary) {
   return Z_OK;
 }
 
-
-var deflateInit_1 = deflateInit;
-var deflateInit2_1 = deflateInit2;
-var deflateReset_1 = deflateReset;
-var deflateResetKeep_1 = deflateResetKeep;
-var deflateSetHeader_1 = deflateSetHeader;
-var deflate_2 = deflate;
-var deflateEnd_1 = deflateEnd;
-var deflateSetDictionary_1 = deflateSetDictionary;
-var deflateInfo = 'pako deflate (from Nodeca project)';
-
 /* Not implemented
 exports.deflateBound = deflateBound;
 exports.deflateCopy = deflateCopy;
@@ -3355,207 +3312,6 @@ exports.deflatePending = deflatePending;
 exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
-
-var deflate_1 = {
-	deflateInit: deflateInit_1,
-	deflateInit2: deflateInit2_1,
-	deflateReset: deflateReset_1,
-	deflateResetKeep: deflateResetKeep_1,
-	deflateSetHeader: deflateSetHeader_1,
-	deflate: deflate_2,
-	deflateEnd: deflateEnd_1,
-	deflateSetDictionary: deflateSetDictionary_1,
-	deflateInfo: deflateInfo
-};
-
-// Quick check if we can use fast array to bin string conversion
-//
-// - apply(Array) can fail on Android 2.2
-// - apply(Uint8Array) can fail on iOS 5.1 Safari
-//
-var STR_APPLY_OK = true;
-var STR_APPLY_UIA_OK = true;
-
-try { String.fromCharCode.apply(null, [ 0 ]); } catch (__) { STR_APPLY_OK = false; }
-try { String.fromCharCode.apply(null, new Uint8Array(1)); } catch (__) { STR_APPLY_UIA_OK = false; }
-
-
-// Table with utf8 lengths (calculated by first byte of sequence)
-// Note, that 5 & 6-byte values and some 4-byte values can not be represented in JS,
-// because max possible codepoint is 0x10ffff
-var _utf8len = new common.Buf8(256);
-for (var q = 0; q < 256; q++) {
-  _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
-}
-_utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
-
-
-// convert string to array (typed, when possible)
-var string2buf = function (str) {
-  var buf, c, c2, m_pos, i, str_len = str.length, buf_len = 0;
-
-  // count binary size
-  for (m_pos = 0; m_pos < str_len; m_pos++) {
-    c = str.charCodeAt(m_pos);
-    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
-      c2 = str.charCodeAt(m_pos + 1);
-      if ((c2 & 0xfc00) === 0xdc00) {
-        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
-        m_pos++;
-      }
-    }
-    buf_len += c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
-  }
-
-  // allocate buffer
-  buf = new common.Buf8(buf_len);
-
-  // convert
-  for (i = 0, m_pos = 0; i < buf_len; m_pos++) {
-    c = str.charCodeAt(m_pos);
-    if ((c & 0xfc00) === 0xd800 && (m_pos + 1 < str_len)) {
-      c2 = str.charCodeAt(m_pos + 1);
-      if ((c2 & 0xfc00) === 0xdc00) {
-        c = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
-        m_pos++;
-      }
-    }
-    if (c < 0x80) {
-      /* one byte */
-      buf[i++] = c;
-    } else if (c < 0x800) {
-      /* two bytes */
-      buf[i++] = 0xC0 | (c >>> 6);
-      buf[i++] = 0x80 | (c & 0x3f);
-    } else if (c < 0x10000) {
-      /* three bytes */
-      buf[i++] = 0xE0 | (c >>> 12);
-      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
-      buf[i++] = 0x80 | (c & 0x3f);
-    } else {
-      /* four bytes */
-      buf[i++] = 0xf0 | (c >>> 18);
-      buf[i++] = 0x80 | (c >>> 12 & 0x3f);
-      buf[i++] = 0x80 | (c >>> 6 & 0x3f);
-      buf[i++] = 0x80 | (c & 0x3f);
-    }
-  }
-
-  return buf;
-};
-
-// Helper (used in 2 places)
-function buf2binstring(buf, len) {
-  // On Chrome, the arguments in a function call that are allowed is `65534`.
-  // If the length of the buffer is smaller than that, we can use this optimization,
-  // otherwise we will take a slower path.
-  if (len < 65534) {
-    if ((buf.subarray && STR_APPLY_UIA_OK) || (!buf.subarray && STR_APPLY_OK)) {
-      return String.fromCharCode.apply(null, common.shrinkBuf(buf, len));
-    }
-  }
-
-  var result = '';
-  for (var i = 0; i < len; i++) {
-    result += String.fromCharCode(buf[i]);
-  }
-  return result;
-}
-
-
-// Convert byte array to binary string
-var buf2binstring_1 = function (buf) {
-  return buf2binstring(buf, buf.length);
-};
-
-
-// Convert binary string (typed, when possible)
-var binstring2buf = function (str) {
-  var buf = new common.Buf8(str.length);
-  for (var i = 0, len = buf.length; i < len; i++) {
-    buf[i] = str.charCodeAt(i);
-  }
-  return buf;
-};
-
-
-// convert array to string
-var buf2string = function (buf, max) {
-  var i, out, c, c_len;
-  var len = max || buf.length;
-
-  // Reserve max possible length (2 words per char)
-  // NB: by unknown reasons, Array is significantly faster for
-  //     String.fromCharCode.apply than Uint16Array.
-  var utf16buf = new Array(len * 2);
-
-  for (out = 0, i = 0; i < len;) {
-    c = buf[i++];
-    // quick process ascii
-    if (c < 0x80) { utf16buf[out++] = c; continue; }
-
-    c_len = _utf8len[c];
-    // skip 5 & 6 byte codes
-    if (c_len > 4) { utf16buf[out++] = 0xfffd; i += c_len - 1; continue; }
-
-    // apply mask on first byte
-    c &= c_len === 2 ? 0x1f : c_len === 3 ? 0x0f : 0x07;
-    // join the rest
-    while (c_len > 1 && i < len) {
-      c = (c << 6) | (buf[i++] & 0x3f);
-      c_len--;
-    }
-
-    // terminated by end of string?
-    if (c_len > 1) { utf16buf[out++] = 0xfffd; continue; }
-
-    if (c < 0x10000) {
-      utf16buf[out++] = c;
-    } else {
-      c -= 0x10000;
-      utf16buf[out++] = 0xd800 | ((c >> 10) & 0x3ff);
-      utf16buf[out++] = 0xdc00 | (c & 0x3ff);
-    }
-  }
-
-  return buf2binstring(utf16buf, out);
-};
-
-
-// Calculate max possible position in utf8 buffer,
-// that will not break sequence. If that's not possible
-// - (very small limits) return max size as is.
-//
-// buf[] - utf8 bytes array
-// max   - length limit (mandatory);
-var utf8border = function (buf, max) {
-  var pos;
-
-  max = max || buf.length;
-  if (max > buf.length) { max = buf.length; }
-
-  // go back from last position, until start of sequence found
-  pos = max - 1;
-  while (pos >= 0 && (buf[pos] & 0xC0) === 0x80) { pos--; }
-
-  // Very small and broken sequence,
-  // return max, because we should return something anyway.
-  if (pos < 0) { return max; }
-
-  // If we came to start of buffer - that means buffer is too small,
-  // return max too.
-  if (pos === 0) { return max; }
-
-  return (pos + _utf8len[buf[pos]] > max) ? pos : max;
-};
-
-var strings = {
-	string2buf: string2buf,
-	buf2binstring: buf2binstring_1,
-	binstring2buf: binstring2buf,
-	buf2string: buf2string,
-	utf8border: utf8border
-};
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
 // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
@@ -3601,28 +3357,7 @@ function ZStream() {
   this.adler = 0;
 }
 
-var zstream = ZStream;
-
 var toString = Object.prototype.toString;
-
-/* Public constants ==========================================================*/
-/* ===========================================================================*/
-
-var Z_NO_FLUSH$1      = 0;
-var Z_FINISH$1        = 4;
-
-var Z_OK$1            = 0;
-var Z_STREAM_END$1    = 1;
-var Z_SYNC_FLUSH    = 2;
-
-var Z_DEFAULT_COMPRESSION$1 = -1;
-
-var Z_DEFAULT_STRATEGY$1    = 0;
-
-var Z_DEFLATED$1  = 8;
-
-/* ===========================================================================*/
-
 
 /**
  * class Deflate
@@ -3662,7 +3397,6 @@ var Z_DEFLATED$1  = 8;
  *
  * Error message, if [[Deflate.err]] != 0
  **/
-
 
 /**
  * new Deflate(options)
@@ -3716,13 +3450,13 @@ var Z_DEFLATED$1  = 8;
 function Deflate(options) {
   if (!(this instanceof Deflate)) return new Deflate(options);
 
-  this.options = common.assign({
-    level: Z_DEFAULT_COMPRESSION$1,
-    method: Z_DEFLATED$1,
+  this.options = assign({
+    level: Z_DEFAULT_COMPRESSION,
+    method: Z_DEFLATED,
     chunkSize: 16384,
     windowBits: 15,
     memLevel: 8,
-    strategy: Z_DEFAULT_STRATEGY$1,
+    strategy: Z_DEFAULT_STRATEGY,
     to: ''
   }, options || {});
 
@@ -3741,10 +3475,10 @@ function Deflate(options) {
   this.ended  = false;  // used to avoid multiple onEnd() calls
   this.chunks = [];     // chunks of compressed data
 
-  this.strm = new zstream();
+  this.strm = new ZStream();
   this.strm.avail_out = 0;
 
-  var status = deflate_1.deflateInit2(
+  var status = deflateInit2(
     this.strm,
     opt.level,
     opt.method,
@@ -3753,12 +3487,12 @@ function Deflate(options) {
     opt.strategy
   );
 
-  if (status !== Z_OK$1) {
-    throw new Error(messages[status]);
+  if (status !== Z_OK) {
+    throw new Error(msg[status]);
   }
 
   if (opt.header) {
-    deflate_1.deflateSetHeader(this.strm, opt.header);
+    deflateSetHeader(this.strm, opt.header);
   }
 
   if (opt.dictionary) {
@@ -3766,17 +3500,17 @@ function Deflate(options) {
     // Convert data if needed
     if (typeof opt.dictionary === 'string') {
       // If we need to compress text, change encoding to utf8.
-      dict = strings.string2buf(opt.dictionary);
+      dict = string2buf(opt.dictionary);
     } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
       dict = new Uint8Array(opt.dictionary);
     } else {
       dict = opt.dictionary;
     }
 
-    status = deflate_1.deflateSetDictionary(this.strm, dict);
+    status = deflateSetDictionary(this.strm, dict);
 
-    if (status !== Z_OK$1) {
-      throw new Error(messages[status]);
+    if (status !== Z_OK) {
+      throw new Error(msg[status]);
     }
 
     this._dict_set = true;
@@ -3819,12 +3553,12 @@ Deflate.prototype.push = function (data, mode) {
 
   if (this.ended) { return false; }
 
-  _mode = (mode === ~~mode) ? mode : ((mode === true) ? Z_FINISH$1 : Z_NO_FLUSH$1);
+  _mode = (mode === ~~mode) ? mode : ((mode === true) ? Z_FINISH : Z_NO_FLUSH);
 
   // Convert data if needed
   if (typeof data === 'string') {
     // If we need to compress text, change encoding to utf8.
-    strm.input = strings.string2buf(data);
+    strm.input = string2buf(data);
   } else if (toString.call(data) === '[object ArrayBuffer]') {
     strm.input = new Uint8Array(data);
   } else {
@@ -3836,37 +3570,37 @@ Deflate.prototype.push = function (data, mode) {
 
   do {
     if (strm.avail_out === 0) {
-      strm.output = new common.Buf8(chunkSize);
+      strm.output = new Uint8Array(chunkSize);
       strm.next_out = 0;
       strm.avail_out = chunkSize;
     }
-    status = deflate_1.deflate(strm, _mode);    /* no bad return value */
+    status = deflate(strm, _mode);    /* no bad return value */
 
-    if (status !== Z_STREAM_END$1 && status !== Z_OK$1) {
+    if (status !== Z_STREAM_END && status !== Z_OK) {
       this.onEnd(status);
       this.ended = true;
       return false;
     }
-    if (strm.avail_out === 0 || (strm.avail_in === 0 && (_mode === Z_FINISH$1 || _mode === Z_SYNC_FLUSH))) {
+    if (strm.avail_out === 0 || (strm.avail_in === 0 && (_mode === Z_FINISH || _mode === Z_SYNC_FLUSH))) {
       if (this.options.to === 'string') {
-        this.onData(strings.buf2binstring(common.shrinkBuf(strm.output, strm.next_out)));
+        this.onData(buf2binstring(shrinkBuf(strm.output, strm.next_out)));
       } else {
-        this.onData(common.shrinkBuf(strm.output, strm.next_out));
+        this.onData(shrinkBuf(strm.output, strm.next_out));
       }
     }
-  } while ((strm.avail_in > 0 || strm.avail_out === 0) && status !== Z_STREAM_END$1);
+  } while ((strm.avail_in > 0 || strm.avail_out === 0) && status !== Z_STREAM_END);
 
   // Finalize on the last chunk.
-  if (_mode === Z_FINISH$1) {
-    status = deflate_1.deflateEnd(this.strm);
+  if (_mode === Z_FINISH) {
+    status = deflateEnd(this.strm);
     this.onEnd(status);
     this.ended = true;
-    return status === Z_OK$1;
+    return status === Z_OK;
   }
 
   // callback interim results if Z_SYNC_FLUSH.
   if (_mode === Z_SYNC_FLUSH) {
-    this.onEnd(Z_OK$1);
+    this.onEnd(Z_OK);
     strm.avail_out = 0;
     return true;
   }
@@ -3901,11 +3635,11 @@ Deflate.prototype.onData = function (chunk) {
  **/
 Deflate.prototype.onEnd = function (status) {
   // On success - join
-  if (status === Z_OK$1) {
+  if (status === Z_OK) {
     if (this.options.to === 'string') {
       this.result = this.chunks.join('');
     } else {
-      this.result = common.flattenChunks(this.chunks);
+      this.result = flattenChunks(this.chunks);
     }
   }
   this.chunks = [];
@@ -3954,7 +3688,7 @@ function deflate$1(input, options) {
   deflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (deflator.err) { throw deflator.msg || messages[deflator.err]; }
+  if (deflator.err) { throw deflator.msg || msg[deflator.err]; }
 
   return deflator.result;
 }
@@ -3989,18 +3723,7 @@ function gzip(input, options) {
   return deflate$1(input, options);
 }
 
-
-var Deflate_1 = Deflate;
-var deflate_2$1 = deflate$1;
-var deflateRaw_1 = deflateRaw;
-var gzip_1 = gzip;
-
-var deflate_1$1 = {
-	Deflate: Deflate_1,
-	deflate: deflate_2$1,
-	deflateRaw: deflateRaw_1,
-	gzip: gzip_1
-};
-
-export default deflate_1$1;
-export { Deflate_1 as Deflate, deflate_2$1 as deflate, deflateRaw_1 as deflateRaw, gzip_1 as gzip };
+exports.Deflate = Deflate;
+exports.deflate = deflate$1;
+exports.deflateRaw = deflateRaw;
+exports.gzip = gzip;

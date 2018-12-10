@@ -2,7 +2,7 @@
 
 var fs   = require('fs');
 var path = require('path');
-var pako = require('../');
+var pako = require('../dist/pako.cjs');
 
 var data = new Uint8Array(fs.readFileSync(path.join(__dirname, '/samples/lorem_1mb.txt')));
 

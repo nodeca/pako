@@ -25,7 +25,7 @@ lint:
 
 
 test: lint
-	./node_modules/.bin/mocha
+	./node_modules/.bin/mocha --compilers js:babel-core/register
 
 cover:
 	rm -rf cover

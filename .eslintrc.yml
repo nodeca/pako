@@ -3,11 +3,12 @@ env:
 
 parserOptions:
   ecmaVersion: 5
+  sourceType: "module"
 
 globals:
   Uint8Array:  false
   Uint16Array: false
-  Int32Array:  false
+  Uint32Array:  false
 
 rules:
   accessor-pairs:         2
