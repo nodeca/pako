@@ -35,36 +35,6 @@ doc:
 	rm -rf ./doc
 	./node_modules/.bin/ndoc --link-format "{package.homepage}/blob/${CURR_HEAD}/{file}#L{line}"
 
-
-browserify:
-	rm -rf ./dist
-	mkdir dist
-	# Browserify
-	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		./node_modules/.bin/browserify -r ./ -s pako \
-		) > dist/pako.js
-	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		./node_modules/.bin/browserify -r ./lib/deflate.js -s pako \
-		) > dist/pako_deflate.js
-	( printf %s "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" ; \
-		./node_modules/.bin/browserify -r ./lib/inflate.js -s pako \
-		) > dist/pako_inflate.js
-	# Minify
-	./node_modules/.bin/uglifyjs dist/pako.js -c -m \
-		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
-		> dist/pako.min.js
-	./node_modules/.bin/uglifyjs dist/pako_deflate.js -c -m \
-		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
-		> dist/pako_deflate.min.js
-	./node_modules/.bin/uglifyjs dist/pako_inflate.js -c -m \
-		--preamble "/* ${NPM_PACKAGE} ${NPM_VERSION} ${GITHUB_PROJ} */" \
-		> dist/pako_inflate.min.js
-	# Update bower package
-	#sed -i -r -e \
-	#	"s/(\"version\":\s*)\"[0-9]+[.][0-9]+[.][0-9]+\"/\1\"${NPM_VERSION}\"/" \
-	#	bower.json
-
-
 gh-pages:
 	@if test -z ${REMOTE_REPO} ; then \
 		echo 'Remote repo URL not found' >&2 ; \

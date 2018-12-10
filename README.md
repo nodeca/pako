@@ -9,7 +9,7 @@ pako
 __Why pako is cool:__
 
 - Almost as fast in modern JS engines as C implementation (see benchmarks).
-- Works in browsers, you can browserify any separate component.
+- Works in browsers, you can rollup any separate component.
 - Chunking support for big blobs.
 - Results are binary equal to well known [zlib](http://www.zlib.net/) (now contains ported zlib v1.2.8).
 
