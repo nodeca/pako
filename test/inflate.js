@@ -183,8 +183,18 @@ describe('Inflate with dictionary', function () {
 
   it('spdy dictionary', function () {
     var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
-
-    testInflate(samples, { dictionary: spdyDict }, { dictionary: helpers.spdyDict });
+    testInflate(samples, { dictionary: spdyDict }, { dictionary: spdyDict });
   });
 
+  it('should throw if directory is not supplied to raw inflate', function () {
+    var dict = new Buffer('abcdefghijklmnoprstuvwxyz');
+    assert.throws(function () {
+      testInflate(samples, { raw: true }, { raw: true, dictionary: dict });
+    });
+  });
+
+  it('tests raw inflate with spdy dictionary', function () {
+    var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
+    testInflate(samples, { raw: true, dictionary: spdyDict }, { raw: true, dictionary: spdyDict });
+  });
 });
