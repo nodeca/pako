@@ -197,4 +197,16 @@ describe('Inflate with dictionary', function () {
     var spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
     testInflate(samples, { raw: true, dictionary: spdyDict }, { raw: true, dictionary: spdyDict });
   });
+
+  it('tests dictionary as Uint8Array', function () {
+    var dict = new Uint8Array(100);
+    for (var i = 0; i < 100; i++) dict[i] = Math.random() * 256;
+    testInflate(samples, { dictionary: dict }, { dictionary: dict });
+  });
+
+  it('tests dictionary as ArrayBuffer', function () {
+    var dict = new Uint8Array(100);
+    for (var i = 0; i < 100; i++) dict[i] = Math.random() * 256;
+    testInflate(samples, { dictionary: dict.buffer }, { dictionary: dict });
+  });
 });
