@@ -22,7 +22,7 @@
     "dist/",
     "lib/"
   ],
-  "license": "(MIT AND Zlib)",
+  "license": "MIT",
   "repository": "nodeca/pako",
   "scripts": {
     "test": "make test"
