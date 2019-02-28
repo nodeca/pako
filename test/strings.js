@@ -7,6 +7,7 @@
 var fs      = require('fs');
 var path    = require('path');
 var assert  = require('assert');
+var b       = require('buffer-from');
 
 var pako    = require('../index');
 var cmp     = require('./helpers').cmpBuf;
@@ -42,7 +43,7 @@ describe('Encode/Decode', function () {
   // Create sample, that contains all types of utf8 (1-4byte) after conversion
   var utf16sample = a2utf16([ 0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff ]);
   // use node Buffer internal conversion as "done right"
-  var utf8sample = new Uint8Array(new Buffer(utf16sample));
+  var utf8sample = new Uint8Array(b(utf16sample));
 
   it('utf-8 border detect', function () {
     var ub = strings.utf8border;
@@ -105,7 +106,7 @@ describe('Deflate/Inflate strings', function () {
     var data = pako.deflate(sampleArray, { to: 'string', chunkSize: 99 });
 
     assert.equal(typeof data, 'string');
-    assert.ok(cmp(new Buffer(data, 'binary'), pako.deflate(sampleArray)));
+    assert.ok(cmp(b(data, 'binary'), pako.deflate(sampleArray)));
   });
 
   it('Inflate binary string input', function () {

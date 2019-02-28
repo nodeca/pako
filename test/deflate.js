@@ -12,6 +12,7 @@ var testSamples = helpers.testSamples;
 var assert  = require('assert');
 var fs      = require('fs');
 var path    = require('path');
+var b       = require('buffer-from');
 
 
 
@@ -178,7 +179,7 @@ describe('Deflate RAW', function () {
 describe('Deflate dictionary', function () {
 
   it('trivial dictionary', function () {
-    var dict = new Buffer('abcdefghijklmnoprstuvwxyz');
+    var dict = b('abcdefghijklmnoprstuvwxyz');
     testSamples(zlib.deflateSync, pako.deflate, samples, { dictionary: dict });
   });
 
@@ -189,18 +190,18 @@ describe('Deflate dictionary', function () {
   });
 
   it('handles multiple pushes', function () {
-    var dict = new Buffer('abcd');
+    var dict = b('abcd');
     var deflate = new pako.Deflate({ dictionary: dict });
 
-    deflate.push(new Buffer('hello'), false);
-    deflate.push(new Buffer('hello'), false);
-    deflate.push(new Buffer(' world'), true);
+    deflate.push(b('hello'), false);
+    deflate.push(b('hello'), false);
+    deflate.push(b(' world'), true);
 
     if (deflate.err) { throw new Error(deflate.err); }
 
-    var uncompressed = pako.inflate(new Buffer(deflate.result), { dictionary: dict });
+    var uncompressed = pako.inflate(b(deflate.result), { dictionary: dict });
 
-    if (!helpers.cmpBuf(new Buffer('hellohello world'), uncompressed)) {
+    if (!helpers.cmpBuf(b('hellohello world'), uncompressed)) {
       throw new Error('Result not equal for p -> z');
     }
   });

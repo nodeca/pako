@@ -4,6 +4,7 @@
 var fs     = require('fs');
 var path   = require('path');
 var assert = require('assert');
+var b      = require('buffer-from');
 
 var pako_utils = require('../lib/utils/common');
 var pako  = require('../index');
@@ -48,9 +49,6 @@ function cmpBuf(a, b) {
 }
 
 
-function toBuffer(src) { return Buffer.from ? Buffer.from(src) : new Buffer(src); }
-
-
 // Helper to test deflate/inflate with different options.
 // Use zlib streams, because it's the only way to define options.
 //
@@ -60,7 +58,7 @@ function testSingle(zlib_method, pako_method, data, options) {
   // hack for testing negative windowBits
   if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
 
-  var zlib_result = zlib_method(toBuffer(data), zlib_options);
+  var zlib_result = zlib_method(b(data), zlib_options);
   var pako_result = pako_method(data, options);
 
   // One more hack: gzip header contains OS code, that can vary.

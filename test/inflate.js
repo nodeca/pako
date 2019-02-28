@@ -168,7 +168,7 @@ describe('Inflate RAW', function () {
 describe('Inflate with dictionary', function () {
 
   it('should throw on the wrong dictionary', function () {
-    // var zCompressed = helpers.deflateSync('world', { dictionary: new Buffer('hello') });
+    // var zCompressed = helpers.deflateSync('world', { dictionary: b('hello') });
     var zCompressed = new Uint8Array([ 120, 187, 6, 44, 2, 21, 43, 207, 47, 202, 73, 1, 0, 6, 166, 2, 41 ]);
 
     assert.throws(function () {
