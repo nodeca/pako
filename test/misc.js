@@ -25,7 +25,7 @@ describe('ArrayBuffer', function () {
     assert.ok(cmp(sample, pako.inflate(deflated.buffer)));
   });
 
-  it.skip('Simplified minified version test', function () {
+  it('Simplified minified version test', function () {
     // At some point minifier started to corrupt str2buf function
     // https://github.com/nodeca/pako/issues/161#issuecomment-468420555
     var minified = require('../dist/pako.min.js');
