@@ -14,7 +14,7 @@ var pako = window.pako;
 var obj = new Array(10);
 
 for (var i = 0; i < obj.length; i++) {
-  obj[i] = { foo: 'bar', baz: 'БАТ' }
+  obj[i] = { foo: 'bar', baz: 'БАТ' };
 }
 
 // Convert /////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ function sendAncient() {
   data += '--' + boundary + '\r\n';
   data += 'Content-Disposition: form-data; name="binson"; filename="blob"\r\n';
   data += 'Content-Type: application/octet-stream\r\n';
-  data += 'Content-Transfer-Encoding: base64\r\n'
+  data += 'Content-Transfer-Encoding: base64\r\n';
   data += '\r\n';
   data += btoa(resultAsBinString) + '\r\n';
   data += '--' + boundary + '--\r\n';
