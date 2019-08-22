@@ -157,6 +157,12 @@ Pako does not contain some specific zlib functions:
   modes. Those should work: Z_NO_FLUSH, Z_FINISH, Z_SYNC_FLUSH.
 
 
+Support pako
+------------
+
+You can support this project via [Tidelift subscription](https://tidelift.com/subscription/pkg/npm-pako?utm_source=npm-pako&utm_medium=referral&utm_campaign=readme).
+
+
 Authors
 -------
 
