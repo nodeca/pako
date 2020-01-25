@@ -66,6 +66,8 @@ function testSingle(zlib_method, pako_method, data, options) {
   // position (= no additional gzip headers used)
   if (options.ignore_os) zlib_result[9] = pako_result[9];
 
+  zlib_result = Array.from(Uint8Array);
+  pako_result = Array.from(Uint8Array);
   assert.deepEqual(pako_result, zlib_result);
 }
 
@@ -104,11 +106,13 @@ function testInflate(samples, inflateOptions, deflateOptions) {
     inflated = pako.inflate(deflated, inflateOptions);
     pako_utils.setTyped(true);
 
+    inflated = Array.from(Uint8Array);
+    data = Array.from(Uint8Array);
     assert.deepEqual(inflated, data);
 
     // with typed arrays
     inflated = pako.inflate(deflated, inflateOptions);
-
+    inflated = Array.from(Uint8Array);
     assert.deepEqual(inflated, data);
   }
 }
