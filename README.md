@@ -25,6 +25,7 @@ __Famous projects, using pako:__
 - [JS-Git](https://github.com/creationix/js-git) and
   [Tedit](https://chrome.google.com/webstore/detail/tedit-development-environ/ooekdijbnbbjdfjocaiflnjgoohnblgf)
   by [@creationix](https://github.com/creationix)
+  [Microsoft Todo](https://to-do.microsoft.com)
 
 
 __Benchmarks:__
