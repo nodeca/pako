@@ -8,23 +8,12 @@ pako
 
 __Why pako is cool:__
 
+- Results are binary equal to well known [zlib](http://www.zlib.net/) (now contains ported zlib v1.2.8).
 - Almost as fast in modern JS engines as C implementation (see benchmarks).
 - Works in browsers, you can browserify any separate component.
-- Chunking support for big blobs.
-- Results are binary equal to well known [zlib](http://www.zlib.net/) (now contains ported zlib v1.2.8).
 
 This project was done to understand how fast JS can be and is it necessary to
 develop native C modules for CPU-intensive tasks. Enjoy the result!
-
-
-__Famous projects, using pako:__
-
-- [browserify](http://browserify.org/) (via [browserify-zlib](https://github.com/devongovett/browserify-zlib))
-- [JSZip](http://stuk.github.io/jszip/)
-- [mincer](https://github.com/nodeca/mincer)
-- [JS-Git](https://github.com/creationix/js-git) and
-  [Tedit](https://chrome.google.com/webstore/detail/tedit-development-environ/ooekdijbnbbjdfjocaiflnjgoohnblgf)
-  by [@creationix](https://github.com/creationix)
 
 
 __Benchmarks:__
@@ -73,12 +62,6 @@ node.js:
 
 ```
 npm install pako
-```
-
-browser:
-
-```
-bower install pako
 ```
 
 
