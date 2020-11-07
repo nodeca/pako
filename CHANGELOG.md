@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - WIP
 ### Changed
+- Removed binary strings support.
 - Removed support of `Inflate` & `Deflate` instance create without `new`.
 - Upgrade build tools to modern ones.
 

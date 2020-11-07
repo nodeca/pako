@@ -102,19 +102,6 @@ describe('Deflate/Inflate strings', function () {
     ));
   });
 
-  it('Deflate with binary string output', function () {
-    var data = pako.deflate(sampleArray, { to: 'string', chunkSize: 99 });
-
-    assert.equal(typeof data, 'string');
-    assert.ok(cmp(b(data, 'binary'), pako.deflate(sampleArray)));
-  });
-
-  it('Inflate binary string input', function () {
-    var deflatedString = pako.deflate(sampleArray, { to: 'string' });
-    var deflatedArray  = pako.deflate(sampleArray);
-    assert.ok(cmp(pako.inflate(deflatedString), pako.inflate(deflatedArray)));
-  });
-
   it('Inflate with javascript string (utf16) output', function () {
     var deflatedArray  = pako.deflate(sampleArray);
     var data = pako.inflate(deflatedArray, { to: 'string', chunkSize: 99 });
