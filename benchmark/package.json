@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "ansi": "^0.3.1",
+    "benchmark": "^2.1.4",
+    "zlibjs": "^0.3.1"
+  }
+}
