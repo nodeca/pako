@@ -6,12 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.0.11] -  2020-01-29
+## [2.0.0] - WIP
+### Changed
+- Removed support of `Inflate` & `Deflate` instance create without `new`.
+- Upgrade build tools to modern ones.
+
+## [1.0.11] - 2020-01-29
 ### Fixed
 - Fix tests in node.js v12+, #179.
 
 
-## [1.0.10] -  2019-02-28
+## [1.0.10] - 2019-02-28
 ### Fixed
 - Fix minified version, #161.
 
@@ -139,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 
+[2.0.0]: https://github.com/nodeca/pako/compare/1.0.11...2.0.0
 [1.0.10]: https://github.com/nodeca/pako/compare/1.0.10...1.0.11
 [1.0.10]: https://github.com/nodeca/pako/compare/1.0.9...1.0.10
 [1.0.9]: https://github.com/nodeca/pako/compare/1.0.8...1.0.9
