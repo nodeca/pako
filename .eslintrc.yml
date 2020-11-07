@@ -12,6 +12,7 @@ globals:
 ignorePatterns:
   - coverage/
   - dist/
+  - rollup.config.js
 
 rules:
   accessor-pairs:         2
