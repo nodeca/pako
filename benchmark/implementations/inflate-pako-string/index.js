@@ -1,9 +1,9 @@
-'use strict'
+'use strict';
 
 var pako = require('../../../');
 
-exports.run = function(data) {
+exports.run = function (data) {
   return pako.inflate(data.deflateString, {
     to: 'string'
   });
-}
+};

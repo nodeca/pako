@@ -9,6 +9,10 @@ globals:
   Uint16Array: false
   Int32Array:  false
 
+ignorePatterns:
+  - coverage/
+  - dist/
+
 rules:
   accessor-pairs:         2
   array-bracket-spacing:  [ 2, "always", { "singleValue": true, "objectsInArrays": true, "arraysInArrays": true } ]
