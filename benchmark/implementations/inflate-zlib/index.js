@@ -3,5 +3,5 @@
 var zlib = require('zlib');
 
 exports.run = function (data) {
-  zlib.inflateSync(data.deflateBuffer);
+  zlib.inflateSync(data.deflateTyped);
 };

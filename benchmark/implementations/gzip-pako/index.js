@@ -3,5 +3,5 @@
 var pako = require('../../../');
 
 exports.run = function (data, level) {
-  return pako.deflate(data.typed, { level: level });
+  return pako.gzip(data.typed, { level: level });
 };

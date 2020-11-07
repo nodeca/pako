@@ -3,5 +3,6 @@
 var pako = require('../../../');
 
 exports.run = function (data) {
-  return pako.inflate(data.deflateTyped, {});
+  return pako.ungzip(data.gzipTyped, {
+  });
 };

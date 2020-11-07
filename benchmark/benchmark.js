@@ -10,7 +10,6 @@ var util      = require('util');
 var Benchmark = require('benchmark');
 var ansi      = require('ansi');
 var cursor    = ansi(process.stdout);
-var b         = require('buffer-from');
 
 var pako      = require('../');
 
@@ -48,11 +47,9 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
   content.string = fs.readFileSync(filepath, 'utf8');
 
   content.deflateTyped = pako.deflate(content.typed, { level: LEVEL });
-  content.deflateBuffer = b(content.deflateTyped);
-  content.deflateString = pako.deflate(content.typed, { level: LEVEL, to: 'string' });
+  content.gzipTyped = pako.gzip(content.typed, { level: LEVEL });
 
   content.deflateRawTyped = pako.deflateRaw(content.typed, { level: LEVEL });
-  content.deflateRawBuffer = b(content.deflateRawTyped);
 
   var title    = util.format('(%d bytes raw / ~%d bytes compressed)', content.typed.length, content.deflateTyped.length);
 
