@@ -1,6 +1,3 @@
-/*global describe, it*/
-
-
 'use strict';
 
 
@@ -9,7 +6,6 @@ var path    = require('path');
 var assert  = require('assert');
 
 var pako    = require('../index');
-var cmp     = require('./helpers').cmpBuf;
 
 
 function a2s(array) {
@@ -24,9 +20,9 @@ describe('Gzip special cases', function () {
     var inflator = new pako.Inflate();
     inflator.push(data, true);
 
-    assert.equal(inflator.header.name, 'test name');
-    assert.equal(inflator.header.comment, 'test comment');
-    assert.equal(a2s(inflator.header.extra), 'test extra');
+    assert.strictEqual(inflator.header.name, 'test name');
+    assert.strictEqual(inflator.header.comment, 'test comment');
+    assert.strictEqual(a2s(inflator.header.extra), 'test extra');
   });
 
   it('Write custom headers', function () {
@@ -48,15 +44,15 @@ describe('Gzip special cases', function () {
     var inflator = new pako.Inflate({ to: 'string' });
     inflator.push(deflator.result, true);
 
-    assert.equal(inflator.err, 0);
-    assert.equal(inflator.result, data);
+    assert.strictEqual(inflator.err, 0);
+    assert.strictEqual(inflator.result, data);
 
     var header = inflator.header;
-    assert.equal(header.time, 1234567);
-    assert.equal(header.os, 15);
-    assert.equal(header.name, 'test name');
-    assert.equal(header.comment, 'test comment');
-    assert(cmp(header.extra, [ 4, 5, 6 ]));
+    assert.strictEqual(header.time, 1234567);
+    assert.strictEqual(header.os, 15);
+    assert.strictEqual(header.name, 'test name');
+    assert.strictEqual(header.comment, 'test comment');
+    assert.deepStrictEqual(header.extra, new Uint8Array([ 4, 5, 6 ]));
   });
 
   it('Read stream with SYNC marks', function () {

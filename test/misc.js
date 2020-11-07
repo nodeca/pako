@@ -1,6 +1,3 @@
-/*global describe, it*/
-
-
 'use strict';
 
 
@@ -9,7 +6,6 @@ var path    = require('path');
 var assert  = require('assert');
 
 var pako    = require('../index');
-var cmp     = require('./helpers').cmpBuf;
 
 describe('ArrayBuffer', function () {
 
@@ -18,10 +14,10 @@ describe('ArrayBuffer', function () {
   var deflated = pako.deflate(sample);
 
   it('Deflate ArrayBuffer', function () {
-    assert.ok(cmp(deflated, pako.deflate(sample.buffer)));
+    assert.deepStrictEqual(deflated, pako.deflate(sample.buffer));
   });
 
   it('Inflate ArrayBuffer', function () {
-    assert.ok(cmp(sample, pako.inflate(deflated.buffer)));
+    assert.deepStrictEqual(sample, pako.inflate(deflated.buffer));
   });
 });

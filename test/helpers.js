@@ -4,7 +4,6 @@
 var fs     = require('fs');
 var path   = require('path');
 var assert = require('assert');
-var b      = require('buffer-from');
 
 var pako  = require('../index');
 
@@ -30,24 +29,6 @@ function loadSamples(subdir) {
 }
 
 
-// Compare 2 buffers (can be Array, Uint8Array, Buffer).
-//
-function cmpBuf(a, b) {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  for (var i = 0, l = a.length; i < l; i++) {
-    if (a[i] !== b[i]) {
-      //console.log('pos: ' +i+ ' - ' + a[i].toString(16) + '/' + b[i].toString(16));
-      return false;
-    }
-  }
-
-  return true;
-}
-
-
 // Helper to test deflate/inflate with different options.
 // Use zlib streams, because it's the only way to define options.
 //
@@ -57,7 +38,7 @@ function testSingle(zlib_method, pako_method, data, options) {
   // hack for testing negative windowBits
   if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
 
-  var zlib_result = zlib_method(b(data), zlib_options);
+  var zlib_result = zlib_method(data, zlib_options);
   var pako_result = pako_method(data, options);
 
   // One more hack: gzip header contains OS code, that can vary.
@@ -65,7 +46,7 @@ function testSingle(zlib_method, pako_method, data, options) {
   // position (= no additional gzip headers used)
   if (options.ignore_os) zlib_result[9] = pako_result[9];
 
-  assert.deepEqual(new Uint8Array(pako_result), zlib_result);
+  assert.deepStrictEqual(pako_result, new Uint8Array(zlib_result));
 }
 
 
@@ -91,12 +72,11 @@ function testInflate(samples, inflateOptions, deflateOptions) {
     deflated = pako.deflate(data, deflateOptions);
     inflated = pako.inflate(deflated, inflateOptions);
 
-    assert.deepEqual(inflated, data);
+    assert.deepStrictEqual(inflated, data);
   }
 }
 
 
-exports.cmpBuf = cmpBuf;
 exports.testSamples = testSamples;
 exports.testInflate = testInflate;
 exports.loadSamples = loadSamples;

@@ -1,6 +1,3 @@
-/*global describe, it*/
-
-
 'use strict';
 
 
@@ -12,8 +9,6 @@ var testSamples = helpers.testSamples;
 var assert  = require('assert');
 var fs      = require('fs');
 var path    = require('path');
-var b       = require('buffer-from');
-
 
 
 var samples = helpers.loadSamples();
@@ -179,7 +174,7 @@ describe('Deflate RAW', function () {
 describe('Deflate dictionary', function () {
 
   it('trivial dictionary', function () {
-    var dict = b('abcdefghijklmnoprstuvwxyz');
+    var dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
     testSamples(zlib.deflateSync, pako.deflate, samples, { dictionary: dict });
   });
 
@@ -190,20 +185,21 @@ describe('Deflate dictionary', function () {
   });
 
   it('handles multiple pushes', function () {
-    var dict = b('abcd');
+    var dict = Buffer.from('abcd');
     var deflate = new pako.Deflate({ dictionary: dict });
 
-    deflate.push(b('hello'), false);
-    deflate.push(b('hello'), false);
-    deflate.push(b(' world'), true);
+    deflate.push(Buffer.from('hello'), false);
+    deflate.push(Buffer.from('hello'), false);
+    deflate.push(Buffer.from(' world'), true);
 
     if (deflate.err) { throw new Error(deflate.err); }
 
-    var uncompressed = pako.inflate(b(deflate.result), { dictionary: dict });
+    var uncompressed = pako.inflate(Buffer.from(deflate.result), { dictionary: dict });
 
-    if (!helpers.cmpBuf(b('hellohello world'), uncompressed)) {
-      throw new Error('Result not equal for p -> z');
-    }
+    assert.deepStrictEqual(
+      new Uint8Array(Buffer.from('hellohello world')),
+      uncompressed
+    );
   });
 });
 
@@ -215,6 +211,6 @@ describe('Deflate issues', function () {
     var deflatedPakoData = pako.deflate(data, { memLevel: 1 });
     var inflatedPakoData = pako.inflate(deflatedPakoData);
 
-    assert.equal(data.length, inflatedPakoData.length);
+    assert.strictEqual(data.length, inflatedPakoData.length);
   });
 });

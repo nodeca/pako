@@ -1,13 +1,8 @@
-/*global describe, it*/
-
-
 'use strict';
 
 
 var assert = require('assert');
-
 var helpers = require('./helpers');
-
 var pako = require('../index');
 
 
@@ -47,8 +42,8 @@ function testChunk(buf, expected, packer, chunkSize) {
   expFlushCount = Math.ceil(packer.result.length / 16384);
 
   assert(!packer.err, 'Packer error: ' + packer.err);
-  assert(helpers.cmpBuf(packer.result, expected), 'Result is different');
-  assert.equal(flushCount, expFlushCount, 'onData called ' + flushCount + 'times, expected: ' + expFlushCount);
+  assert.deepStrictEqual(packer.result, expected);
+  assert.strictEqual(flushCount, expFlushCount, 'onData called ' + flushCount + 'times, expected: ' + expFlushCount);
 }
 
 describe('Small input chunks', function () {
@@ -89,7 +84,7 @@ describe('Dummy push (force end)', function () {
     deflator.push(data);
     deflator.push([], true);
 
-    assert(helpers.cmpBuf(deflator.result, pako.deflate(data)));
+    assert.deepStrictEqual(deflator.result, pako.deflate(data));
   });
 
   it('inflate end', function () {
@@ -99,7 +94,7 @@ describe('Dummy push (force end)', function () {
     inflator.push(data);
     inflator.push([], true);
 
-    assert(helpers.cmpBuf(inflator.result, pako.inflate(data)));
+    assert.deepStrictEqual(inflator.result, pako.inflate(data));
   });
 
 });
@@ -127,7 +122,7 @@ describe('Edge condition', function () {
     inflator.push(new Uint8Array(0), true);
 
     assert.ok(!inflator.err, 'Inflate failed with status ' + inflator.err);
-    assert(helpers.cmpBuf(data, inflator.result));
+    assert.deepStrictEqual(data, inflator.result);
   });
 
 });

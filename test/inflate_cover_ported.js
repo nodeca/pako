@@ -1,8 +1,4 @@
 // This tests are ported from original zlib
-
-/*global describe, it*/
-
-
 'use strict';
 
 
@@ -33,7 +29,7 @@ function testInflate(hex, wbits, status) {
     return;
   }
   inflator.push(new Uint8Array(h2b(hex)), true);
-  assert.equal(inflator.err, status);
+  assert.strictEqual(inflator.err, status);
 }
 
 

@@ -1,8 +1,4 @@
 // Deflate coverage tests
-
-/*global describe, it*/
-
-
 'use strict';
 
 
@@ -26,7 +22,7 @@ function testDeflate(data, opts, flush) {
   deflator.push(data, flush);
   deflator.push(data, true);
 
-  assert.equal(deflator.err, false, msg[deflator.err]);
+  assert.strictEqual(deflator.err, 0, msg[deflator.err]);
 }
 
 describe('Deflate support', function () {
