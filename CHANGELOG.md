@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - WIP
 ### Changed
-- Removed binary strings support.
+- Removed binary strings and `Array` support.
+- Removed fallbacks for unsupported TypedArray methods (`.set()`, `.subarray()`).
 - Removed support of `Inflate` & `Deflate` instance create without `new`.
 - Upgrade build tools to modern ones.
 

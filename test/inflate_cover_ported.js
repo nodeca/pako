@@ -32,7 +32,7 @@ function testInflate(hex, wbits, status) {
     assert(e === msg[status]);
     return;
   }
-  inflator.push(h2b(hex), true);
+  inflator.push(new Uint8Array(h2b(hex)), true);
   assert.equal(inflator.err, status);
 }
 

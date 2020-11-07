@@ -6,7 +6,6 @@ var path   = require('path');
 var assert = require('assert');
 var b      = require('buffer-from');
 
-var pako_utils = require('../lib/utils/common');
 var pako  = require('../index');
 
 // Load fixtures to test
@@ -75,12 +74,6 @@ function testSamples(zlib_method, pako_method, samples, options) {
   Object.keys(samples).forEach(function (name) {
     var data = samples[name];
 
-    // with untyped arrays
-    pako_utils.setTyped(false);
-    testSingle(zlib_method, pako_method, data, options);
-
-    // with typed arrays
-    pako_utils.setTyped(true);
     testSingle(zlib_method, pako_method, data, options);
   });
 }
@@ -95,18 +88,7 @@ function testInflate(samples, inflateOptions, deflateOptions) {
     if (!samples.hasOwnProperty(name)) continue;
     data = samples[name];
 
-    // always use the same data type to generate sample
-    pako_utils.setTyped(true);
     deflated = pako.deflate(data, deflateOptions);
-
-    // with untyped arrays
-    pako_utils.setTyped(false);
-    inflated = pako.inflate(deflated, inflateOptions);
-    pako_utils.setTyped(true);
-
-    assert.deepEqual(new Uint8Array(inflated), data);
-
-    // with typed arrays
     inflated = pako.inflate(deflated, inflateOptions);
 
     assert.deepEqual(inflated, data);
