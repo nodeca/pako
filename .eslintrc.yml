@@ -1,9 +1,6 @@
 env:
   node:     true
 
-parserOptions:
-  ecmaVersion: 5
-
 globals:
   Uint8Array:  false
   Uint16Array: false

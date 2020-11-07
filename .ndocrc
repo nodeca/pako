@@ -1,10 +1,10 @@
 #
-# Common nodeca config
+# Common config
 ################################################################################
 
 --index         "./README.md"
 --package       "./package.json"
---gh-ribbon     "{package.homepage}"
+--gh-ribbon     "https://github.com/{package.repository}"
 --output        "doc"
 --render        "html"
 --broken-links  "throw"
