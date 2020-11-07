@@ -5,43 +5,20 @@
 <script>
 'use strict';
 
-var pako = window.pako;
-
-// In browser
-
 // Initial object //////////////////////////////////////////////////////////////
 
-var obj = new Array(10);
-
-for (var i = 0; i < obj.length; i++) {
-  obj[i] = { foo: 'bar', baz: 'БАТ' };
-}
+const obj = [
+  { foo: 'bar', baz: 'БАТ' },
+  { abra: 1, cadabra: null }
+]
 
 // Convert /////////////////////////////////////////////////////////////////////
 
 var str = JSON.stringify(obj);
 
-//
-// Now `str` is standard utf16 (16-bit) string. But we need 8-bit data
-//
-
-// Let's reencode to utf8
-// This method is dirty, but simple and ok for example.
-var data = unescape(encodeURIComponent(str));
-
-
 // Compress ////////////////////////////////////////////////////////////////////
 
-//
-// After compression we have binary data (typed array here).
-//
-// `XMLHttpRequest.send` accepts typed arrays in modern browsers.
-// For ancient ones - more work needed.
-//
-
-var resultAsUint8Array = pako.deflate(data);
-var resultAsBinString  = pako.deflate(data, { to: 'string' });
-
+var result = window.pako.deflate(str);
 
 // Send data to server
 //
@@ -52,51 +29,23 @@ var resultAsBinString  = pako.deflate(data, { to: 'string' });
 //
 /////////////////////////////////////////////////////////
 
-function sendModern() {
+function send() {
   var xhr = new XMLHttpRequest;
 
-  console.log('Sending data in modern browsers...');
+  console.log('Sending data...');
 
   xhr.open('POST', 'http://localhost:8000/', true);
 
   var formData = new FormData(document.forms.person);
-  var blob     = new Blob([ resultAsUint8Array ], { type: 'application/octet-stream'});
+  var blob     = new Blob([ result ], { type: 'application/octet-stream'});
 
   formData.append('binson', blob);
   xhr.send(formData);
 
-  setTimeout(sendModern, 5000);
+  setTimeout(send, 5000);
 }
 
-function sendAncient() {
-  var xhr = new XMLHttpRequest;
-
-  console.log('Sending data in ancient browsers...');
-
-  // Emulate form body. But since we can send intact only 7-bit
-  // characters, wrap binary data to base64. That will add 30% of size.
-  var boundary = '----' + String(Math.random()).slice(2);
-
-  var data = '';
-
-  data += '--' + boundary + '\r\n';
-  data += 'Content-Disposition: form-data; name="binson"; filename="blob"\r\n';
-  data += 'Content-Type: application/octet-stream\r\n';
-  data += 'Content-Transfer-Encoding: base64\r\n';
-  data += '\r\n';
-  data += btoa(resultAsBinString) + '\r\n';
-  data += '--' + boundary + '--\r\n';
-
-
-  xhr.open('POST', 'http://localhost:8000/');
-  xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-  xhr.send(data);
-
-  setTimeout(sendAncient, 5000);
-}
-
-sendModern();
-sendAncient();
+send();
 
 </script>
 </html>

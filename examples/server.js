@@ -1,12 +1,15 @@
 'use strict';
 
-/*eslint-disable no-console*/
+/* eslint-disable no-console */
 
 const http       = require('http');
-const pako       = require('../');
 const multiparty = require('multiparty');
 const fs         = require('fs');
+const zlib       = require('zlib');
+const util       = require('util');
 
+const readFile = util.promisify(fs.readFile);
+const inflate  = util.promisify(zlib.inflate);
 
 const MULTIPART_RE    = /^multipart\/form-data(?:;|$)/i;
 const MAX_FIELDS_SIZE = 100 * 1024;       // 100kb
@@ -20,8 +23,7 @@ function error(msg) {
 }
 
 
-
-const server = http.createServer(async (req, res) => {
+const server = http.createServer(async function (req, res) {
 
   console.log('--- received request');
 
@@ -60,22 +62,17 @@ const server = http.createServer(async (req, res) => {
       throw err;
     }
 
-    // In ideal world, we should process data as stream to minimize memory use
-    // on big data (and use node's `zlib` inflate).
-    //
-    // But that's just a quick sample to explain data reencoding steps from
-    // browser to server. Feel free to improve.
-    let bin = fs.readFileSync(files.binson[0].path);
+    let bin = await readFile(files.binson[0].path);
 
     // Kludge - here we should cleanup all files
     fs.unlinkSync(files.binson[0].path);
 
     // Decompress binary content
     // Note! Can throw error on bad data
-    let uncompressed = pako.inflate(new Uint8Array(bin), { to: 'string' });
+    let uncompressed = await inflate(bin);
 
-    // Convert utf8 -> utf16 (native JavaScript string format)
-    let decoded = decodeURIComponent(escape(uncompressed));
+    // Convert utf8 buffer -> utf16 string (native JavaScript string format)
+    let decoded = uncompressed.toString();
 
     // Finally, create an object
     // Note! Can throw error on bad data
