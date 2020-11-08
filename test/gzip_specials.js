@@ -1,11 +1,11 @@
 'use strict';
 
 
-var fs      = require('fs');
-var path    = require('path');
-var assert  = require('assert');
+const fs      = require('fs');
+const path    = require('path');
+const assert  = require('assert');
 
-var pako    = require('../index');
+const pako    = require('../index');
 
 
 function a2s(array) {
@@ -13,11 +13,11 @@ function a2s(array) {
 }
 
 
-describe('Gzip special cases', function () {
+describe('Gzip special cases', () => {
 
-  it('Read custom headers', function () {
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
-    var inflator = new pako.Inflate();
+  it('Read custom headers', () => {
+    const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
+    const inflator = new pako.Inflate();
     inflator.push(data, true);
 
     assert.strictEqual(inflator.header.name, 'test name');
@@ -25,10 +25,10 @@ describe('Gzip special cases', function () {
     assert.strictEqual(a2s(inflator.header.extra), 'test extra');
   });
 
-  it('Write custom headers', function () {
-    var data = '           ';
+  it('Write custom headers', () => {
+    const data = '           ';
 
-    var deflator = new pako.Deflate({
+    const deflator = new pako.Deflate({
       gzip: true,
       header: {
         hcrc: true,
@@ -41,13 +41,13 @@ describe('Gzip special cases', function () {
     });
     deflator.push(data, true);
 
-    var inflator = new pako.Inflate({ to: 'string' });
+    const inflator = new pako.Inflate({ to: 'string' });
     inflator.push(deflator.result, true);
 
     assert.strictEqual(inflator.err, 0);
     assert.strictEqual(inflator.result, data);
 
-    var header = inflator.header;
+    const header = inflator.header;
     assert.strictEqual(header.time, 1234567);
     assert.strictEqual(header.os, 15);
     assert.strictEqual(header.name, 'test name');
@@ -55,9 +55,9 @@ describe('Gzip special cases', function () {
     assert.deepStrictEqual(header.extra, new Uint8Array([ 4, 5, 6 ]));
   });
 
-  it('Read stream with SYNC marks', function () {
-    var inflator, strm, _in, len, pos = 0, i = 0;
-    var data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
+  it('Read stream with SYNC marks', () => {
+    let inflator, strm, _in, len, pos = 0, i = 0;
+    const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
     do {
       len = data.length - pos;

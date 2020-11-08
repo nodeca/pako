@@ -1,24 +1,24 @@
 'use strict';
 
 
-var fs     = require('fs');
-var path   = require('path');
-var assert = require('assert');
+const fs     = require('fs');
+const path   = require('path');
+const assert = require('assert');
 
-var pako  = require('../index');
+const pako  = require('../index');
 
 // Load fixtures to test
 // return: { 'filename1': content1, 'filename2': content2, ...}
 //
 function loadSamples(subdir) {
-  var result = {};
-  var dir = path.join(__dirname, 'fixtures', subdir || 'samples');
+  const result = {};
+  const dir = path.join(__dirname, 'fixtures', subdir || 'samples');
 
   fs.readdirSync(dir).sort().forEach(function (sample) {
-    var filepath = path.join(dir, sample),
-        extname  = path.extname(filepath),
-        basename = path.basename(filepath, extname),
-        content  = new Uint8Array(fs.readFileSync(filepath));
+    const filepath = path.join(dir, sample);
+    const extname  = path.extname(filepath);
+    const basename = path.basename(filepath, extname);
+    const content  = new Uint8Array(fs.readFileSync(filepath));
 
     if (basename[0] === '_') { return; } // skip files with name, started with dash
 
@@ -33,13 +33,13 @@ function loadSamples(subdir) {
 // Use zlib streams, because it's the only way to define options.
 //
 function testSingle(zlib_method, pako_method, data, options) {
-  var zlib_options = Object.assign({}, options);
+  const zlib_options = Object.assign({}, options);
 
   // hack for testing negative windowBits
   if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
 
-  var zlib_result = zlib_method(data, zlib_options);
-  var pako_result = pako_method(data, options);
+  const zlib_result = zlib_method(data, zlib_options);
+  const pako_result = pako_method(data, options);
 
   // One more hack: gzip header contains OS code, that can vary.
   // Override OS code if requested. For simplicity, we assume it on fixed
@@ -53,7 +53,7 @@ function testSingle(zlib_method, pako_method, data, options) {
 function testSamples(zlib_method, pako_method, samples, options) {
 
   Object.keys(samples).forEach(function (name) {
-    var data = samples[name];
+    const data = samples[name];
 
     testSingle(zlib_method, pako_method, data, options);
   });
@@ -61,7 +61,7 @@ function testSamples(zlib_method, pako_method, samples, options) {
 
 
 function testInflate(samples, inflateOptions, deflateOptions) {
-  var name, data, deflated, inflated;
+  let name, data, deflated, inflated;
 
   // inflate options have windowBits = 0 to force autodetect window size
   //
@@ -77,6 +77,6 @@ function testInflate(samples, inflateOptions, deflateOptions) {
 }
 
 
-exports.testSamples = testSamples;
-exports.testInflate = testInflate;
-exports.loadSamples = loadSamples;
+module.exports.testSamples = testSamples;
+module.exports.testInflate = testInflate;
+module.exports.loadSamples = loadSamples;

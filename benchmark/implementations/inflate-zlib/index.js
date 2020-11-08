@@ -1,7 +1,7 @@
 'use strict';
 
-var zlib = require('zlib');
+const zlib = require('zlib');
 
-exports.run = function (data) {
+exports.run = (data) => {
   zlib.inflateSync(data.deflateTyped);
 };

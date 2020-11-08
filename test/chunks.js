@@ -1,27 +1,27 @@
 'use strict';
 
 
-var assert = require('assert');
-var helpers = require('./helpers');
-var pako = require('../index');
+const assert = require('assert');
+const { loadSamples } = require('./helpers');
+const pako = require('../index');
 
 
-var samples = helpers.loadSamples();
+const samples = loadSamples();
 
 
 function randomBuf(size) {
-  var buf = new Uint8Array(size);
-  for (var i = 0; i < size; i++) {
+  const buf = new Uint8Array(size);
+  for (let i = 0; i < size; i++) {
     buf[i] = Math.round(Math.random() * 256);
   }
   return buf;
 }
 
 function testChunk(buf, expected, packer, chunkSize) {
-  var i, _in, count, pos, size, expFlushCount;
+  let i, _in, count, pos, size, expFlushCount;
 
-  var onData = packer.onData;
-  var flushCount = 0;
+  let onData = packer.onData;
+  let flushCount = 0;
 
   packer.onData = function () {
     flushCount++;
@@ -46,51 +46,51 @@ function testChunk(buf, expected, packer, chunkSize) {
   assert.strictEqual(flushCount, expFlushCount, 'onData called ' + flushCount + 'times, expected: ' + expFlushCount);
 }
 
-describe('Small input chunks', function () {
+describe('Small input chunks', () => {
 
-  it('deflate 100b by 1b chunk', function () {
-    var buf = randomBuf(100);
-    var deflated = pako.deflate(buf);
+  it('deflate 100b by 1b chunk', () => {
+    const buf = randomBuf(100);
+    const deflated = pako.deflate(buf);
     testChunk(buf, deflated, new pako.Deflate(), 1);
   });
 
-  it('deflate 20000b by 10b chunk', function () {
-    var buf = randomBuf(20000);
-    var deflated = pako.deflate(buf);
+  it('deflate 20000b by 10b chunk', () => {
+    const buf = randomBuf(20000);
+    const deflated = pako.deflate(buf);
     testChunk(buf, deflated, new pako.Deflate(), 10);
   });
 
-  it('inflate 100b result by 1b chunk', function () {
-    var buf = randomBuf(100);
-    var deflated = pako.deflate(buf);
+  it('inflate 100b result by 1b chunk', () => {
+    const buf = randomBuf(100);
+    const deflated = pako.deflate(buf);
     testChunk(deflated, buf, new pako.Inflate(), 1);
   });
 
-  it('inflate 20000b result by 10b chunk', function () {
-    var buf = randomBuf(20000);
-    var deflated = pako.deflate(buf);
+  it('inflate 20000b result by 10b chunk', () => {
+    const buf = randomBuf(20000);
+    const deflated = pako.deflate(buf);
     testChunk(deflated, buf, new pako.Inflate(), 10);
   });
 
 });
 
 
-describe('Dummy push (force end)', function () {
+describe('Dummy push (force end)', () => {
 
-  it('deflate end', function () {
-    var data = samples.lorem_utf_100k;
+  it('deflate end', () => {
+    const data = samples.lorem_utf_100k;
 
-    var deflator = new pako.Deflate();
+    const deflator = new pako.Deflate();
     deflator.push(data);
     deflator.push([], true);
 
     assert.deepStrictEqual(deflator.result, pako.deflate(data));
   });
 
-  it('inflate end', function () {
-    var data = pako.deflate(samples.lorem_utf_100k);
+  it('inflate end', () => {
+    const data = pako.deflate(samples.lorem_utf_100k);
 
-    var inflator = new pako.Inflate();
+    const inflator = new pako.Inflate();
     inflator.push(data);
     inflator.push([], true);
 
@@ -100,19 +100,19 @@ describe('Dummy push (force end)', function () {
 });
 
 
-describe('Edge condition', function () {
+describe('Edge condition', () => {
 
-  it('should be ok on buffer border', function () {
-    var i;
-    var data = new Uint8Array(1024 * 16 + 1);
+  it('should be ok on buffer border', () => {
+    let i;
+    const data = new Uint8Array(1024 * 16 + 1);
 
     for (i = 0; i < data.length; i++) {
       data[i] = Math.floor(Math.random() * 255.999);
     }
 
-    var deflated = pako.deflate(data);
+    const deflated = pako.deflate(data);
 
-    var inflator = new pako.Inflate();
+    const inflator = new pako.Inflate();
 
     for (i = 0; i < deflated.length; i++) {
       inflator.push(deflated.subarray(i, i + 1), false);

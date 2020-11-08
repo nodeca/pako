@@ -23,7 +23,7 @@ function error(msg) {
 }
 
 
-const server = http.createServer(async function (req, res) {
+const server = http.createServer(async (req, res) => {
 
   console.log('--- received request');
 
@@ -35,7 +35,7 @@ const server = http.createServer(async function (req, res) {
     //
     // Check request size early by header and terminate immediately for big data
     //
-    let length = parseInt((req.headers['content-length'] || '0'), 10);
+    const length = parseInt((req.headers['content-length'] || '0'), 10);
 
     if (!length || isNaN(length)) throw error('Length required');
 
@@ -45,12 +45,12 @@ const server = http.createServer(async function (req, res) {
 
     let err = null;
 
-    let form = new multiparty.Form({
+    const form = new multiparty.Form({
       maxFieldsSize: MAX_FIELDS_SIZE,
       maxFilesSize: MAX_FILES_SIZE
     });
 
-    let files = await new Promise(resolve => {
+    const files = await new Promise(resolve => {
       form.parse(req, function (e, fields, files) {
         if (e) err = e;
         resolve(files);
@@ -62,21 +62,21 @@ const server = http.createServer(async function (req, res) {
       throw err;
     }
 
-    let bin = await readFile(files.binson[0].path);
+    const bin = await readFile(files.binson[0].path);
 
     // Kludge - here we should cleanup all files
     fs.unlinkSync(files.binson[0].path);
 
     // Decompress binary content
     // Note! Can throw error on bad data
-    let uncompressed = await inflate(bin);
+    const uncompressed = await inflate(bin);
 
     // Convert utf8 buffer -> utf16 string (native JavaScript string format)
-    let decoded = uncompressed.toString();
+    const decoded = uncompressed.toString();
 
     // Finally, create an object
     // Note! Can throw error on bad data
-    let obj = JSON.parse(decoded);
+    const obj = JSON.parse(decoded);
 
     console.log('--- received object is: ', obj);
     res.end('ok');

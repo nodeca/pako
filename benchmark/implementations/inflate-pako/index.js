@@ -1,7 +1,7 @@
 'use strict';
 
-var pako = require('../../../');
+const pako = require('../../../');
 
-exports.run = function (data) {
+exports.run = (data) => {
   return pako.inflate(data.deflateTyped, {});
 };

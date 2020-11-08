@@ -1,10 +1,9 @@
 env:
-  node:     true
+  node: true
+  es6: true
 
-globals:
-  Uint8Array:  false
-  Uint16Array: false
-  Int32Array:  false
+parserOptions:
+  ecmaVersion: 2015
 
 ignorePatterns:
   - coverage/
@@ -29,7 +28,7 @@ rules:
   dot-location:           [ 2, 'property' ]
   eol-last:               2
   eqeqeq:                 2
-  func-style:             [ 2, declaration ]
+  # func-style:             [ 2, declaration ]
   guard-for-in:           2
   handle-callback-err:    2
   indent:                 [ 2, 2, { VariableDeclarator: { var: 2, let: 2, const: 3 }, SwitchCase: 1, ignoreComments: true, MemberExpression: off, ignoredNodes: ["ConditionalExpression"] } ]

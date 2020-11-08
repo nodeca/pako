@@ -1,23 +1,23 @@
 'use strict';
 
 
-var fs      = require('fs');
-var path    = require('path');
-var assert  = require('assert');
+const fs      = require('fs');
+const path    = require('path');
+const assert  = require('assert');
 
-var pako    = require('../index');
+const pako    = require('../index');
 
-describe('ArrayBuffer', function () {
+describe('ArrayBuffer', () => {
 
-  var file   = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
-  var sample = new Uint8Array(fs.readFileSync(file));
-  var deflated = pako.deflate(sample);
+  const file   = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
+  const sample = new Uint8Array(fs.readFileSync(file));
+  const deflated = pako.deflate(sample);
 
-  it('Deflate ArrayBuffer', function () {
+  it('Deflate ArrayBuffer', () => {
     assert.deepStrictEqual(deflated, pako.deflate(sample.buffer));
   });
 
-  it('Inflate ArrayBuffer', function () {
+  it('Inflate ArrayBuffer', () => {
     assert.deepStrictEqual(sample, pako.inflate(deflated.buffer));
   });
 });

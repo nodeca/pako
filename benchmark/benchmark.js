@@ -2,26 +2,26 @@
 
 'use strict';
 
-var LEVEL = 6;
+const LEVEL = 6;
 
-var path      = require('path');
-var fs        = require('fs');
-var util      = require('util');
-var Benchmark = require('benchmark');
-var ansi      = require('ansi');
-var cursor    = ansi(process.stdout);
+const path      = require('path');
+const fs        = require('fs');
+const util      = require('util');
+const Benchmark = require('benchmark');
+const ansi      = require('ansi');
+const cursor    = ansi(process.stdout);
 
-var pako      = require('../');
+const pako      = require('../');
 
 
-var IMPLS_DIRECTORY = path.join(__dirname, 'implementations');
-var IMPLS_PATHS = {};
-var IMPLS = [];
+const IMPLS_DIRECTORY = path.join(__dirname, 'implementations');
+const IMPLS_PATHS = {};
+const IMPLS = [];
 
 
 fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
-  var file = path.join(IMPLS_DIRECTORY, name);
-  var code = require(file);
+  const file = path.join(IMPLS_DIRECTORY, name);
+  const code = require(file);
 
   IMPLS_PATHS[name] = file;
   IMPLS.push({
@@ -32,15 +32,15 @@ fs.readdirSync(IMPLS_DIRECTORY).sort().forEach(function (name) {
 
 /* eslint-disable no-console */
 
-var SAMPLES_DIRECTORY = path.join(__dirname, 'samples');
-var SAMPLES = [];
+const SAMPLES_DIRECTORY = path.join(__dirname, 'samples');
+const SAMPLES = [];
 
 fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
-  var filepath = path.join(SAMPLES_DIRECTORY, sample),
-      extname  = path.extname(filepath),
-      basename = path.basename(filepath, extname);
+  const filepath = path.join(SAMPLES_DIRECTORY, sample);
+  const extname  = path.extname(filepath);
+  const basename = path.basename(filepath, extname);
 
-  var content = {}; // raw/compressed data in different formats
+  const content = {}; // raw/compressed data in different formats
 
   content.buffer = fs.readFileSync(filepath);
   content.typed  = new Uint8Array(content.buffer);
@@ -51,7 +51,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
   content.deflateRawTyped = pako.deflateRaw(content.typed, { level: LEVEL });
 
-  var title    = util.format('(%d bytes raw / ~%d bytes compressed)', content.typed.length, content.deflateTyped.length);
+  const title    = util.format('(%d bytes raw / ~%d bytes compressed)', content.typed.length, content.deflateTyped.length);
 
 
   function onComplete() {
@@ -59,7 +59,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
   }
 
 
-  var suite = new Benchmark.Suite(title, {
+  const suite = new Benchmark.Suite(title, {
 
     onStart: function onStart() {
       console.log('\nSample: %s %s', sample, title);
@@ -108,7 +108,7 @@ fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(function (sample) {
 
 
 function select(patterns) {
-  var result = [];
+  const result = [];
 
   if (!(patterns instanceof Array)) {
     patterns = [ patterns ];
@@ -131,7 +131,7 @@ function select(patterns) {
 
 
 function run(files) {
-  var selected = select(files);
+  const selected = select(files);
 
   if (selected.length > 0) {
     console.log('Selected samples: (%d of %d)', selected.length, SAMPLES.length);

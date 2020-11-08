@@ -1,7 +1,7 @@
 'use strict';
 
-var zlib = require('zlib');
+const zlib = require('zlib');
 
-exports.run = function (data, level) {
+exports.run = (data, level) => {
   zlib.deflateSync(data.buffer, { level:level });
 };
