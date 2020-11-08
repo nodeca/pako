@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed binary strings and `Array` support.
 - Removed fallbacks for unsupported TypedArray methods (`.set()`, `.subarray()`).
 - Removed support of `Inflate` & `Deflate` instance create without `new`.
+- Removed `Z_SYNC_FLUSH` related code from wrappers (buggy and no tests).
 - Switched to es6. Legacy es5 builds available in `/dist`.
 - Structure of `/dist` folder changed.
 - Upgraded build tools to modern ones.
