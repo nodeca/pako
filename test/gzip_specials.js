@@ -4,8 +4,10 @@
 const fs      = require('fs');
 const path    = require('path');
 const assert  = require('assert');
+const zlib    = require('zlib');
 
 const pako    = require('../index');
+const { Z_SYNC_FLUSH } = require('../lib/zlib/constants');
 
 
 function a2s(array) {
@@ -18,7 +20,7 @@ describe('Gzip special cases', () => {
   it('Read custom headers', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
     const inflator = new pako.Inflate();
-    inflator.push(data, true);
+    inflator.push(data);
 
     assert.strictEqual(inflator.header.name, 'test name');
     assert.strictEqual(inflator.header.comment, 'test comment');
@@ -42,7 +44,7 @@ describe('Gzip special cases', () => {
     deflator.push(data, true);
 
     const inflator = new pako.Inflate({ to: 'string' });
-    inflator.push(deflator.result, true);
+    inflator.push(deflator.result);
 
     assert.strictEqual(inflator.err, 0);
     assert.strictEqual(inflator.result, data);
@@ -55,26 +57,45 @@ describe('Gzip special cases', () => {
     assert.deepStrictEqual(header.extra, new Uint8Array([ 4, 5, 6 ]));
   });
 
-  it('Read stream with SYNC marks', () => {
-    let inflator, strm, _in, len, pos = 0, i = 0;
+  it('Read stream with SYNC marks (multistream source, file 1)', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 
-    do {
-      len = data.length - pos;
-      _in = new Uint8Array(len);
-      _in.set(data.subarray(pos, pos + len), 0);
+    assert.deepStrictEqual(
+      pako.ungzip(data),
+      new Uint8Array(zlib.gunzipSync(data))
+    );
+  });
 
-      inflator = new pako.Inflate();
-      strm = inflator.strm;
-      inflator.push(_in, true);
+  it.skip('Read stream with SYNC marks (multistream source, file 2)', () => {
+    const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined-bgzip.gz'));
 
-      assert(!inflator.err, inflator.msg);
+    assert.deepStrictEqual(
+      // Currently fails with this chunk size
+      pako.ungzip(data, { chunkSize: 16384 }),
+      new Uint8Array(zlib.gunzipSync(data))
+    );
+  });
 
-      pos += strm.next_in;
-      i++;
-    } while (strm.avail_in);
+  it('Write with Z_SYNC_FLUSH', () => {
+    const deflator = new pako.Deflate({ gzip: true });
 
-    assert(i === 2, 'invalid blobs count');
+    let count = 0;
+
+    deflator.onData = function (chunk) {
+      this.chunks.push(chunk);
+      count++;
+    };
+
+    deflator.push('12345', Z_SYNC_FLUSH);
+    deflator.push('67890', true);
+
+    const flushed = deflator.result;
+    const normal = pako.gzip('1234567890');
+
+    assert.strictEqual(count, 2);
+
+    assert.deepStrictEqual(pako.ungzip(flushed), pako.ungzip(normal));
+    assert.ok(flushed.length > normal.length);
   });
 
 });

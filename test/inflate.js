@@ -171,7 +171,7 @@ describe('Inflate with dictionary', () => {
 
     assert.throws(function () {
       pako.inflate(zCompressed, { dictionary: 'world' });
-    }, /data error/);
+    }, /need dictionary/);
   });
 
   it('trivial dictionary', () => {

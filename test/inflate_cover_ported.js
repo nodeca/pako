@@ -28,7 +28,7 @@ function testInflate(hex, wbits, status) {
     assert(e === msg[status]);
     return;
   }
-  inflator.push(new Uint8Array(h2b(hex)), true);
+  inflator.push(new Uint8Array(h2b(hex)));
   assert.strictEqual(inflator.err, status);
 }
 

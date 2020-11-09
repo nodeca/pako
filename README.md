@@ -58,33 +58,32 @@ For deflate level 6 results can be considered as correct.
 
 __Install:__
 
-node.js:
-
 ```
 npm install pako
 ```
 
 
-Example & API
--------------
+Examples / API
+--------------
 
 Full docs - http://nodeca.github.io/pako/
 
 ```javascript
-var pako = require('pako');
+const pako = require('pako');
 
 // Deflate
 //
-var input = new Uint8Array();
+const input = new Uint8Array();
 //... fill input data here
-var output = pako.deflate(input);
+const output = pako.deflate(input);
 
 // Inflate (simple wrapper can throw exception on broken stream)
 //
-var compressed = new Uint8Array();
+const compressed = new Uint8Array();
 //... fill data to uncompress here
 try {
-  var result = pako.inflate(compressed);
+  const result = pako.inflate(compressed);
+  // ... continue processing
 } catch (err) {
   console.log(err);
 }
@@ -93,37 +92,48 @@ try {
 // Alternate interface for chunking & without exceptions
 //
 
-var inflator = new pako.Inflate();
+const deflator = new pako.Deflate();
 
-inflator.push(chunk1, false);
-inflator.push(chunk2, false);
+deflator.push(chunk1, false);
+deflator.push(chunk2), false;
 ...
-inflator.push(chunkN, true); // true -> last chunk
+deflator.push(chunk_last, true); // `true` says this chunk is last
+
+if (deflator.err) {
+  console.log(deflator.msg);
+}
+
+const output = deflator.result;
+
+
+const inflator = new pako.Inflate();
+
+inflator.push(chunk1);
+inflator.push(chunk2);
+...
+inflator.push(chunk_last); // no second param because end is auto-detected
 
 if (inflator.err) {
   console.log(inflator.msg);
 }
 
-var output = inflator.result;
-
+const output = inflator.result;
 ```
 
 Sometime you can wish to work with strings. For example, to send
-big objects as json to server. Pako detects input data type. You can
-force output to be string with option `{ to: 'string' }`.
+stringified objects to server. Pako's deflate detects input data type, and
+automatically recode strings to utf-8 prior to compress. Inflate has special
+option, to say compressed data has utf-8 encoding and should be recoded to
+javascript's utf-16.
 
 ```javascript
-var pako = require('pako');
+const pako = require('pako');
 
-var test = { my: 'super', puper: [456, 567], awesome: 'pako' };
+const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
 
-var binaryString = pako.deflate(JSON.stringify(test), { to: 'string' });
+const compressed = pako.deflate(JSON.stringify(test));
 
-//
-// Here you can do base64 encode, make xhr requests and so on.
-//
-
-var restored = JSON.parse(pako.inflate(binaryString, { to: 'string' }));
+const restored = JSON.parse(pako.inflate(compressed, { to: 'string' }));
 ```
 
 
@@ -137,7 +147,7 @@ Pako does not contain some specific zlib functions:
 - __inflate__ - methods `inflateCopy`, `inflateMark`,
   `inflatePrime`, `inflateGetDictionary`, `inflateSync`, `inflateSyncPoint`, `inflateUndermine`.
 - High level inflate/deflate wrappers (classes) may not support some flush
-  modes. Those should work: Z_NO_FLUSH, Z_FINISH, Z_SYNC_FLUSH.
+  modes.
 
 
 pako for enterprise
