@@ -3,6 +3,8 @@
 
 const zlib        = require('zlib');
 const assert      = require('assert');
+const fs      = require('fs');
+const path    = require('path');
 
 const pako        = require('../index');
 const { testInflate, testSamples, loadSamples } = require('./helpers');
@@ -204,5 +206,16 @@ describe('Inflate with dictionary', () => {
     const dict = new Uint8Array(100);
     for (let i = 0; i < 100; i++) dict[i] = Math.random() * 256;
     testInflate(samples, { dictionary: dict.buffer }, { dictionary: dict });
+  });
+});
+
+
+describe('pako patches for inflate', () => {
+
+  it('Force use max window size by default', () => {
+    const data = fs.readFileSync(path.join(__dirname, 'fixtures/bad_wbits.deflate'));
+    const unpacked = fs.readFileSync(path.join(__dirname, 'fixtures/bad_wbits.txt'));
+
+    assert.deepStrictEqual(pako.inflate(data), new Uint8Array(unpacked));
   });
 });
