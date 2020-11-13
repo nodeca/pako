@@ -18,38 +18,31 @@ develop native C modules for CPU-intensive tasks. Enjoy the result!
 
 __Benchmarks:__
 
+
+node v12.16.3 (zlib 1.2.9), 1mb input sample:
+
 ```
-node v0.10.26, 1mb sample:
+deflate-imaya x 4.75 ops/sec ±4.93% (15 runs sampled)
+deflate-pako x 10.38 ops/sec ±0.37% (29 runs sampled)
+deflate-zlib x 17.74 ops/sec ±0.77% (46 runs sampled)
+gzip-pako x 8.86 ops/sec ±1.41% (29 runs sampled)
+inflate-imaya x 107 ops/sec ±0.69% (77 runs sampled)
+inflate-pako x 131 ops/sec ±1.74% (82 runs sampled)
+inflate-zlib x 258 ops/sec ±0.66% (88 runs sampled)
+ungzip-pako x 115 ops/sec ±1.92% (80 runs sampled)
+```
 
-   deflate-dankogai x 4.73 ops/sec ±0.82% (15 runs sampled)
-   deflate-gildas x 4.58 ops/sec ±2.33% (15 runs sampled)
-   deflate-imaya x 3.22 ops/sec ±3.95% (12 runs sampled)
- ! deflate-pako x 6.99 ops/sec ±0.51% (21 runs sampled)
-   deflate-pako-string x 5.89 ops/sec ±0.77% (18 runs sampled)
-   deflate-pako-untyped x 4.39 ops/sec ±1.58% (14 runs sampled)
- * deflate-zlib x 14.71 ops/sec ±4.23% (59 runs sampled)
-   inflate-dankogai x 32.16 ops/sec ±0.13% (56 runs sampled)
-   inflate-imaya x 30.35 ops/sec ±0.92% (53 runs sampled)
- ! inflate-pako x 69.89 ops/sec ±1.46% (71 runs sampled)
-   inflate-pako-string x 19.22 ops/sec ±1.86% (49 runs sampled)
-   inflate-pako-untyped x 17.19 ops/sec ±0.85% (32 runs sampled)
- * inflate-zlib x 70.03 ops/sec ±1.64% (81 runs sampled)
+node v14.15.0 (google's zlib), 1mb output sample:
 
-node v0.11.12, 1mb sample:
-
-   deflate-dankogai x 5.60 ops/sec ±0.49% (17 runs sampled)
-   deflate-gildas x 5.06 ops/sec ±6.00% (16 runs sampled)
-   deflate-imaya x 3.52 ops/sec ±3.71% (13 runs sampled)
- ! deflate-pako x 11.52 ops/sec ±0.22% (32 runs sampled)
-   deflate-pako-string x 9.53 ops/sec ±1.12% (27 runs sampled)
-   deflate-pako-untyped x 5.44 ops/sec ±0.72% (17 runs sampled)
- * deflate-zlib x 14.05 ops/sec ±3.34% (63 runs sampled)
-   inflate-dankogai x 42.19 ops/sec ±0.09% (56 runs sampled)
-   inflate-imaya x 79.68 ops/sec ±1.07% (68 runs sampled)
- ! inflate-pako x 97.52 ops/sec ±0.83% (80 runs sampled)
-   inflate-pako-string x 45.19 ops/sec ±1.69% (57 runs sampled)
-   inflate-pako-untyped x 24.35 ops/sec ±2.59% (40 runs sampled)
- * inflate-zlib x 60.32 ops/sec ±1.36% (69 runs sampled)
+```
+deflate-imaya x 4.93 ops/sec ±3.09% (16 runs sampled)
+deflate-pako x 10.22 ops/sec ±0.33% (29 runs sampled)
+deflate-zlib x 18.48 ops/sec ±0.24% (48 runs sampled)
+gzip-pako x 10.16 ops/sec ±0.25% (28 runs sampled)
+inflate-imaya x 110 ops/sec ±0.41% (77 runs sampled)
+inflate-pako x 134 ops/sec ±0.66% (83 runs sampled)
+inflate-zlib x 402 ops/sec ±0.74% (87 runs sampled)
+ungzip-pako x 113 ops/sec ±0.62% (80 runs sampled)
 ```
 
 zlib's test is partially affected by marshalling (that make sense for inflate only).
