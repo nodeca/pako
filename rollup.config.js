@@ -80,7 +80,7 @@ export default [
   {
     input: 'index.js',
     output: [
-      { file: 'dist/pako.esm.js', format: 'esm' }
+      { file: 'dist/pako.esm.mjs', format: 'esm' }
     ],
     plugins: plugins
   }
