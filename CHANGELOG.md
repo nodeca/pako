@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Increased default inflate chunk size to 64K.
 - Moved exported constants to `.constants`.
 - Switched to es6. Legacy es5 builds available in `/dist`.
+- Added esm build.
 - Structure of `/dist` folder changed.
 - Upgraded build tools to modern ones.
 

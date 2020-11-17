@@ -75,6 +75,13 @@ export default [
       { file: 'dist/pako_inflate.es5.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
     ],
     plugins: plugins_es5
+  },
+  // esm
+  {
+    input: 'index.js',
+    output: [
+      { file: 'dist/pako.esm.js', format: 'esm' }
+    ],
+    plugins: plugins
   }
-
 ];
