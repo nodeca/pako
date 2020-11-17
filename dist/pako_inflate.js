@@ -1,5 +1,5 @@
 
-/*! pako 2.0.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.0.1 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
