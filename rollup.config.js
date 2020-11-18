@@ -24,30 +24,32 @@ const plugins_es5 = [
   banner
 ];
 
+const umd_out_base = { format: 'umd', name: 'pako', exports: 'named' };
+
 
 export default [
   // es6
   {
     input: 'index.js',
     output: [
-      { file: 'dist/pako.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako.js' },
+      { ...umd_out_base, file: 'dist/pako.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins
   },
   {
     input: 'lib/deflate.js',
     output: [
-      { file: 'dist/pako_deflate.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako_deflate.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako_deflate.js' },
+      { ...umd_out_base, file: 'dist/pako_deflate.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins
   },
   {
     input: 'lib/inflate.js',
     output: [
-      { file: 'dist/pako_inflate.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako_inflate.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako_inflate.js' },
+      { ...umd_out_base, file: 'dist/pako_inflate.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins
   },
@@ -55,24 +57,24 @@ export default [
   {
     input: 'index.js',
     output: [
-      { file: 'dist/pako.es5.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako.es5.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako.es5.js' },
+      { ...umd_out_base, file: 'dist/pako.es5.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins_es5
   },
   {
     input: 'lib/deflate.js',
     output: [
-      { file: 'dist/pako_deflate.es5.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako_deflate.es5.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako_deflate.es5.js' },
+      { ...umd_out_base, file: 'dist/pako_deflate.es5.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins_es5
   },
   {
     input: 'lib/inflate.js',
     output: [
-      { file: 'dist/pako_inflate.es5.js', format: 'umd', name: 'pako' },
-      { file: 'dist/pako_inflate.es5.min.js', format: 'umd', name: 'pako', plugins: [ terser() ] }
+      { ...umd_out_base, file: 'dist/pako_inflate.es5.js' },
+      { ...umd_out_base, file: 'dist/pako_inflate.es5.min.js', plugins: [ terser() ] }
     ],
     plugins: plugins_es5
   },

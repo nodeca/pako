@@ -7,8 +7,12 @@ const { Inflate, inflate, inflateRaw, ungzip } = require('./lib/inflate');
 
 const constants = require('./lib/zlib/constants');
 
-module.exports = {
-  Deflate, deflate, deflateRaw, gzip,
-  Inflate, inflate, inflateRaw, ungzip,
-  constants
-};
+module.exports.Deflate = Deflate;
+module.exports.deflate = deflate;
+module.exports.deflateRaw = deflateRaw;
+module.exports.gzip = gzip;
+module.exports.Inflate = Inflate;
+module.exports.inflate = inflate;
+module.exports.inflateRaw = inflateRaw;
+module.exports.ungzip = ungzip;
+module.exports.constants = constants;
