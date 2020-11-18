@@ -1,10 +1,10 @@
 
-/*! pako 2.0.1 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.0.2 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.pako = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pako = {}));
+}(this, (function (exports) { 'use strict';
 
   // Note: adler32 takes 12% for level 0 and 2% for level 6.
   // It isn't worth it to make additional optimizations as in original.
@@ -2401,13 +2401,13 @@
   var inflateInfo = 'pako inflate (from Nodeca project)';
 
   /* Not implemented
-  exports.inflateCopy = inflateCopy;
-  exports.inflateGetDictionary = inflateGetDictionary;
-  exports.inflateMark = inflateMark;
-  exports.inflatePrime = inflatePrime;
-  exports.inflateSync = inflateSync;
-  exports.inflateSyncPoint = inflateSyncPoint;
-  exports.inflateUndermine = inflateUndermine;
+  module.exports.inflateCopy = inflateCopy;
+  module.exports.inflateGetDictionary = inflateGetDictionary;
+  module.exports.inflateMark = inflateMark;
+  module.exports.inflatePrime = inflatePrime;
+  module.exports.inflateSync = inflateSync;
+  module.exports.inflateSyncPoint = inflateSyncPoint;
+  module.exports.inflateUndermine = inflateUndermine;
   */
 
   var inflate_1 = {
@@ -3183,14 +3183,27 @@
    **/
 
 
+  var Inflate_1 = Inflate;
+  var inflate_2$1 = inflate$1;
+  var inflateRaw_1 = inflateRaw;
+  var ungzip = inflate$1;
+  var constants$1 = constants;
+
   var inflate_1$1 = {
-    Inflate,
-    inflate: inflate$1,
-    inflateRaw,
-    ungzip: inflate$1,
-    constants: constants
+  	Inflate: Inflate_1,
+  	inflate: inflate_2$1,
+  	inflateRaw: inflateRaw_1,
+  	ungzip: ungzip,
+  	constants: constants$1
   };
 
-  return inflate_1$1;
+  exports.Inflate = Inflate_1;
+  exports.constants = constants$1;
+  exports.default = inflate_1$1;
+  exports.inflate = inflate_2$1;
+  exports.inflateRaw = inflateRaw_1;
+  exports.ungzip = ungzip;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

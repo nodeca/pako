@@ -1,10 +1,10 @@
 
-/*! pako 2.0.1 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.0.2 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.pako = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pako = {}));
+}(this, (function (exports) { 'use strict';
 
   // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
   //
@@ -3842,12 +3842,12 @@
   var deflateSetDictionary_1 = deflateSetDictionary;
   var deflateInfo = 'pako deflate (from Nodeca project)';
   /* Not implemented
-  exports.deflateBound = deflateBound;
-  exports.deflateCopy = deflateCopy;
-  exports.deflateParams = deflateParams;
-  exports.deflatePending = deflatePending;
-  exports.deflatePrime = deflatePrime;
-  exports.deflateTune = deflateTune;
+  module.exports.deflateBound = deflateBound;
+  module.exports.deflateCopy = deflateCopy;
+  module.exports.deflateParams = deflateParams;
+  module.exports.deflatePending = deflatePending;
+  module.exports.deflatePrime = deflatePrime;
+  module.exports.deflateTune = deflateTune;
   */
 
   var deflate_1 = {
@@ -4555,12 +4555,17 @@
     return deflate$1(input, options);
   }
 
+  var Deflate_1 = Deflate;
+  var deflate_2$1 = deflate$1;
+  var deflateRaw_1 = deflateRaw;
+  var gzip_1 = gzip;
+  var constants$1 = constants;
   var deflate_1$1 = {
-    Deflate: Deflate,
-    deflate: deflate$1,
-    deflateRaw: deflateRaw,
-    gzip: gzip,
-    constants: constants
+    Deflate: Deflate_1,
+    deflate: deflate_2$1,
+    deflateRaw: deflateRaw_1,
+    gzip: gzip_1,
+    constants: constants$1
   };
 
   // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
@@ -7501,13 +7506,13 @@
   var inflateSetDictionary_1 = inflateSetDictionary;
   var inflateInfo = 'pako inflate (from Nodeca project)';
   /* Not implemented
-  exports.inflateCopy = inflateCopy;
-  exports.inflateGetDictionary = inflateGetDictionary;
-  exports.inflateMark = inflateMark;
-  exports.inflatePrime = inflatePrime;
-  exports.inflateSync = inflateSync;
-  exports.inflateSyncPoint = inflateSyncPoint;
-  exports.inflateUndermine = inflateUndermine;
+  module.exports.inflateCopy = inflateCopy;
+  module.exports.inflateGetDictionary = inflateGetDictionary;
+  module.exports.inflateMark = inflateMark;
+  module.exports.inflatePrime = inflatePrime;
+  module.exports.inflateSync = inflateSync;
+  module.exports.inflateSyncPoint = inflateSyncPoint;
+  module.exports.inflateUndermine = inflateUndermine;
   */
 
   var inflate_1 = {
@@ -7980,12 +7985,17 @@
    **/
 
 
+  var Inflate_1 = Inflate;
+  var inflate_2$1 = inflate$1;
+  var inflateRaw_1 = inflateRaw;
+  var ungzip = inflate$1;
+  var constants$2 = constants;
   var inflate_1$1 = {
-    Inflate: Inflate,
-    inflate: inflate$1,
-    inflateRaw: inflateRaw,
-    ungzip: inflate$1,
-    constants: constants
+    Inflate: Inflate_1,
+    inflate: inflate_2$1,
+    inflateRaw: inflateRaw_1,
+    ungzip: ungzip,
+    constants: constants$2
   };
 
   var Deflate$1 = deflate_1$1.Deflate,
@@ -7995,19 +8005,39 @@
   var Inflate$1 = inflate_1$1.Inflate,
       inflate$2 = inflate_1$1.inflate,
       inflateRaw$1 = inflate_1$1.inflateRaw,
-      ungzip = inflate_1$1.ungzip;
+      ungzip$1 = inflate_1$1.ungzip;
+  var Deflate_1$1 = Deflate$1;
+  var deflate_1$2 = deflate$2;
+  var deflateRaw_1$1 = deflateRaw$1;
+  var gzip_1$1 = gzip$1;
+  var Inflate_1$1 = Inflate$1;
+  var inflate_1$2 = inflate$2;
+  var inflateRaw_1$1 = inflateRaw$1;
+  var ungzip_1 = ungzip$1;
+  var constants_1 = constants;
   var pako = {
-    Deflate: Deflate$1,
-    deflate: deflate$2,
-    deflateRaw: deflateRaw$1,
-    gzip: gzip$1,
-    Inflate: Inflate$1,
-    inflate: inflate$2,
-    inflateRaw: inflateRaw$1,
-    ungzip: ungzip,
-    constants: constants
+    Deflate: Deflate_1$1,
+    deflate: deflate_1$2,
+    deflateRaw: deflateRaw_1$1,
+    gzip: gzip_1$1,
+    Inflate: Inflate_1$1,
+    inflate: inflate_1$2,
+    inflateRaw: inflateRaw_1$1,
+    ungzip: ungzip_1,
+    constants: constants_1
   };
 
-  return pako;
+  exports.Deflate = Deflate_1$1;
+  exports.Inflate = Inflate_1$1;
+  exports.constants = constants_1;
+  exports.default = pako;
+  exports.deflate = deflate_1$2;
+  exports.deflateRaw = deflateRaw_1$1;
+  exports.gzip = gzip_1$1;
+  exports.inflate = inflate_1$2;
+  exports.inflateRaw = inflateRaw_1$1;
+  exports.ungzip = ungzip_1;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

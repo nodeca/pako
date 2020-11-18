@@ -1,10 +1,10 @@
 
-/*! pako 2.0.1 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.0.2 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.pako = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pako = {}));
+}(this, (function (exports) { 'use strict';
 
   // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
   //
@@ -3842,12 +3842,12 @@
   var deflateSetDictionary_1 = deflateSetDictionary;
   var deflateInfo = 'pako deflate (from Nodeca project)';
   /* Not implemented
-  exports.deflateBound = deflateBound;
-  exports.deflateCopy = deflateCopy;
-  exports.deflateParams = deflateParams;
-  exports.deflatePending = deflatePending;
-  exports.deflatePrime = deflatePrime;
-  exports.deflateTune = deflateTune;
+  module.exports.deflateBound = deflateBound;
+  module.exports.deflateCopy = deflateCopy;
+  module.exports.deflateParams = deflateParams;
+  module.exports.deflatePending = deflatePending;
+  module.exports.deflatePrime = deflatePrime;
+  module.exports.deflateTune = deflateTune;
   */
 
   var deflate_1 = {
@@ -4555,14 +4555,26 @@
     return deflate$1(input, options);
   }
 
+  var Deflate_1 = Deflate;
+  var deflate_2$1 = deflate$1;
+  var deflateRaw_1 = deflateRaw;
+  var gzip_1 = gzip;
+  var constants$1 = constants;
   var deflate_1$1 = {
-    Deflate: Deflate,
-    deflate: deflate$1,
-    deflateRaw: deflateRaw,
-    gzip: gzip,
-    constants: constants
+    Deflate: Deflate_1,
+    deflate: deflate_2$1,
+    deflateRaw: deflateRaw_1,
+    gzip: gzip_1,
+    constants: constants$1
   };
 
-  return deflate_1$1;
+  exports.Deflate = Deflate_1;
+  exports.constants = constants$1;
+  exports.default = deflate_1$1;
+  exports.deflate = deflate_2$1;
+  exports.deflateRaw = deflateRaw_1;
+  exports.gzip = gzip_1;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
