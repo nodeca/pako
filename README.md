@@ -88,7 +88,7 @@ try {
 const deflator = new pako.Deflate();
 
 deflator.push(chunk1, false);
-deflator.push(chunk2), false;
+deflator.push(chunk2); // second param is false by default.
 ...
 deflator.push(chunk_last, true); // `true` says this chunk is last
 
