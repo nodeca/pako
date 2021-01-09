@@ -25,8 +25,16 @@
   "repository": "nodeca/pako",
   "module": "./dist/pako.esm.mjs",
   "exports": {
-    "import": "./dist/pako.esm.mjs",
-    "require": "./index.js"
+    ".": {
+      "import": "./dist/pako.esm.mjs",
+      "require": "./index.js"
+    },
+    "./deflate": {
+      "require": "./lib/deflate.js"
+    },
+    "./inflate": {
+      "require": "./lib/inflate.js"
+    }
   },
   "scripts": {
     "lint": "eslint .",
