@@ -29,7 +29,11 @@
       "import": "./dist/pako.esm.mjs",
       "require": "./index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*",
+    "./lib/*": "./lib/*",
+    "./lib/zlib/*": "./lib/zlib/*",
+    "./lib/utils/*": "./lib/utils/*"
   },
   "scripts": {
     "lint": "eslint .",
