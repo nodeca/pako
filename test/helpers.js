@@ -29,37 +29,6 @@ function loadSamples(subdir) {
 }
 
 
-// Helper to test deflate/inflate with different options.
-// Use zlib streams, because it's the only way to define options.
-//
-function testSingle(zlib_method, pako_method, data, options) {
-  const zlib_options = Object.assign({}, options);
-
-  // hack for testing negative windowBits
-  if (zlib_options.windowBits < 0) { zlib_options.windowBits = -zlib_options.windowBits; }
-
-  const zlib_result = zlib_method(data, zlib_options);
-  const pako_result = pako_method(data, options);
-
-  // One more hack: gzip header contains OS code, that can vary.
-  // Override OS code if requested. For simplicity, we assume it on fixed
-  // position (= no additional gzip headers used)
-  if (options.ignore_os) zlib_result[9] = pako_result[9];
-
-  assert.deepStrictEqual(pako_result, new Uint8Array(zlib_result));
-}
-
-
-function testSamples(zlib_method, pako_method, samples, options) {
-
-  Object.keys(samples).forEach(function (name) {
-    const data = samples[name];
-
-    testSingle(zlib_method, pako_method, data, options);
-  });
-}
-
-
 function testInflate(samples, inflateOptions, deflateOptions) {
   let name, data, deflated, inflated;
 
@@ -77,6 +46,5 @@ function testInflate(samples, inflateOptions, deflateOptions) {
 }
 
 
-module.exports.testSamples = testSamples;
 module.exports.testInflate = testInflate;
 module.exports.loadSamples = loadSamples;

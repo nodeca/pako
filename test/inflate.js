@@ -1,13 +1,13 @@
 'use strict';
 
 
-const zlib        = require('zlib');
-const assert      = require('assert');
+const assert  = require('assert');
 const fs      = require('fs');
 const path    = require('path');
+const zlib    = require('zlib');
 
-const pako        = require('../index');
-const { testInflate, testSamples, loadSamples } = require('./helpers');
+const pako    = require('../index');
+const { testInflate, loadSamples } = require('./helpers');
 
 
 const samples = loadSamples();
@@ -23,8 +23,11 @@ describe('Inflate defaults', () => {
   });
 
   it('inflate raw from compressed samples', () => {
-    const compressed_samples = loadSamples('samples_deflated_raw');
-    testSamples(zlib.inflateRawSync, pako.inflateRaw, compressed_samples, {});
+    Object.values(loadSamples('samples_deflated_raw')).forEach(function (sample) {
+      const pako_result = pako.inflateRaw(sample);
+      const zlib_result = zlib.inflateRawSync(sample);
+      assert.deepStrictEqual(pako_result, new Uint8Array(zlib_result));
+    });
   });
 
 });

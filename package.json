@@ -40,6 +40,7 @@
     "test": "npm run lint && mocha",
     "coverage": "npm run lint && nyc mocha && nyc report --reporter html",
     "build": "rollup -c",
+    "build_fixtures": "node support/build_fixtures.js",
     "doc": "node support/build_doc.js",
     "gh-doc": "npm run doc && gh-pages -d doc -f",
     "prepublishOnly": "npm run gh-doc"
