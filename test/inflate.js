@@ -1,7 +1,6 @@
 'use strict';
 
 
-const zlib        = require('zlib');
 const assert      = require('assert');
 const fs      = require('fs');
 const path    = require('path');
@@ -24,7 +23,7 @@ describe('Inflate defaults', () => {
 
   it('inflate raw from compressed samples', () => {
     const compressed_samples = loadSamples('samples_deflated_raw');
-    testSamples(zlib.inflateRawSync, pako.inflateRaw, compressed_samples, {});
+    testSamples('inflateRawSync', pako.inflateRaw, compressed_samples, {});
   });
 
 });

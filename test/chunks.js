@@ -78,7 +78,7 @@ describe('Small input chunks', () => {
 describe('Dummy push (force end)', () => {
 
   it('deflate end', () => {
-    const data = samples.lorem_utf_100k;
+    const data = samples.lorem_utf_100k.data;
 
     const deflator = new pako.Deflate();
     deflator.push(data);
@@ -88,7 +88,7 @@ describe('Dummy push (force end)', () => {
   });
 
   it('inflate end', () => {
-    const data = pako.deflate(samples.lorem_utf_100k);
+    const data = pako.deflate(samples.lorem_utf_100k.data);
 
     const inflator = new pako.Inflate();
     inflator.push(data);
