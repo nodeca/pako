@@ -6,10 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.0.4] - WIP
+## [2.0.4] - 2021-07-29
 ### Fixed
 
 - Use TextEncoder and TextDecoder if available, #228.
+- Use pre-generated fixtures instead of node.js zlib.
 
 
 ## [2.0.3] - 2021-01-09
