@@ -1,5 +1,5 @@
 
-/*! pako 2.0.3 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.0.4 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -33,17 +33,17 @@
   //const Z_HUFFMAN_ONLY      = 2;
   //const Z_RLE               = 3;
 
-  var Z_FIXED = 4; //const Z_DEFAULT_STRATEGY  = 0;
+  var Z_FIXED$1 = 4; //const Z_DEFAULT_STRATEGY  = 0;
 
   /* Possible values of the data_type field (though see inflate()) */
 
   var Z_BINARY = 0;
   var Z_TEXT = 1; //const Z_ASCII             = 1; // = Z_TEXT
 
-  var Z_UNKNOWN = 2;
+  var Z_UNKNOWN$1 = 2;
   /*============================================================================*/
 
-  function zero(buf) {
+  function zero$1(buf) {
     var len = buf.length;
 
     while (--len >= 0) {
@@ -57,8 +57,8 @@
   var DYN_TREES = 2;
   /* The three kinds of block type */
 
-  var MIN_MATCH = 3;
-  var MAX_MATCH = 258;
+  var MIN_MATCH$1 = 3;
+  var MAX_MATCH$1 = 258;
   /* The minimum and maximum match lengths */
   // From deflate.h
 
@@ -66,25 +66,25 @@
    * Internal compression state.
    */
 
-  var LENGTH_CODES = 29;
+  var LENGTH_CODES$1 = 29;
   /* number of length codes, not counting the special END_BLOCK code */
 
-  var LITERALS = 256;
+  var LITERALS$1 = 256;
   /* number of literal bytes 0..255 */
 
-  var L_CODES = LITERALS + 1 + LENGTH_CODES;
+  var L_CODES$1 = LITERALS$1 + 1 + LENGTH_CODES$1;
   /* number of Literal or Length codes, including the END_BLOCK code */
 
-  var D_CODES = 30;
+  var D_CODES$1 = 30;
   /* number of distance codes */
 
-  var BL_CODES = 19;
+  var BL_CODES$1 = 19;
   /* number of codes used to transfer the bit lengths */
 
-  var HEAP_SIZE = 2 * L_CODES + 1;
+  var HEAP_SIZE$1 = 2 * L_CODES$1 + 1;
   /* maximum heap size */
 
-  var MAX_BITS = 15;
+  var MAX_BITS$1 = 15;
   /* All codes must not exceed MAX_BITS bits */
 
   var Buf_size = 16;
@@ -136,39 +136,39 @@
   /* see definition of array dist_code below */
   // !!!! Use flat array instead of structure, Freq = i*2, Len = i*2+1
 
-  var static_ltree = new Array((L_CODES + 2) * 2);
-  zero(static_ltree);
+  var static_ltree = new Array((L_CODES$1 + 2) * 2);
+  zero$1(static_ltree);
   /* The static literal tree. Since the bit lengths are imposed, there is no
    * need for the L_CODES extra codes used during heap construction. However
    * The codes 286 and 287 are needed to build a canonical tree (see _tr_init
    * below).
    */
 
-  var static_dtree = new Array(D_CODES * 2);
-  zero(static_dtree);
+  var static_dtree = new Array(D_CODES$1 * 2);
+  zero$1(static_dtree);
   /* The static distance tree. (Actually a trivial tree since all codes use
    * 5 bits.)
    */
 
   var _dist_code = new Array(DIST_CODE_LEN);
 
-  zero(_dist_code);
+  zero$1(_dist_code);
   /* Distance codes. The first 256 values correspond to the distances
    * 3 .. 258, the last 256 values correspond to the top 8 bits of
    * the 15 bit distances.
    */
 
-  var _length_code = new Array(MAX_MATCH - MIN_MATCH + 1);
+  var _length_code = new Array(MAX_MATCH$1 - MIN_MATCH$1 + 1);
 
-  zero(_length_code);
+  zero$1(_length_code);
   /* length code for each normalized match length (0 == MIN_MATCH) */
 
-  var base_length = new Array(LENGTH_CODES);
-  zero(base_length);
+  var base_length = new Array(LENGTH_CODES$1);
+  zero$1(base_length);
   /* First normalized length for each code (0 = MIN_MATCH) */
 
-  var base_dist = new Array(D_CODES);
-  zero(base_dist);
+  var base_dist = new Array(D_CODES$1);
+  zero$1(base_dist);
   /* First normalized distance for each code (0 = distance of 1) */
 
   function StaticTreeDesc(static_tree, extra_bits, extra_base, elems, max_length) {
@@ -320,7 +320,7 @@
     var overflow = 0;
     /* number of elements with bit length too large */
 
-    for (bits = 0; bits <= MAX_BITS; bits++) {
+    for (bits = 0; bits <= MAX_BITS$1; bits++) {
       s.bl_count[bits] = 0;
     }
     /* In a first pass, compute the optimal bit lengths (which may
@@ -333,7 +333,7 @@
     = 0;
     /* root of the heap */
 
-    for (h = s.heap_max + 1; h < HEAP_SIZE; h++) {
+    for (h = s.heap_max + 1; h < HEAP_SIZE$1; h++) {
       n = s.heap[h];
       bits = tree[tree[n * 2 + 1]
       /*.Dad*/
@@ -454,7 +454,7 @@
   //    int max_code;              /* largest code with non zero frequency */
   //    ushf *bl_count;            /* number of codes at each bit length */
   {
-    var next_code = new Array(MAX_BITS + 1);
+    var next_code = new Array(MAX_BITS$1 + 1);
     /* next code value for each bit length */
 
     var code = 0;
@@ -470,7 +470,7 @@
      * without bit reversal.
      */
 
-    for (bits = 1; bits <= MAX_BITS; bits++) {
+    for (bits = 1; bits <= MAX_BITS$1; bits++) {
       next_code[bits] = code = code + bl_count[bits - 1] << 1;
     }
     /* Check that the bit counts in bl_count are consistent. The last code
@@ -519,7 +519,7 @@
     var dist;
     /* distance index */
 
-    var bl_count = new Array(MAX_BITS + 1);
+    var bl_count = new Array(MAX_BITS$1 + 1);
     /* number of codes at each bit length for an optimal tree */
     // do check in _tr_init()
     //if (static_init_done) return;
@@ -538,7 +538,7 @@
 
     length = 0;
 
-    for (code = 0; code < LENGTH_CODES - 1; code++) {
+    for (code = 0; code < LENGTH_CODES$1 - 1; code++) {
       base_length[code] = length;
 
       for (n = 0; n < 1 << extra_lbits[code]; n++) {
@@ -569,7 +569,7 @@
     dist >>= 7;
     /* from now on, all distances are divided by 128 */
 
-    for (; code < D_CODES; code++) {
+    for (; code < D_CODES$1; code++) {
       base_dist[code] = dist << 7;
 
       for (n = 0; n < 1 << extra_dbits[code] - 7; n++) {
@@ -580,7 +580,7 @@
     /* Construct the codes of the static literal tree */
 
 
-    for (bits = 0; bits <= MAX_BITS; bits++) {
+    for (bits = 0; bits <= MAX_BITS$1; bits++) {
       bl_count[bits] = 0;
     }
 
@@ -623,10 +623,10 @@
      */
 
 
-    gen_codes(static_ltree, L_CODES + 1, bl_count);
+    gen_codes(static_ltree, L_CODES$1 + 1, bl_count);
     /* The static distance tree is trivial: */
 
-    for (n = 0; n < D_CODES; n++) {
+    for (n = 0; n < D_CODES$1; n++) {
       static_dtree[n * 2 + 1]
       /*.Len*/
       = 5;
@@ -636,9 +636,9 @@
     } // Now data ready and we can init static trees
 
 
-    static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS + 1, L_CODES, MAX_BITS);
-    static_d_desc = new StaticTreeDesc(static_dtree, extra_dbits, 0, D_CODES, MAX_BITS);
-    static_bl_desc = new StaticTreeDesc(new Array(0), extra_blbits, 0, BL_CODES, MAX_BL_BITS); //static_init_done = true;
+    static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS$1 + 1, L_CODES$1, MAX_BITS$1);
+    static_d_desc = new StaticTreeDesc(static_dtree, extra_dbits, 0, D_CODES$1, MAX_BITS$1);
+    static_bl_desc = new StaticTreeDesc(new Array(0), extra_blbits, 0, BL_CODES$1, MAX_BL_BITS); //static_init_done = true;
   };
   /* ===========================================================================
    * Initialize a new block.
@@ -651,19 +651,19 @@
 
     /* Initialize the trees. */
 
-    for (n = 0; n < L_CODES; n++) {
+    for (n = 0; n < L_CODES$1; n++) {
       s.dyn_ltree[n * 2]
       /*.Freq*/
       = 0;
     }
 
-    for (n = 0; n < D_CODES; n++) {
+    for (n = 0; n < D_CODES$1; n++) {
       s.dyn_dtree[n * 2]
       /*.Freq*/
       = 0;
     }
 
-    for (n = 0; n < BL_CODES; n++) {
+    for (n = 0; n < BL_CODES$1; n++) {
       s.bl_tree[n * 2]
       /*.Freq*/
       = 0;
@@ -815,7 +815,7 @@
         } else {
           /* Here, lc is the match length - MIN_MATCH */
           code = _length_code[lc];
-          send_code(s, code + LITERALS + 1, ltree);
+          send_code(s, code + LITERALS$1 + 1, ltree);
           /* send the length code */
 
           extra = extra_lbits[code];
@@ -885,7 +885,7 @@
      */
 
     s.heap_len = 0;
-    s.heap_max = HEAP_SIZE;
+    s.heap_max = HEAP_SIZE$1;
 
     for (n = 0; n < elems; n++) {
       if (tree[n * 2]
@@ -1196,7 +1196,7 @@
      * 3 but the actual value used is 4.)
      */
 
-    for (max_blindex = BL_CODES - 1; max_blindex >= 3; max_blindex--) {
+    for (max_blindex = BL_CODES$1 - 1; max_blindex >= 3; max_blindex--) {
       if (s.bl_tree[bl_order[max_blindex] * 2 + 1]
       /*.Len*/
       !== 0) {
@@ -1295,7 +1295,7 @@
       return Z_TEXT;
     }
 
-    for (n = 32; n < LITERALS; n++) {
+    for (n = 32; n < LITERALS$1; n++) {
       if (s.dyn_ltree[n * 2]
       /*.Freq*/
       !== 0) {
@@ -1315,7 +1315,7 @@
    * Initialize the tree data structures for a new zlib stream.
    */
 
-  var _tr_init = function _tr_init(s) {
+  var _tr_init$1 = function _tr_init(s) {
     if (!static_init_done) {
       tr_static_init();
       static_init_done = true;
@@ -1335,7 +1335,7 @@
    */
 
 
-  var _tr_stored_block = function _tr_stored_block(s, buf, stored_len, last) //DeflateState *s;
+  var _tr_stored_block$1 = function _tr_stored_block(s, buf, stored_len, last) //DeflateState *s;
   //charf *buf;       /* input block */
   //ulg stored_len;   /* length of input block */
   //int last;         /* one if this is the last block for a file */
@@ -1352,7 +1352,7 @@
    */
 
 
-  var _tr_align = function _tr_align(s) {
+  var _tr_align$1 = function _tr_align(s) {
     send_bits(s, STATIC_TREES << 1, 3);
     send_code(s, END_BLOCK, static_ltree);
     bi_flush(s);
@@ -1363,7 +1363,7 @@
    */
 
 
-  var _tr_flush_block = function _tr_flush_block(s, buf, stored_len, last) //DeflateState *s;
+  var _tr_flush_block$1 = function _tr_flush_block(s, buf, stored_len, last) //DeflateState *s;
   //charf *buf;       /* input block, or NULL if too old */
   //ulg stored_len;   /* length of input block */
   //int last;         /* one if this is the last block for a file */
@@ -1378,7 +1378,7 @@
 
     if (s.level > 0) {
       /* Check if the file is binary or text */
-      if (s.strm.data_type === Z_UNKNOWN) {
+      if (s.strm.data_type === Z_UNKNOWN$1) {
         s.strm.data_type = detect_data_type(s);
       }
       /* Construct the literal and distance trees */
@@ -1424,8 +1424,8 @@
        * successful. If LIT_BUFSIZE <= WSIZE, it is never too late to
        * transform a block into a stored block.
        */
-      _tr_stored_block(s, buf, stored_len, last);
-    } else if (s.strategy === Z_FIXED || static_lenb === opt_lenb) {
+      _tr_stored_block$1(s, buf, stored_len, last);
+    } else if (s.strategy === Z_FIXED$1 || static_lenb === opt_lenb) {
       send_bits(s, (STATIC_TREES << 1) + (last ? 1 : 0), 3);
       compress_block(s, static_ltree, static_dtree);
     } else {
@@ -1453,7 +1453,7 @@
    */
 
 
-  var _tr_tally = function _tr_tally(s, dist, lc) //    deflate_state *s;
+  var _tr_tally$1 = function _tr_tally(s, dist, lc) //    deflate_state *s;
   //    unsigned dist;  /* distance of matched string */
   //    unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
   {
@@ -1476,7 +1476,7 @@
       //       (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
       //       (ush)d_code(dist) < (ush)D_CODES,  "_tr_tally: bad match");
 
-      s.dyn_ltree[(_length_code[lc] + LITERALS + 1) * 2] /*.Freq*/++;
+      s.dyn_ltree[(_length_code[lc] + LITERALS$1 + 1) * 2] /*.Freq*/++;
       s.dyn_dtree[d_code(dist) * 2] /*.Freq*/++;
     } // (!) This block is disabled in zlib defaults,
     // don't enable it for binary compatibility
@@ -1508,11 +1508,11 @@
      */
   };
 
-  var _tr_init_1 = _tr_init;
-  var _tr_stored_block_1 = _tr_stored_block;
-  var _tr_flush_block_1 = _tr_flush_block;
-  var _tr_tally_1 = _tr_tally;
-  var _tr_align_1 = _tr_align;
+  var _tr_init_1 = _tr_init$1;
+  var _tr_stored_block_1 = _tr_stored_block$1;
+  var _tr_flush_block_1 = _tr_flush_block$1;
+  var _tr_tally_1 = _tr_tally$1;
+  var _tr_align_1 = _tr_align$1;
   var trees = {
     _tr_init: _tr_init_1,
     _tr_stored_block: _tr_stored_block_1,
@@ -1690,7 +1690,7 @@
   //   misrepresented as being the original software.
   // 3. This notice may not be removed or altered from any source distribution.
 
-  var constants = {
+  var constants$1 = {
     /* Allowed flush values; see deflate() and inflate() below for details */
     Z_NO_FLUSH: 0,
     Z_PARTIAL_FLUSH: 1,
@@ -1754,33 +1754,33 @@
   // 3. This notice may not be removed or altered from any source distribution.
 
 
-  var _tr_init$1 = trees._tr_init,
-      _tr_stored_block$1 = trees._tr_stored_block,
-      _tr_flush_block$1 = trees._tr_flush_block,
-      _tr_tally$1 = trees._tr_tally,
-      _tr_align$1 = trees._tr_align;
+  var _tr_init = trees._tr_init,
+      _tr_stored_block = trees._tr_stored_block,
+      _tr_flush_block = trees._tr_flush_block,
+      _tr_tally = trees._tr_tally,
+      _tr_align = trees._tr_align;
   /* Public constants ==========================================================*/
 
   /* ===========================================================================*/
 
-  var Z_NO_FLUSH = constants.Z_NO_FLUSH,
-      Z_PARTIAL_FLUSH = constants.Z_PARTIAL_FLUSH,
-      Z_FULL_FLUSH = constants.Z_FULL_FLUSH,
-      Z_FINISH = constants.Z_FINISH,
-      Z_BLOCK = constants.Z_BLOCK,
-      Z_OK = constants.Z_OK,
-      Z_STREAM_END = constants.Z_STREAM_END,
-      Z_STREAM_ERROR = constants.Z_STREAM_ERROR,
-      Z_DATA_ERROR = constants.Z_DATA_ERROR,
-      Z_BUF_ERROR = constants.Z_BUF_ERROR,
-      Z_DEFAULT_COMPRESSION = constants.Z_DEFAULT_COMPRESSION,
-      Z_FILTERED = constants.Z_FILTERED,
-      Z_HUFFMAN_ONLY = constants.Z_HUFFMAN_ONLY,
-      Z_RLE = constants.Z_RLE,
-      Z_FIXED$1 = constants.Z_FIXED,
-      Z_DEFAULT_STRATEGY = constants.Z_DEFAULT_STRATEGY,
-      Z_UNKNOWN$1 = constants.Z_UNKNOWN,
-      Z_DEFLATED = constants.Z_DEFLATED;
+  var Z_NO_FLUSH$1 = constants$1.Z_NO_FLUSH,
+      Z_PARTIAL_FLUSH = constants$1.Z_PARTIAL_FLUSH,
+      Z_FULL_FLUSH$1 = constants$1.Z_FULL_FLUSH,
+      Z_FINISH$1 = constants$1.Z_FINISH,
+      Z_BLOCK = constants$1.Z_BLOCK,
+      Z_OK$1 = constants$1.Z_OK,
+      Z_STREAM_END$1 = constants$1.Z_STREAM_END,
+      Z_STREAM_ERROR = constants$1.Z_STREAM_ERROR,
+      Z_DATA_ERROR = constants$1.Z_DATA_ERROR,
+      Z_BUF_ERROR = constants$1.Z_BUF_ERROR,
+      Z_DEFAULT_COMPRESSION$1 = constants$1.Z_DEFAULT_COMPRESSION,
+      Z_FILTERED = constants$1.Z_FILTERED,
+      Z_HUFFMAN_ONLY = constants$1.Z_HUFFMAN_ONLY,
+      Z_RLE = constants$1.Z_RLE,
+      Z_FIXED = constants$1.Z_FIXED,
+      Z_DEFAULT_STRATEGY$1 = constants$1.Z_DEFAULT_STRATEGY,
+      Z_UNKNOWN = constants$1.Z_UNKNOWN,
+      Z_DEFLATED$1 = constants$1.Z_DEFLATED;
   /*============================================================================*/
 
   var MAX_MEM_LEVEL = 9;
@@ -1790,30 +1790,30 @@
   /* 32K LZ77 window */
 
   var DEF_MEM_LEVEL = 8;
-  var LENGTH_CODES$1 = 29;
+  var LENGTH_CODES = 29;
   /* number of length codes, not counting the special END_BLOCK code */
 
-  var LITERALS$1 = 256;
+  var LITERALS = 256;
   /* number of literal bytes 0..255 */
 
-  var L_CODES$1 = LITERALS$1 + 1 + LENGTH_CODES$1;
+  var L_CODES = LITERALS + 1 + LENGTH_CODES;
   /* number of Literal or Length codes, including the END_BLOCK code */
 
-  var D_CODES$1 = 30;
+  var D_CODES = 30;
   /* number of distance codes */
 
-  var BL_CODES$1 = 19;
+  var BL_CODES = 19;
   /* number of codes used to transfer the bit lengths */
 
-  var HEAP_SIZE$1 = 2 * L_CODES$1 + 1;
+  var HEAP_SIZE = 2 * L_CODES + 1;
   /* maximum heap size */
 
-  var MAX_BITS$1 = 15;
+  var MAX_BITS = 15;
   /* All codes must not exceed MAX_BITS bits */
 
-  var MIN_MATCH$1 = 3;
-  var MAX_MATCH$1 = 258;
-  var MIN_LOOKAHEAD = MAX_MATCH$1 + MIN_MATCH$1 + 1;
+  var MIN_MATCH = 3;
+  var MAX_MATCH = 258;
+  var MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
   var PRESET_DICT = 0x20;
   var INIT_STATE = 42;
   var EXTRA_STATE = 69;
@@ -1845,7 +1845,7 @@
     return (f << 1) - (f > 4 ? 9 : 0);
   };
 
-  var zero$1 = function zero(buf) {
+  var zero = function zero(buf) {
     var len = buf.length;
 
     while (--len >= 0) {
@@ -1896,7 +1896,7 @@
   };
 
   var flush_block_only = function flush_block_only(s, last) {
-    _tr_flush_block$1(s, s.block_start >= 0 ? s.block_start : -1, s.strstart - s.block_start, last);
+    _tr_flush_block(s, s.block_start >= 0 ? s.block_start : -1, s.strstart - s.block_start, last);
 
     s.block_start = s.strstart;
     flush_pending(s.strm);
@@ -1993,7 +1993,7 @@
      * we prevent matches with the string of window index 0.
      */
 
-    var strend = s.strstart + MAX_MATCH$1;
+    var strend = s.strstart + MAX_MATCH;
     var scan_end1 = _win[scan + best_len - 1];
     var scan_end = _win[scan + best_len];
     /* The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
@@ -2051,8 +2051,8 @@
       } while (_win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && _win[++scan] === _win[++match] && scan < strend); // Assert(scan <= s->window+(unsigned)(s->window_size-1), "wild scan");
 
 
-      len = MAX_MATCH$1 - (strend - scan);
-      scan = strend - MAX_MATCH$1;
+      len = MAX_MATCH - (strend - scan);
+      scan = strend - MAX_MATCH;
 
       if (len > best_len) {
         s.match_start = cur_match;
@@ -2166,7 +2166,7 @@
       s.lookahead += n;
       /* Initialize the hash value now that we have some input: */
 
-      if (s.lookahead + s.insert >= MIN_MATCH$1) {
+      if (s.lookahead + s.insert >= MIN_MATCH) {
         str = s.strstart - s.insert;
         s.ins_h = s.window[str];
         /* UPDATE_HASH(s, s->ins_h, s->window[str + 1]); */
@@ -2177,13 +2177,13 @@
 
         while (s.insert) {
           /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
-          s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH$1 - 1]);
+          s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
           s.prev[str & s.w_mask] = s.head[s.ins_h];
           s.head[s.ins_h] = str;
           str++;
           s.insert--;
 
-          if (s.lookahead + s.insert < MIN_MATCH$1) {
+          if (s.lookahead + s.insert < MIN_MATCH) {
             break;
           }
         }
@@ -2265,7 +2265,7 @@
         //      }
         fill_window(s);
 
-        if (s.lookahead === 0 && flush === Z_NO_FLUSH) {
+        if (s.lookahead === 0 && flush === Z_NO_FLUSH$1) {
           return BS_NEED_MORE;
         }
 
@@ -2317,7 +2317,7 @@
 
     s.insert = 0;
 
-    if (flush === Z_FINISH) {
+    if (flush === Z_FINISH$1) {
       /*** FLUSH_BLOCK(s, 1); ***/
       flush_block_only(s, true);
 
@@ -2368,7 +2368,7 @@
       if (s.lookahead < MIN_LOOKAHEAD) {
         fill_window(s);
 
-        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH) {
+        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH$1) {
           return BS_NEED_MORE;
         }
 
@@ -2386,9 +2386,9 @@
       /*NIL*/
       ;
 
-      if (s.lookahead >= MIN_MATCH$1) {
+      if (s.lookahead >= MIN_MATCH) {
         /*** INSERT_STRING(s, s.strstart, hash_head); ***/
-        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH$1 - 1]);
+        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
         hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
         s.head[s.ins_h] = s.strstart;
         /***/
@@ -2409,12 +2409,12 @@
         /* longest_match() sets match_start */
       }
 
-      if (s.match_length >= MIN_MATCH$1) {
+      if (s.match_length >= MIN_MATCH) {
         // check_match(s, s.strstart, s.match_start, s.match_length); // for debug only
 
         /*** _tr_tally_dist(s, s.strstart - s.match_start,
                        s.match_length - MIN_MATCH, bflush); ***/
-        bflush = _tr_tally$1(s, s.strstart - s.match_start, s.match_length - MIN_MATCH$1);
+        bflush = _tr_tally(s, s.strstart - s.match_start, s.match_length - MIN_MATCH);
         s.lookahead -= s.match_length;
         /* Insert new strings in the hash table only if the match length
          * is not too large. This saves time but degrades compression.
@@ -2422,7 +2422,7 @@
 
         if (s.match_length <= s.max_lazy_match
         /*max_insert_length*/
-        && s.lookahead >= MIN_MATCH$1) {
+        && s.lookahead >= MIN_MATCH) {
           s.match_length--;
           /* string at strstart already in table */
 
@@ -2430,7 +2430,7 @@
             s.strstart++;
             /*** INSERT_STRING(s, s.strstart, hash_head); ***/
 
-            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH$1 - 1]);
+            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
             hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
             s.head[s.ins_h] = s.strstart;
             /***/
@@ -2460,7 +2460,7 @@
         //Tracevv((stderr,"%c", s.window[s.strstart]));
 
         /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
-        bflush = _tr_tally$1(s, 0, s.window[s.strstart]);
+        bflush = _tr_tally(s, 0, s.window[s.strstart]);
         s.lookahead--;
         s.strstart++;
       }
@@ -2477,9 +2477,9 @@
       }
     }
 
-    s.insert = s.strstart < MIN_MATCH$1 - 1 ? s.strstart : MIN_MATCH$1 - 1;
+    s.insert = s.strstart < MIN_MATCH - 1 ? s.strstart : MIN_MATCH - 1;
 
-    if (flush === Z_FINISH) {
+    if (flush === Z_FINISH$1) {
       /*** FLUSH_BLOCK(s, 1); ***/
       flush_block_only(s, true);
 
@@ -2531,7 +2531,7 @@
       if (s.lookahead < MIN_LOOKAHEAD) {
         fill_window(s);
 
-        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH) {
+        if (s.lookahead < MIN_LOOKAHEAD && flush === Z_NO_FLUSH$1) {
           return BS_NEED_MORE;
         }
 
@@ -2550,9 +2550,9 @@
       /*NIL*/
       ;
 
-      if (s.lookahead >= MIN_MATCH$1) {
+      if (s.lookahead >= MIN_MATCH) {
         /*** INSERT_STRING(s, s.strstart, hash_head); ***/
-        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH$1 - 1]);
+        s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
         hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
         s.head[s.ins_h] = s.strstart;
         /***/
@@ -2563,43 +2563,43 @@
 
       s.prev_length = s.match_length;
       s.prev_match = s.match_start;
-      s.match_length = MIN_MATCH$1 - 1;
+      s.match_length = MIN_MATCH - 1;
 
       if (hash_head !== 0
       /*NIL*/
       && s.prev_length < s.max_lazy_match && s.strstart - hash_head <= s.w_size - MIN_LOOKAHEAD
       /*MAX_DIST(s)*/
       ) {
-          /* To simplify the code, we prevent matches with the string
-           * of window index 0 (in particular we have to avoid a match
-           * of the string with itself at the start of the input file).
-           */
-          s.match_length = longest_match(s, hash_head);
-          /* longest_match() sets match_start */
+        /* To simplify the code, we prevent matches with the string
+         * of window index 0 (in particular we have to avoid a match
+         * of the string with itself at the start of the input file).
+         */
+        s.match_length = longest_match(s, hash_head);
+        /* longest_match() sets match_start */
 
-          if (s.match_length <= 5 && (s.strategy === Z_FILTERED || s.match_length === MIN_MATCH$1 && s.strstart - s.match_start > 4096
-          /*TOO_FAR*/
-          )) {
-            /* If prev_match is also MIN_MATCH, match_start is garbage
-             * but we will ignore the current match anyway.
-             */
-            s.match_length = MIN_MATCH$1 - 1;
-          }
+        if (s.match_length <= 5 && (s.strategy === Z_FILTERED || s.match_length === MIN_MATCH && s.strstart - s.match_start > 4096
+        /*TOO_FAR*/
+        )) {
+          /* If prev_match is also MIN_MATCH, match_start is garbage
+           * but we will ignore the current match anyway.
+           */
+          s.match_length = MIN_MATCH - 1;
         }
+      }
       /* If there was a match at the previous step and the current
        * match is not better, output the previous match:
        */
 
 
-      if (s.prev_length >= MIN_MATCH$1 && s.match_length <= s.prev_length) {
-        max_insert = s.strstart + s.lookahead - MIN_MATCH$1;
+      if (s.prev_length >= MIN_MATCH && s.match_length <= s.prev_length) {
+        max_insert = s.strstart + s.lookahead - MIN_MATCH;
         /* Do not insert strings in hash table beyond this. */
         //check_match(s, s.strstart-1, s.prev_match, s.prev_length);
 
         /***_tr_tally_dist(s, s.strstart - 1 - s.prev_match,
                        s.prev_length - MIN_MATCH, bflush);***/
 
-        bflush = _tr_tally$1(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH$1);
+        bflush = _tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH);
         /* Insert in hash table all strings up to the end of the match.
          * strstart-1 and strstart are already inserted. If there is not
          * enough lookahead, the last two strings are not inserted in
@@ -2612,7 +2612,7 @@
         do {
           if (++s.strstart <= max_insert) {
             /*** INSERT_STRING(s, s.strstart, hash_head); ***/
-            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH$1 - 1]);
+            s.ins_h = HASH(s, s.ins_h, s.window[s.strstart + MIN_MATCH - 1]);
             hash_head = s.prev[s.strstart & s.w_mask] = s.head[s.ins_h];
             s.head[s.ins_h] = s.strstart;
             /***/
@@ -2620,7 +2620,7 @@
         } while (--s.prev_length !== 0);
 
         s.match_available = 0;
-        s.match_length = MIN_MATCH$1 - 1;
+        s.match_length = MIN_MATCH - 1;
         s.strstart++;
 
         if (bflush) {
@@ -2641,7 +2641,7 @@
         //Tracevv((stderr,"%c", s->window[s->strstart-1]));
 
         /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-        bflush = _tr_tally$1(s, 0, s.window[s.strstart - 1]);
+        bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
 
         if (bflush) {
           /*** FLUSH_BLOCK_ONLY(s, 0) ***/
@@ -2670,13 +2670,13 @@
       //Tracevv((stderr,"%c", s->window[s->strstart-1]));
 
       /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-      bflush = _tr_tally$1(s, 0, s.window[s.strstart - 1]);
+      bflush = _tr_tally(s, 0, s.window[s.strstart - 1]);
       s.match_available = 0;
     }
 
-    s.insert = s.strstart < MIN_MATCH$1 - 1 ? s.strstart : MIN_MATCH$1 - 1;
+    s.insert = s.strstart < MIN_MATCH - 1 ? s.strstart : MIN_MATCH - 1;
 
-    if (flush === Z_FINISH) {
+    if (flush === Z_FINISH$1) {
       /*** FLUSH_BLOCK(s, 1); ***/
       flush_block_only(s, true);
 
@@ -2726,10 +2726,10 @@
        * at the end of the input file. We need MAX_MATCH bytes
        * for the longest run, plus one for the unrolled loop.
        */
-      if (s.lookahead <= MAX_MATCH$1) {
+      if (s.lookahead <= MAX_MATCH) {
         fill_window(s);
 
-        if (s.lookahead <= MAX_MATCH$1 && flush === Z_NO_FLUSH) {
+        if (s.lookahead <= MAX_MATCH && flush === Z_NO_FLUSH$1) {
           return BS_NEED_MORE;
         }
 
@@ -2744,18 +2744,18 @@
 
       s.match_length = 0;
 
-      if (s.lookahead >= MIN_MATCH$1 && s.strstart > 0) {
+      if (s.lookahead >= MIN_MATCH && s.strstart > 0) {
         scan = s.strstart - 1;
         prev = _win[scan];
 
         if (prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan]) {
-          strend = s.strstart + MAX_MATCH$1;
+          strend = s.strstart + MAX_MATCH;
 
           do {
             /*jshint noempty:false*/
           } while (prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && prev === _win[++scan] && scan < strend);
 
-          s.match_length = MAX_MATCH$1 - (strend - scan);
+          s.match_length = MAX_MATCH - (strend - scan);
 
           if (s.match_length > s.lookahead) {
             s.match_length = s.lookahead;
@@ -2766,11 +2766,11 @@
       /* Emit match if have run of MIN_MATCH or longer, else emit literal */
 
 
-      if (s.match_length >= MIN_MATCH$1) {
+      if (s.match_length >= MIN_MATCH) {
         //check_match(s, s.strstart, s.strstart - 1, s.match_length);
 
         /*** _tr_tally_dist(s, 1, s.match_length - MIN_MATCH, bflush); ***/
-        bflush = _tr_tally$1(s, 1, s.match_length - MIN_MATCH$1);
+        bflush = _tr_tally(s, 1, s.match_length - MIN_MATCH);
         s.lookahead -= s.match_length;
         s.strstart += s.match_length;
         s.match_length = 0;
@@ -2779,7 +2779,7 @@
         //Tracevv((stderr,"%c", s->window[s->strstart]));
 
         /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
-        bflush = _tr_tally$1(s, 0, s.window[s.strstart]);
+        bflush = _tr_tally(s, 0, s.window[s.strstart]);
         s.lookahead--;
         s.strstart++;
       }
@@ -2798,7 +2798,7 @@
 
     s.insert = 0;
 
-    if (flush === Z_FINISH) {
+    if (flush === Z_FINISH$1) {
       /*** FLUSH_BLOCK(s, 1); ***/
       flush_block_only(s, true);
 
@@ -2840,7 +2840,7 @@
         fill_window(s);
 
         if (s.lookahead === 0) {
-          if (flush === Z_NO_FLUSH) {
+          if (flush === Z_NO_FLUSH$1) {
             return BS_NEED_MORE;
           }
 
@@ -2855,7 +2855,7 @@
 
       /*** _tr_tally_lit(s, s.window[s.strstart], bflush); ***/
 
-      bflush = _tr_tally$1(s, 0, s.window[s.strstart]);
+      bflush = _tr_tally(s, 0, s.window[s.strstart]);
       s.lookahead--;
       s.strstart++;
 
@@ -2873,7 +2873,7 @@
 
     s.insert = 0;
 
-    if (flush === Z_FINISH) {
+    if (flush === Z_FINISH$1) {
       /*** FLUSH_BLOCK(s, 1); ***/
       flush_block_only(s, true);
 
@@ -2945,7 +2945,7 @@
     s.window_size = 2 * s.w_size;
     /*** CLEAR_HASH(s); ***/
 
-    zero$1(s.head); // Fill with NIL (= 0);
+    zero(s.head); // Fill with NIL (= 0);
 
     /* Set the default configuration parameters:
      */
@@ -2958,7 +2958,7 @@
     s.block_start = 0;
     s.lookahead = 0;
     s.insert = 0;
-    s.match_length = s.prev_length = MIN_MATCH$1 - 1;
+    s.match_length = s.prev_length = MIN_MATCH - 1;
     s.match_available = 0;
     s.ins_h = 0;
   };
@@ -2991,7 +2991,7 @@
     this.gzindex = 0;
     /* where in extra, name, or comment */
 
-    this.method = Z_DEFLATED;
+    this.method = Z_DEFLATED$1;
     /* can only be DEFLATED */
 
     this.last_flush = -1;
@@ -3115,12 +3115,12 @@
     // Use flat array of DOUBLE size, with interleaved fata,
     // because JS does not support effective
 
-    this.dyn_ltree = new Uint16Array(HEAP_SIZE$1 * 2);
-    this.dyn_dtree = new Uint16Array((2 * D_CODES$1 + 1) * 2);
-    this.bl_tree = new Uint16Array((2 * BL_CODES$1 + 1) * 2);
-    zero$1(this.dyn_ltree);
-    zero$1(this.dyn_dtree);
-    zero$1(this.bl_tree);
+    this.dyn_ltree = new Uint16Array(HEAP_SIZE * 2);
+    this.dyn_dtree = new Uint16Array((2 * D_CODES + 1) * 2);
+    this.bl_tree = new Uint16Array((2 * BL_CODES + 1) * 2);
+    zero(this.dyn_ltree);
+    zero(this.dyn_dtree);
+    zero(this.bl_tree);
     this.l_desc = null;
     /* desc. for literal tree */
 
@@ -3131,14 +3131,14 @@
     /* desc. for bit length tree */
     //ush bl_count[MAX_BITS+1];
 
-    this.bl_count = new Uint16Array(MAX_BITS$1 + 1);
+    this.bl_count = new Uint16Array(MAX_BITS + 1);
     /* number of codes at each bit length for an optimal tree */
     //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
 
-    this.heap = new Uint16Array(2 * L_CODES$1 + 1);
+    this.heap = new Uint16Array(2 * L_CODES + 1);
     /* heap used to build the Huffman trees */
 
-    zero$1(this.heap);
+    zero(this.heap);
     this.heap_len = 0;
     /* number of elements in the heap */
 
@@ -3149,9 +3149,9 @@
      * The same heap array is used to build all trees.
      */
 
-    this.depth = new Uint16Array(2 * L_CODES$1 + 1); //uch depth[2*L_CODES+1];
+    this.depth = new Uint16Array(2 * L_CODES + 1); //uch depth[2*L_CODES+1];
 
-    zero$1(this.depth);
+    zero(this.depth);
     /* Depth of each subtree used as tie breaker for trees of equal frequency
      */
 
@@ -3225,7 +3225,7 @@
     }
 
     strm.total_in = strm.total_out = 0;
-    strm.data_type = Z_UNKNOWN$1;
+    strm.data_type = Z_UNKNOWN;
     var s = strm.state;
     s.pending = 0;
     s.pending_out = 0;
@@ -3239,17 +3239,17 @@
     strm.adler = s.wrap === 2 ? 0 // crc32(0, Z_NULL, 0)
     : 1; // adler32(0, Z_NULL, 0)
 
-    s.last_flush = Z_NO_FLUSH;
+    s.last_flush = Z_NO_FLUSH$1;
 
-    _tr_init$1(s);
+    _tr_init(s);
 
-    return Z_OK;
+    return Z_OK$1;
   };
 
   var deflateReset = function deflateReset(strm) {
     var ret = deflateResetKeep(strm);
 
-    if (ret === Z_OK) {
+    if (ret === Z_OK$1) {
       lm_init(strm.state);
     }
 
@@ -3266,7 +3266,7 @@
     }
 
     strm.state.gzhead = head;
-    return Z_OK;
+    return Z_OK$1;
   };
 
   var deflateInit2 = function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
@@ -3277,7 +3277,7 @@
 
     var wrap = 1;
 
-    if (level === Z_DEFAULT_COMPRESSION) {
+    if (level === Z_DEFAULT_COMPRESSION$1) {
       level = 6;
     }
 
@@ -3292,7 +3292,7 @@
       windowBits -= 16;
     }
 
-    if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED || windowBits < 8 || windowBits > 15 || level < 0 || level > 9 || strategy < 0 || strategy > Z_FIXED$1) {
+    if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED$1 || windowBits < 8 || windowBits > 15 || level < 0 || level > 9 || strategy < 0 || strategy > Z_FIXED) {
       return err(strm, Z_STREAM_ERROR);
     }
 
@@ -3313,7 +3313,7 @@
     s.hash_bits = memLevel + 7;
     s.hash_size = 1 << s.hash_bits;
     s.hash_mask = s.hash_size - 1;
-    s.hash_shift = ~~((s.hash_bits + MIN_MATCH$1 - 1) / MIN_MATCH$1);
+    s.hash_shift = ~~((s.hash_bits + MIN_MATCH - 1) / MIN_MATCH);
     s.window = new Uint8Array(s.w_size * 2);
     s.head = new Uint16Array(s.hash_size);
     s.prev = new Uint16Array(s.w_size); // Don't need mem init magic for JS.
@@ -3338,10 +3338,10 @@
   };
 
   var deflateInit = function deflateInit(strm, level) {
-    return deflateInit2(strm, level, Z_DEFLATED, MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY);
+    return deflateInit2(strm, level, Z_DEFLATED$1, MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY$1);
   };
 
-  var deflate = function deflate(strm, flush) {
+  var deflate$1 = function deflate(strm, flush) {
     var beg, val; // for gzip header write only
 
     if (!strm || !strm.state || flush > Z_BLOCK || flush < 0) {
@@ -3350,7 +3350,7 @@
 
     var s = strm.state;
 
-    if (!strm.output || !strm.input && strm.avail_in !== 0 || s.status === FINISH_STATE && flush !== Z_FINISH) {
+    if (!strm.output || !strm.input && strm.avail_in !== 0 || s.status === FINISH_STATE && flush !== Z_FINISH$1) {
       return err(strm, strm.avail_out === 0 ? Z_BUF_ERROR : Z_STREAM_ERROR);
     }
 
@@ -3403,7 +3403,7 @@
         }
       } else // DEFLATE header
         {
-          var header = Z_DEFLATED + (s.w_bits - 8 << 4) << 8;
+          var header = Z_DEFLATED$1 + (s.w_bits - 8 << 4) << 8;
           var level_flags = -1;
 
           if (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2) {
@@ -3441,36 +3441,36 @@
       if (s.gzhead.extra
       /* != Z_NULL*/
       ) {
-          beg = s.pending;
-          /* start of bytes to update crc */
+        beg = s.pending;
+        /* start of bytes to update crc */
 
-          while (s.gzindex < (s.gzhead.extra.length & 0xffff)) {
-            if (s.pending === s.pending_buf_size) {
-              if (s.gzhead.hcrc && s.pending > beg) {
-                strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-              }
-
-              flush_pending(strm);
-              beg = s.pending;
-
-              if (s.pending === s.pending_buf_size) {
-                break;
-              }
+        while (s.gzindex < (s.gzhead.extra.length & 0xffff)) {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
             }
 
-            put_byte(s, s.gzhead.extra[s.gzindex] & 0xff);
-            s.gzindex++;
+            flush_pending(strm);
+            beg = s.pending;
+
+            if (s.pending === s.pending_buf_size) {
+              break;
+            }
           }
 
-          if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-          }
+          put_byte(s, s.gzhead.extra[s.gzindex] & 0xff);
+          s.gzindex++;
+        }
 
-          if (s.gzindex === s.gzhead.extra.length) {
-            s.gzindex = 0;
-            s.status = NAME_STATE;
-          }
-        } else {
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+
+        if (s.gzindex === s.gzhead.extra.length) {
+          s.gzindex = 0;
+          s.status = NAME_STATE;
+        }
+      } else {
         s.status = NAME_STATE;
       }
     }
@@ -3479,44 +3479,44 @@
       if (s.gzhead.name
       /* != Z_NULL*/
       ) {
-          beg = s.pending;
-          /* start of bytes to update crc */
-          //int val;
+        beg = s.pending;
+        /* start of bytes to update crc */
+        //int val;
 
-          do {
-            if (s.pending === s.pending_buf_size) {
-              if (s.gzhead.hcrc && s.pending > beg) {
-                strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-              }
-
-              flush_pending(strm);
-              beg = s.pending;
-
-              if (s.pending === s.pending_buf_size) {
-                val = 1;
-                break;
-              }
-            } // JS specific: little magic to add zero terminator to end of string
-
-
-            if (s.gzindex < s.gzhead.name.length) {
-              val = s.gzhead.name.charCodeAt(s.gzindex++) & 0xff;
-            } else {
-              val = 0;
+        do {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
             }
 
-            put_byte(s, val);
-          } while (val !== 0);
+            flush_pending(strm);
+            beg = s.pending;
 
-          if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            if (s.pending === s.pending_buf_size) {
+              val = 1;
+              break;
+            }
+          } // JS specific: little magic to add zero terminator to end of string
+
+
+          if (s.gzindex < s.gzhead.name.length) {
+            val = s.gzhead.name.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
           }
 
-          if (val === 0) {
-            s.gzindex = 0;
-            s.status = COMMENT_STATE;
-          }
-        } else {
+          put_byte(s, val);
+        } while (val !== 0);
+
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+
+        if (val === 0) {
+          s.gzindex = 0;
+          s.status = COMMENT_STATE;
+        }
+      } else {
         s.status = COMMENT_STATE;
       }
     }
@@ -3525,43 +3525,43 @@
       if (s.gzhead.comment
       /* != Z_NULL*/
       ) {
-          beg = s.pending;
-          /* start of bytes to update crc */
-          //int val;
+        beg = s.pending;
+        /* start of bytes to update crc */
+        //int val;
 
-          do {
-            if (s.pending === s.pending_buf_size) {
-              if (s.gzhead.hcrc && s.pending > beg) {
-                strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-              }
-
-              flush_pending(strm);
-              beg = s.pending;
-
-              if (s.pending === s.pending_buf_size) {
-                val = 1;
-                break;
-              }
-            } // JS specific: little magic to add zero terminator to end of string
-
-
-            if (s.gzindex < s.gzhead.comment.length) {
-              val = s.gzhead.comment.charCodeAt(s.gzindex++) & 0xff;
-            } else {
-              val = 0;
+        do {
+          if (s.pending === s.pending_buf_size) {
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
             }
 
-            put_byte(s, val);
-          } while (val !== 0);
+            flush_pending(strm);
+            beg = s.pending;
 
-          if (s.gzhead.hcrc && s.pending > beg) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            if (s.pending === s.pending_buf_size) {
+              val = 1;
+              break;
+            }
+          } // JS specific: little magic to add zero terminator to end of string
+
+
+          if (s.gzindex < s.gzhead.comment.length) {
+            val = s.gzhead.comment.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
           }
 
-          if (val === 0) {
-            s.status = HCRC_STATE;
-          }
-        } else {
+          put_byte(s, val);
+        } while (val !== 0);
+
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+
+        if (val === 0) {
+          s.status = HCRC_STATE;
+        }
+      } else {
         s.status = HCRC_STATE;
       }
     }
@@ -3598,14 +3598,14 @@
          * return OK instead of BUF_ERROR at next call of deflate:
          */
         s.last_flush = -1;
-        return Z_OK;
+        return Z_OK$1;
       }
       /* Make sure there is something to do and avoid duplicate consecutive
        * flushes. For repeated and useless calls with Z_FINISH, we keep
        * returning Z_STREAM_END instead of Z_BUF_ERROR.
        */
 
-    } else if (strm.avail_in === 0 && rank(flush) <= rank(old_flush) && flush !== Z_FINISH) {
+    } else if (strm.avail_in === 0 && rank(flush) <= rank(old_flush) && flush !== Z_FINISH$1) {
       return err(strm, Z_BUF_ERROR);
     }
     /* User must not provide more input after the first FINISH: */
@@ -3618,7 +3618,7 @@
      */
 
 
-    if (strm.avail_in !== 0 || s.lookahead !== 0 || flush !== Z_NO_FLUSH && s.status !== FINISH_STATE) {
+    if (strm.avail_in !== 0 || s.lookahead !== 0 || flush !== Z_NO_FLUSH$1 && s.status !== FINISH_STATE) {
       var bstate = s.strategy === Z_HUFFMAN_ONLY ? deflate_huff(s, flush) : s.strategy === Z_RLE ? deflate_rle(s, flush) : configuration_table[s.level].func(s, flush);
 
       if (bstate === BS_FINISH_STARTED || bstate === BS_FINISH_DONE) {
@@ -3631,7 +3631,7 @@
           /* avoid BUF_ERROR next call, see above */
         }
 
-        return Z_OK;
+        return Z_OK$1;
         /* If flush != Z_NO_FLUSH && avail_out == 0, the next call
          * of deflate should use the same flush parameter to make sure
          * that the flush is complete. So we don't have to output an
@@ -3643,20 +3643,20 @@
 
       if (bstate === BS_BLOCK_DONE) {
         if (flush === Z_PARTIAL_FLUSH) {
-          _tr_align$1(s);
+          _tr_align(s);
         } else if (flush !== Z_BLOCK) {
           /* FULL_FLUSH or SYNC_FLUSH */
-          _tr_stored_block$1(s, 0, 0, false);
+          _tr_stored_block(s, 0, 0, false);
           /* For a full flush, this empty block will be recognized
            * as a special marker by inflate_sync().
            */
 
 
-          if (flush === Z_FULL_FLUSH) {
+          if (flush === Z_FULL_FLUSH$1) {
             /*** CLEAR_HASH(s); ***/
 
             /* forget history */
-            zero$1(s.head); // Fill with NIL (= 0);
+            zero(s.head); // Fill with NIL (= 0);
 
             if (s.lookahead === 0) {
               s.strstart = 0;
@@ -3672,19 +3672,19 @@
           s.last_flush = -1;
           /* avoid BUF_ERROR at next call, see above */
 
-          return Z_OK;
+          return Z_OK$1;
         }
       }
     } //Assert(strm->avail_out > 0, "bug2");
     //if (strm.avail_out <= 0) { throw new Error("bug2");}
 
 
-    if (flush !== Z_FINISH) {
-      return Z_OK;
+    if (flush !== Z_FINISH$1) {
+      return Z_OK$1;
     }
 
     if (s.wrap <= 0) {
-      return Z_STREAM_END;
+      return Z_STREAM_END$1;
     }
     /* Write the trailer */
 
@@ -3714,7 +3714,7 @@
     /* write the trailer only once! */
 
 
-    return s.pending !== 0 ? Z_OK : Z_STREAM_END;
+    return s.pending !== 0 ? Z_OK$1 : Z_STREAM_END$1;
   };
 
   var deflateEnd = function deflateEnd(strm) {
@@ -3723,8 +3723,8 @@
     || !strm.state
     /*== Z_NULL*/
     ) {
-        return Z_STREAM_ERROR;
-      }
+      return Z_STREAM_ERROR;
+    }
 
     var status = strm.state.status;
 
@@ -3733,7 +3733,7 @@
     }
 
     strm.state = null;
-    return status === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK;
+    return status === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK$1;
   };
   /* =========================================================================
    * Initializes the compression dictionary from the given byte
@@ -3749,8 +3749,8 @@
     || !strm.state
     /*== Z_NULL*/
     ) {
-        return Z_STREAM_ERROR;
-      }
+      return Z_STREAM_ERROR;
+    }
 
     var s = strm.state;
     var wrap = s.wrap;
@@ -3776,7 +3776,7 @@
         /* already empty otherwise */
 
         /*** CLEAR_HASH(s); ***/
-        zero$1(s.head); // Fill with NIL (= 0);
+        zero(s.head); // Fill with NIL (= 0);
 
         s.strstart = 0;
         s.block_start = 0;
@@ -3802,20 +3802,20 @@
     strm.input = dictionary;
     fill_window(s);
 
-    while (s.lookahead >= MIN_MATCH$1) {
+    while (s.lookahead >= MIN_MATCH) {
       var str = s.strstart;
-      var n = s.lookahead - (MIN_MATCH$1 - 1);
+      var n = s.lookahead - (MIN_MATCH - 1);
 
       do {
         /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
-        s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH$1 - 1]);
+        s.ins_h = HASH(s, s.ins_h, s.window[str + MIN_MATCH - 1]);
         s.prev[str & s.w_mask] = s.head[s.ins_h];
         s.head[s.ins_h] = str;
         str++;
       } while (--n);
 
       s.strstart = str;
-      s.lookahead = MIN_MATCH$1 - 1;
+      s.lookahead = MIN_MATCH - 1;
       fill_window(s);
     }
 
@@ -3823,13 +3823,13 @@
     s.block_start = s.strstart;
     s.insert = s.lookahead;
     s.lookahead = 0;
-    s.match_length = s.prev_length = MIN_MATCH$1 - 1;
+    s.match_length = s.prev_length = MIN_MATCH - 1;
     s.match_available = 0;
     strm.next_in = next;
     strm.input = input;
     strm.avail_in = avail;
     s.wrap = wrap;
-    return Z_OK;
+    return Z_OK$1;
   };
 
   var deflateInit_1 = deflateInit;
@@ -3837,7 +3837,7 @@
   var deflateReset_1 = deflateReset;
   var deflateResetKeep_1 = deflateResetKeep;
   var deflateSetHeader_1 = deflateSetHeader;
-  var deflate_2 = deflate;
+  var deflate_2$1 = deflate$1;
   var deflateEnd_1 = deflateEnd;
   var deflateSetDictionary_1 = deflateSetDictionary;
   var deflateInfo = 'pako deflate (from Nodeca project)';
@@ -3850,13 +3850,13 @@
   module.exports.deflateTune = deflateTune;
   */
 
-  var deflate_1 = {
+  var deflate_1$1 = {
     deflateInit: deflateInit_1,
     deflateInit2: deflateInit2_1,
     deflateReset: deflateReset_1,
     deflateResetKeep: deflateResetKeep_1,
     deflateSetHeader: deflateSetHeader_1,
-    deflate: deflate_2,
+    deflate: deflate_2$1,
     deflateEnd: deflateEnd_1,
     deflateSetDictionary: deflateSetDictionary_1,
     deflateInfo: deflateInfo
@@ -3961,6 +3961,10 @@
   // convert string to array (typed, when possible)
 
   var string2buf = function string2buf(str) {
+    if (typeof TextEncoder === 'function' && TextEncoder.prototype.encode) {
+      return new TextEncoder().encode(str);
+    }
+
     var buf,
         c,
         c2,
@@ -4045,8 +4049,13 @@
 
 
   var buf2string = function buf2string(buf, max) {
-    var i, out;
-    var len = max || buf.length; // Reserve max possible length (2 words per char)
+    var len = max || buf.length;
+
+    if (typeof TextDecoder === 'function' && TextDecoder.prototype.decode) {
+      return new TextDecoder().decode(buf.subarray(0, max));
+    }
+
+    var i, out; // Reserve max possible length (2 words per char)
     // NB: by unknown reasons, Array is significantly faster for
     //     String.fromCharCode.apply than Uint16Array.
 
@@ -4200,15 +4209,15 @@
 
   /* ===========================================================================*/
 
-  var Z_NO_FLUSH$1 = constants.Z_NO_FLUSH,
-      Z_SYNC_FLUSH = constants.Z_SYNC_FLUSH,
-      Z_FULL_FLUSH$1 = constants.Z_FULL_FLUSH,
-      Z_FINISH$1 = constants.Z_FINISH,
-      Z_OK$1 = constants.Z_OK,
-      Z_STREAM_END$1 = constants.Z_STREAM_END,
-      Z_DEFAULT_COMPRESSION$1 = constants.Z_DEFAULT_COMPRESSION,
-      Z_DEFAULT_STRATEGY$1 = constants.Z_DEFAULT_STRATEGY,
-      Z_DEFLATED$1 = constants.Z_DEFLATED;
+  var Z_NO_FLUSH = constants$1.Z_NO_FLUSH,
+      Z_SYNC_FLUSH = constants$1.Z_SYNC_FLUSH,
+      Z_FULL_FLUSH = constants$1.Z_FULL_FLUSH,
+      Z_FINISH = constants$1.Z_FINISH,
+      Z_OK = constants$1.Z_OK,
+      Z_STREAM_END = constants$1.Z_STREAM_END,
+      Z_DEFAULT_COMPRESSION = constants$1.Z_DEFAULT_COMPRESSION,
+      Z_DEFAULT_STRATEGY = constants$1.Z_DEFAULT_STRATEGY,
+      Z_DEFLATED = constants$1.Z_DEFLATED;
   /* ===========================================================================*/
 
   /**
@@ -4298,12 +4307,12 @@
 
   function Deflate(options) {
     this.options = common.assign({
-      level: Z_DEFAULT_COMPRESSION$1,
-      method: Z_DEFLATED$1,
+      level: Z_DEFAULT_COMPRESSION,
+      method: Z_DEFLATED,
       chunkSize: 16384,
       windowBits: 15,
       memLevel: 8,
-      strategy: Z_DEFAULT_STRATEGY$1
+      strategy: Z_DEFAULT_STRATEGY
     }, options || {});
     var opt = this.options;
 
@@ -4323,14 +4332,14 @@
 
     this.strm = new zstream();
     this.strm.avail_out = 0;
-    var status = deflate_1.deflateInit2(this.strm, opt.level, opt.method, opt.windowBits, opt.memLevel, opt.strategy);
+    var status = deflate_1$1.deflateInit2(this.strm, opt.level, opt.method, opt.windowBits, opt.memLevel, opt.strategy);
 
-    if (status !== Z_OK$1) {
+    if (status !== Z_OK) {
       throw new Error(messages[status]);
     }
 
     if (opt.header) {
-      deflate_1.deflateSetHeader(this.strm, opt.header);
+      deflate_1$1.deflateSetHeader(this.strm, opt.header);
     }
 
     if (opt.dictionary) {
@@ -4345,9 +4354,9 @@
         dict = opt.dictionary;
       }
 
-      status = deflate_1.deflateSetDictionary(this.strm, dict);
+      status = deflate_1$1.deflateSetDictionary(this.strm, dict);
 
-      if (status !== Z_OK$1) {
+      if (status !== Z_OK) {
         throw new Error(messages[status]);
       }
 
@@ -4388,7 +4397,7 @@
       return false;
     }
 
-    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;else _flush_mode = flush_mode === true ? Z_FINISH$1 : Z_NO_FLUSH$1; // Convert data if needed
+    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH; // Convert data if needed
 
     if (typeof data === 'string') {
       // If we need to compress text, change encoding to utf8.
@@ -4410,23 +4419,23 @@
       } // Make sure avail_out > 6 to avoid repeating markers
 
 
-      if ((_flush_mode === Z_SYNC_FLUSH || _flush_mode === Z_FULL_FLUSH$1) && strm.avail_out <= 6) {
+      if ((_flush_mode === Z_SYNC_FLUSH || _flush_mode === Z_FULL_FLUSH) && strm.avail_out <= 6) {
         this.onData(strm.output.subarray(0, strm.next_out));
         strm.avail_out = 0;
         continue;
       }
 
-      status = deflate_1.deflate(strm, _flush_mode); // Ended => flush and finish
+      status = deflate_1$1.deflate(strm, _flush_mode); // Ended => flush and finish
 
-      if (status === Z_STREAM_END$1) {
+      if (status === Z_STREAM_END) {
         if (strm.next_out > 0) {
           this.onData(strm.output.subarray(0, strm.next_out));
         }
 
-        status = deflate_1.deflateEnd(this.strm);
+        status = deflate_1$1.deflateEnd(this.strm);
         this.onEnd(status);
         this.ended = true;
-        return status === Z_OK$1;
+        return status === Z_OK;
       } // Flush if out buffer full
 
 
@@ -4472,7 +4481,7 @@
 
   Deflate.prototype.onEnd = function (status) {
     // On success - join
-    if (status === Z_OK$1) {
+    if (status === Z_OK) {
       this.result = common.flattenChunks(this.chunks);
     }
 
@@ -4514,7 +4523,7 @@
    **/
 
 
-  function deflate$1(input, options) {
+  function deflate(input, options) {
     var deflator = new Deflate(options);
     deflator.push(input, true); // That will never happens, if you don't cheat with options :)
 
@@ -4537,7 +4546,7 @@
   function deflateRaw(input, options) {
     options = options || {};
     options.raw = true;
-    return deflate$1(input, options);
+    return deflate(input, options);
   }
   /**
    * gzip(data[, options]) -> Uint8Array
@@ -4552,26 +4561,26 @@
   function gzip(input, options) {
     options = options || {};
     options.gzip = true;
-    return deflate$1(input, options);
+    return deflate(input, options);
   }
 
   var Deflate_1 = Deflate;
-  var deflate_2$1 = deflate$1;
+  var deflate_2 = deflate;
   var deflateRaw_1 = deflateRaw;
   var gzip_1 = gzip;
-  var constants$1 = constants;
-  var deflate_1$1 = {
+  var constants = constants$1;
+  var deflate_1 = {
     Deflate: Deflate_1,
-    deflate: deflate_2$1,
+    deflate: deflate_2,
     deflateRaw: deflateRaw_1,
     gzip: gzip_1,
-    constants: constants$1
+    constants: constants
   };
 
   exports.Deflate = Deflate_1;
-  exports.constants = constants$1;
-  exports.default = deflate_1$1;
-  exports.deflate = deflate_2$1;
+  exports.constants = constants;
+  exports['default'] = deflate_1;
+  exports.deflate = deflate_2;
   exports.deflateRaw = deflateRaw_1;
   exports.gzip = gzip_1;
 
