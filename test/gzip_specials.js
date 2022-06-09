@@ -38,7 +38,7 @@ describe('Gzip special cases', () => {
         os: 15,
         name: 'test name',
         comment: 'test comment',
-        extra: [ 4, 5, 6 ]
+        extra: new Uint8Array([ 4, 5, 6 ])
       }
     });
     deflator.push(data, true);
