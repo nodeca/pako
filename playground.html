@@ -1,0 +1,142 @@
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet" />
+    <style>
+      html {
+        margin-top: 5vh !important;
+      }
+      html,
+      body {
+        font-family: 'Open Sans', sans-serif;
+        margin: 0;
+      }
+      body,
+      html,
+      #container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 90vh;
+        flex-direction: row;
+        width: 100%;
+      }
+      #container {
+        margin: 5vh 5%;
+      }
+      textarea {
+        resize: none;
+        width: 100%;
+        height: 30%;
+        margin-top: 5px;
+      }
+      label {
+        text-align: left;
+        width: 100%;
+      }
+      #io {
+        width: 70%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100%;
+        flex-direction: column;
+      }
+      #actions {
+        width: 25%;
+        margin-left: 5%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100%;
+        flex-direction: column;
+        background: #5581b533;
+        border-radius: 10px;
+      }
+      #actions > * {
+        width: 60%;
+        margin: 5px 0;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #actions * {
+        font-size: 1.25rem;
+        cursor: pointer;
+      }
+      #actions > button {
+        background-color: #30a75044;
+        border-radius: 12px;
+        height: 2.5rem;
+        box-shadow: 0px 2px 1px 2px black;
+        border: 2px solid #fabb05aa;
+      }
+      #actions > button:active {
+        box-shadow: 0px 1px 0px 1px black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="io">
+        <label for="input">Input</label>
+        <textarea
+          data-gramm="false"
+          data-gramm_editor="false"
+          data-enable-grammarly="false"
+          spellcheck="false"
+          autocapitalize="false"
+          autocomplete="false"
+          id="input"
+        ></textarea>
+        <br />
+        <label for="output">Output</label>
+        <textarea readonly id="output"></textarea>
+      </div>
+      <div id="actions">
+        <button id="deflate">Deflate</button>
+        <button id="inflate">Inflate</button>
+        <div>
+          <input type="checkbox" id="raw" />
+          <label for="raw">Raw</label>
+        </div>
+        <button id="copy">Copy</button>
+      </div>
+    </div>
+    <script src="https://unpkg.com/pako@2.0.4/dist/pako.min.js"></script>
+    <script>
+      function byId(id) {
+        return document.getElementById(id);
+      }
+      byId('inflate').onclick = () => {
+        try {
+          byId('output').value = pako.inflate(new Uint8Array(byId('input').value.split(',')), { to: 'string', raw: byId('raw').checked });
+        } catch (e) {
+          alert('Error thrown: ' + e);
+          console.error(e);
+        }
+      };
+      byId('deflate').onclick = () => {
+        try {
+          byId('output').value = pako.deflate(byId('input').value, { raw: byId('raw').checked });
+        } catch (e) {
+          alert('Error thrown: ' + e);
+          console.error(e);
+        }
+      };
+      byId('copy').onclick = () => {
+        navigator.permissions.query({ name: 'clipboard-write' }).then(function (permissionStatus) {
+          if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+            navigator.clipboard.writeText(byId('output').value);
+            byId('copy').innerText = 'Copied!';
+            setTimeout(function () {
+              byId('copy').innerText = 'Copy Result';
+            }, 5000);
+          } else {
+            alert('Access was denied to clipboard-write, please give access to continue.');
+          }
+        });
+      };
+    </script>
+  </body>
+</html>
