@@ -1,10 +1,10 @@
 
-/*! pako 2.0.4 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.pako = {}));
-}(this, (function (exports) { 'use strict';
+})(this, (function (exports) { 'use strict';
 
   // (C) 1995-2013 Jean-loup Gailly and Mark Adler
   // (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
@@ -282,10 +282,10 @@
    *     The length opt_len is updated; static_len is also updated if stree is
    *     not null.
    */
-  const gen_bitlen = (s, desc) =>
+  const gen_bitlen = (s, desc) => {
   //    deflate_state *s;
   //    tree_desc *desc;    /* the tree descriptor */
-  {
+
     const tree            = desc.dyn_tree;
     const max_code        = desc.max_code;
     const stree           = desc.stat_desc.static_tree;
@@ -334,7 +334,7 @@
     }
     if (overflow === 0) { return; }
 
-    // Trace((stderr,"\nbit length overflow\n"));
+    // Tracev((stderr,"\nbit length overflow\n"));
     /* This happens for example on obj2 and pic of the Calgary corpus */
 
     /* Find the first bit length which could increase: */
@@ -361,7 +361,7 @@
         m = s.heap[--h];
         if (m > max_code) { continue; }
         if (tree[m * 2 + 1]/*.Len*/ !== bits) {
-          // Trace((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
+          // Tracev((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
           s.opt_len += (bits - tree[m * 2 + 1]/*.Len*/) * tree[m * 2]/*.Freq*/;
           tree[m * 2 + 1]/*.Len*/ = bits;
         }
@@ -379,11 +379,11 @@
    * OUT assertion: the field code is set for all tree elements of non
    *     zero code length.
    */
-  const gen_codes = (tree, max_code, bl_count) =>
+  const gen_codes = (tree, max_code, bl_count) => {
   //    ct_data *tree;             /* the tree to decorate */
   //    int max_code;              /* largest code with non zero frequency */
   //    ushf *bl_count;            /* number of codes at each bit length */
-  {
+
     const next_code = new Array(MAX_BITS$1 + 1); /* next code value for each bit length */
     let code = 0;              /* running code value */
     let bits;                  /* bit index */
@@ -393,7 +393,8 @@
      * without bit reversal.
      */
     for (bits = 1; bits <= MAX_BITS$1; bits++) {
-      next_code[bits] = code = (code + bl_count[bits - 1]) << 1;
+      code = (code + bl_count[bits - 1]) << 1;
+      next_code[bits] = code;
     }
     /* Check that the bit counts in bl_count are consistent. The last code
      * must be all ones.
@@ -533,7 +534,7 @@
 
     s.dyn_ltree[END_BLOCK * 2]/*.Freq*/ = 1;
     s.opt_len = s.static_len = 0;
-    s.last_lit = s.matches = 0;
+    s.sym_next = s.matches = 0;
   };
 
 
@@ -550,29 +551,6 @@
     }
     s.bi_buf = 0;
     s.bi_valid = 0;
-  };
-
-  /* ===========================================================================
-   * Copy a stored block, storing first the length and its
-   * one's complement if requested.
-   */
-  const copy_block = (s, buf, len, header) =>
-  //DeflateState *s;
-  //charf    *buf;    /* the input data */
-  //unsigned len;     /* its length */
-  //int      header;  /* true if block header must be written */
-  {
-    bi_windup(s);        /* align on byte boundary */
-
-    if (header) {
-      put_short(s, len);
-      put_short(s, ~len);
-    }
-  //  while (len--) {
-  //    put_byte(s, *buf++);
-  //  }
-    s.pending_buf.set(s.window.subarray(buf, buf + len), s.pending);
-    s.pending += len;
   };
 
   /* ===========================================================================
@@ -593,11 +571,11 @@
    * when the heap property is re-established (each father smaller than its
    * two sons).
    */
-  const pqdownheap = (s, tree, k) =>
+  const pqdownheap = (s, tree, k) => {
   //    deflate_state *s;
   //    ct_data *tree;  /* the tree to restore */
   //    int k;               /* node to move down */
-  {
+
     const v = s.heap[k];
     let j = k << 1;  /* left son of k */
     while (j <= s.heap_len) {
@@ -626,23 +604,22 @@
   /* ===========================================================================
    * Send the block data compressed using the given Huffman trees
    */
-  const compress_block = (s, ltree, dtree) =>
+  const compress_block = (s, ltree, dtree) => {
   //    deflate_state *s;
   //    const ct_data *ltree; /* literal tree */
   //    const ct_data *dtree; /* distance tree */
-  {
+
     let dist;           /* distance of matched string */
     let lc;             /* match length or unmatched char (if dist == 0) */
-    let lx = 0;         /* running index in l_buf */
+    let sx = 0;         /* running index in sym_buf */
     let code;           /* the code to send */
     let extra;          /* number of extra bits to send */
 
-    if (s.last_lit !== 0) {
+    if (s.sym_next !== 0) {
       do {
-        dist = (s.pending_buf[s.d_buf + lx * 2] << 8) | (s.pending_buf[s.d_buf + lx * 2 + 1]);
-        lc = s.pending_buf[s.l_buf + lx];
-        lx++;
-
+        dist = s.pending_buf[s.sym_buf + sx++] & 0xff;
+        dist += (s.pending_buf[s.sym_buf + sx++] & 0xff) << 8;
+        lc = s.pending_buf[s.sym_buf + sx++];
         if (dist === 0) {
           send_code(s, lc, ltree); /* send a literal byte */
           //Tracecv(isgraph(lc), (stderr," '%c' ", lc));
@@ -667,11 +644,10 @@
           }
         } /* literal or match pair ? */
 
-        /* Check that the overlay between pending_buf and d_buf+l_buf is ok: */
-        //Assert((uInt)(s->pending) < s->lit_bufsize + 2*lx,
-        //       "pendingBuf overflow");
+        /* Check that the overlay between pending_buf and sym_buf is ok: */
+        //Assert(s->pending < s->lit_bufsize + sx, "pendingBuf overflow");
 
-      } while (lx < s.last_lit);
+      } while (sx < s.sym_next);
     }
 
     send_code(s, END_BLOCK, ltree);
@@ -686,10 +662,10 @@
    *     and corresponding code. The length opt_len is updated; static_len is
    *     also updated if stree is not null. The field max_code is set.
    */
-  const build_tree = (s, desc) =>
+  const build_tree = (s, desc) => {
   //    deflate_state *s;
   //    tree_desc *desc; /* the tree descriptor */
-  {
+
     const tree     = desc.dyn_tree;
     const stree    = desc.stat_desc.static_tree;
     const has_stree = desc.stat_desc.has_stree;
@@ -782,11 +758,11 @@
    * Scan a literal or distance tree to determine the frequencies of the codes
    * in the bit length tree.
    */
-  const scan_tree = (s, tree, max_code) =>
+  const scan_tree = (s, tree, max_code) => {
   //    deflate_state *s;
   //    ct_data *tree;   /* the tree to be scanned */
   //    int max_code;    /* and its largest code of non zero frequency */
-  {
+
     let n;                     /* iterates over all tree elements */
     let prevlen = -1;          /* last emitted length */
     let curlen;                /* length of current code */
@@ -848,11 +824,11 @@
    * Send a literal or distance tree in compressed form, using the codes in
    * bl_tree.
    */
-  const send_tree = (s, tree, max_code) =>
+  const send_tree = (s, tree, max_code) => {
   //    deflate_state *s;
   //    ct_data *tree; /* the tree to be scanned */
   //    int max_code;       /* and its largest code of non zero frequency */
-  {
+
     let n;                     /* iterates over all tree elements */
     let prevlen = -1;          /* last emitted length */
     let curlen;                /* length of current code */
@@ -956,10 +932,10 @@
    * lengths of the bit length codes, the literal tree and the distance tree.
    * IN assertion: lcodes >= 257, dcodes >= 1, blcodes >= 4.
    */
-  const send_all_trees = (s, lcodes, dcodes, blcodes) =>
+  const send_all_trees = (s, lcodes, dcodes, blcodes) => {
   //    deflate_state *s;
   //    int lcodes, dcodes, blcodes; /* number of codes for each tree */
-  {
+
     let rank;                    /* index in bl_order */
 
     //Assert (lcodes >= 257 && dcodes >= 1 && blcodes >= 4, "not enough codes");
@@ -987,9 +963,9 @@
    * Check if the data type is TEXT or BINARY, using the following algorithm:
    * - TEXT if the two conditions below are satisfied:
    *    a) There are no non-portable control characters belonging to the
-   *       "black list" (0..6, 14..25, 28..31).
+   *       "block list" (0..6, 14..25, 28..31).
    *    b) There is at least one printable character belonging to the
-   *       "white list" (9 {TAB}, 10 {LF}, 13 {CR}, 32..255).
+   *       "allow list" (9 {TAB}, 10 {LF}, 13 {CR}, 32..255).
    * - BINARY otherwise.
    * - The following partially-portable control characters form a
    *   "gray list" that is ignored in this detection algorithm:
@@ -997,21 +973,21 @@
    * IN assertion: the fields Freq of dyn_ltree are set.
    */
   const detect_data_type = (s) => {
-    /* black_mask is the bit mask of black-listed bytes
+    /* block_mask is the bit mask of block-listed bytes
      * set bits 0..6, 14..25, and 28..31
      * 0xf3ffc07f = binary 11110011111111111100000001111111
      */
-    let black_mask = 0xf3ffc07f;
+    let block_mask = 0xf3ffc07f;
     let n;
 
-    /* Check for non-textual ("black-listed") bytes. */
-    for (n = 0; n <= 31; n++, black_mask >>>= 1) {
-      if ((black_mask & 1) && (s.dyn_ltree[n * 2]/*.Freq*/ !== 0)) {
+    /* Check for non-textual ("block-listed") bytes. */
+    for (n = 0; n <= 31; n++, block_mask >>>= 1) {
+      if ((block_mask & 1) && (s.dyn_ltree[n * 2]/*.Freq*/ !== 0)) {
         return Z_BINARY;
       }
     }
 
-    /* Check for textual ("white-listed") bytes. */
+    /* Check for textual ("allow-listed") bytes. */
     if (s.dyn_ltree[9 * 2]/*.Freq*/ !== 0 || s.dyn_ltree[10 * 2]/*.Freq*/ !== 0 ||
         s.dyn_ltree[13 * 2]/*.Freq*/ !== 0) {
       return Z_TEXT;
@@ -1022,7 +998,7 @@
       }
     }
 
-    /* There are no "black-listed" or "white-listed" bytes:
+    /* There are no "block-listed" or "allow-listed" bytes:
      * this stream either is empty or has tolerated ("gray-listed") bytes only.
      */
     return Z_BINARY;
@@ -1057,14 +1033,20 @@
   /* ===========================================================================
    * Send a stored block
    */
-  const _tr_stored_block$1 = (s, buf, stored_len, last) =>
+  const _tr_stored_block$1 = (s, buf, stored_len, last) => {
   //DeflateState *s;
   //charf *buf;       /* input block */
   //ulg stored_len;   /* length of input block */
   //int last;         /* one if this is the last block for a file */
-  {
+
     send_bits(s, (STORED_BLOCK << 1) + (last ? 1 : 0), 3);    /* send block type */
-    copy_block(s, buf, stored_len, true); /* with header */
+    bi_windup(s);        /* align on byte boundary */
+    put_short(s, stored_len);
+    put_short(s, ~stored_len);
+    if (stored_len) {
+      s.pending_buf.set(s.window.subarray(buf, buf + stored_len), s.pending);
+    }
+    s.pending += stored_len;
   };
 
 
@@ -1081,14 +1063,14 @@
 
   /* ===========================================================================
    * Determine the best encoding for the current block: dynamic trees, static
-   * trees or store, and output the encoded block to the zip file.
+   * trees or store, and write out the encoded block.
    */
-  const _tr_flush_block$1 = (s, buf, stored_len, last) =>
+  const _tr_flush_block$1 = (s, buf, stored_len, last) => {
   //DeflateState *s;
   //charf *buf;       /* input block, or NULL if too old */
   //ulg stored_len;   /* length of input block */
   //int last;         /* one if this is the last block for a file */
-  {
+
     let opt_lenb, static_lenb;  /* opt_len and static_len in bytes */
     let max_blindex = 0;        /* index of last bit length code of non zero freq */
 
@@ -1123,7 +1105,7 @@
 
       // Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u ",
       //        opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
-      //        s->last_lit));
+      //        s->sym_next / 3));
 
       if (static_lenb <= opt_lenb) { opt_lenb = static_lenb; }
 
@@ -1170,19 +1152,14 @@
    * Save the match info and tally the frequency counts. Return true if
    * the current block must be flushed.
    */
-  const _tr_tally$1 = (s, dist, lc) =>
+  const _tr_tally$1 = (s, dist, lc) => {
   //    deflate_state *s;
   //    unsigned dist;  /* distance of matched string */
   //    unsigned lc;    /* match length-MIN_MATCH or unmatched char (if dist==0) */
-  {
-    //let out_length, in_length, dcode;
 
-    s.pending_buf[s.d_buf + s.last_lit * 2]     = (dist >>> 8) & 0xff;
-    s.pending_buf[s.d_buf + s.last_lit * 2 + 1] = dist & 0xff;
-
-    s.pending_buf[s.l_buf + s.last_lit] = lc & 0xff;
-    s.last_lit++;
-
+    s.pending_buf[s.sym_buf + s.sym_next++] = dist;
+    s.pending_buf[s.sym_buf + s.sym_next++] = dist >> 8;
+    s.pending_buf[s.sym_buf + s.sym_next++] = lc;
     if (dist === 0) {
       /* lc is the unmatched char */
       s.dyn_ltree[lc * 2]/*.Freq*/++;
@@ -1198,34 +1175,7 @@
       s.dyn_dtree[d_code(dist) * 2]/*.Freq*/++;
     }
 
-  // (!) This block is disabled in zlib defaults,
-  // don't enable it for binary compatibility
-
-  //#ifdef TRUNCATE_BLOCK
-  //  /* Try to guess if it is profitable to stop the current block here */
-  //  if ((s.last_lit & 0x1fff) === 0 && s.level > 2) {
-  //    /* Compute an upper bound for the compressed length */
-  //    out_length = s.last_lit*8;
-  //    in_length = s.strstart - s.block_start;
-  //
-  //    for (dcode = 0; dcode < D_CODES; dcode++) {
-  //      out_length += s.dyn_dtree[dcode*2]/*.Freq*/ * (5 + extra_dbits[dcode]);
-  //    }
-  //    out_length >>>= 3;
-  //    //Tracev((stderr,"\nlast_lit %u, in %ld, out ~%ld(%ld%%) ",
-  //    //       s->last_lit, in_length, out_length,
-  //    //       100L - out_length*100L/in_length));
-  //    if (s.matches < (s.last_lit>>1)/*int /2*/ && out_length < (in_length>>1)/*int /2*/) {
-  //      return true;
-  //    }
-  //  }
-  //#endif
-
-    return (s.last_lit === s.lit_bufsize - 1);
-    /* We avoid equality with lit_bufsize because of wraparound at 64K
-     * on 16 bit machines and because stored blocks are restricted to
-     * 64K-1 bytes.
-     */
+    return (s.sym_next === s.sym_end);
   };
 
   var _tr_init_1  = _tr_init$1;
@@ -1515,13 +1465,16 @@
 
   const PRESET_DICT = 0x20;
 
-  const INIT_STATE = 42;
-  const EXTRA_STATE = 69;
-  const NAME_STATE = 73;
-  const COMMENT_STATE = 91;
-  const HCRC_STATE = 103;
-  const BUSY_STATE = 113;
-  const FINISH_STATE = 666;
+  const INIT_STATE    =  42;    /* zlib header -> BUSY_STATE */
+  //#ifdef GZIP
+  const GZIP_STATE    =  57;    /* gzip header -> BUSY_STATE | EXTRA_STATE */
+  //#endif
+  const EXTRA_STATE   =  69;    /* gzip extra block -> NAME_STATE */
+  const NAME_STATE    =  73;    /* gzip file name -> COMMENT_STATE */
+  const COMMENT_STATE =  91;    /* gzip comment -> HCRC_STATE */
+  const HCRC_STATE    = 103;    /* gzip header CRC -> BUSY_STATE */
+  const BUSY_STATE    = 113;    /* deflate -> FINISH_STATE */
+  const FINISH_STATE  = 666;    /* stream complete */
 
   const BS_NEED_MORE      = 1; /* block not completed, need more input or more output */
   const BS_BLOCK_DONE     = 2; /* block flush performed */
@@ -1536,13 +1489,41 @@
   };
 
   const rank = (f) => {
-    return ((f) << 1) - ((f) > 4 ? 9 : 0);
+    return ((f) * 2) - ((f) > 4 ? 9 : 0);
   };
 
   const zero = (buf) => {
     let len = buf.length; while (--len >= 0) { buf[len] = 0; }
   };
 
+  /* ===========================================================================
+   * Slide the hash table when sliding the window down (could be avoided with 32
+   * bit values at the expense of memory usage). We slide even when level == 0 to
+   * keep the hash table consistent if we switch back to level > 0 later.
+   */
+  const slide_hash = (s) => {
+    let n, m;
+    let p;
+    let wsize = s.w_size;
+
+    n = s.hash_size;
+    p = n;
+    do {
+      m = s.head[--p];
+      s.head[p] = (m >= wsize ? m - wsize : 0);
+    } while (--n);
+    n = wsize;
+  //#ifndef FASTEST
+    p = n;
+    do {
+      m = s.prev[--p];
+      s.prev[p] = (m >= wsize ? m - wsize : 0);
+      /* If n is not on any hash chain, prev[n] is garbage but
+       * its value will never be used.
+       */
+    } while (--n);
+  //#endif
+  };
 
   /* eslint-disable new-cap */
   let HASH_ZLIB = (s, prev, data) => ((prev << s.hash_shift) ^ data) & s.hash_mask;
@@ -1551,11 +1532,12 @@
   //let HASH_FAST = (s, prev, data) => ((prev << 8) + (prev >> 8) + (data << 4)) & s.hash_mask;
   let HASH = HASH_ZLIB;
 
+
   /* =========================================================================
-   * Flush as much pending output as possible. All deflate() output goes
-   * through this function so some applications may wish to modify it
-   * to avoid allocating a large strm->output buffer and copying into it.
-   * (See also read_buf()).
+   * Flush as much pending output as possible. All deflate() output, except for
+   * some deflate_stored() output, goes through this function so some
+   * applications may wish to modify it to avoid allocating a large
+   * strm->next_out buffer and copying into it. (See also read_buf()).
    */
   const flush_pending = (strm) => {
     const s = strm.state;
@@ -1568,11 +1550,11 @@
     if (len === 0) { return; }
 
     strm.output.set(s.pending_buf.subarray(s.pending_out, s.pending_out + len), strm.next_out);
-    strm.next_out += len;
-    s.pending_out += len;
+    strm.next_out  += len;
+    s.pending_out  += len;
     strm.total_out += len;
     strm.avail_out -= len;
-    s.pending -= len;
+    s.pending      -= len;
     if (s.pending === 0) {
       s.pending_out = 0;
     }
@@ -1764,7 +1746,7 @@
   const fill_window = (s) => {
 
     const _w_size = s.w_size;
-    let p, n, m, more, str;
+    let n, more, str;
 
     //Assert(s->lookahead < MIN_LOOKAHEAD, "already enough lookahead");
 
@@ -1791,38 +1773,15 @@
        */
       if (s.strstart >= _w_size + (_w_size - MIN_LOOKAHEAD)) {
 
-        s.window.set(s.window.subarray(_w_size, _w_size + _w_size), 0);
+        s.window.set(s.window.subarray(_w_size, _w_size + _w_size - more), 0);
         s.match_start -= _w_size;
         s.strstart -= _w_size;
         /* we now have strstart >= MAX_DIST */
         s.block_start -= _w_size;
-
-        /* Slide the hash table (could be avoided with 32 bit values
-         at the expense of memory usage). We slide even when level == 0
-         to keep the hash table consistent if we switch back to level > 0
-         later. (Using level 0 permanently is not an optimal usage of
-         zlib, so we don't care about this pathological case.)
-         */
-
-        n = s.hash_size;
-        p = n;
-
-        do {
-          m = s.head[--p];
-          s.head[p] = (m >= _w_size ? m - _w_size : 0);
-        } while (--n);
-
-        n = _w_size;
-        p = n;
-
-        do {
-          m = s.prev[--p];
-          s.prev[p] = (m >= _w_size ? m - _w_size : 0);
-          /* If n is not on any hash chain, prev[n] is garbage but
-           * its value will never be used.
-           */
-        } while (--n);
-
+        if (s.insert > s.strstart) {
+          s.insert = s.strstart;
+        }
+        slide_hash(s);
         more += _w_size;
       }
       if (s.strm.avail_in === 0) {
@@ -1914,103 +1873,215 @@
   /* ===========================================================================
    * Copy without compression as much as possible from the input stream, return
    * the current block state.
-   * This function does not insert new strings in the dictionary since
-   * uncompressible data is probably not useful. This function is used
-   * only for the level=0 compression option.
-   * NOTE: this function should be optimized to avoid extra copying from
-   * window to pending_buf.
+   *
+   * In case deflateParams() is used to later switch to a non-zero compression
+   * level, s->matches (otherwise unused when storing) keeps track of the number
+   * of hash table slides to perform. If s->matches is 1, then one hash table
+   * slide will be done when switching. If s->matches is 2, the maximum value
+   * allowed here, then the hash table will be cleared, since two or more slides
+   * is the same as a clear.
+   *
+   * deflate_stored() is written to minimize the number of times an input byte is
+   * copied. It is most efficient with large input and output buffers, which
+   * maximizes the opportunites to have a single copy from next_in to next_out.
    */
   const deflate_stored = (s, flush) => {
 
-    /* Stored blocks are limited to 0xffff bytes, pending_buf is limited
-     * to pending_buf_size, and each stored block has a 5 byte header:
+    /* Smallest worthy block size when not flushing or finishing. By default
+     * this is 32K. This can be as small as 507 bytes for memLevel == 1. For
+     * large input and output buffers, the stored block size will be larger.
      */
-    let max_block_size = 0xffff;
+    let min_block = s.pending_buf_size - 5 > s.w_size ? s.w_size : s.pending_buf_size - 5;
 
-    if (max_block_size > s.pending_buf_size - 5) {
-      max_block_size = s.pending_buf_size - 5;
-    }
-
-    /* Copy as much as possible from input to output: */
-    for (;;) {
-      /* Fill the window as much as possible: */
-      if (s.lookahead <= 1) {
-
-        //Assert(s->strstart < s->w_size+MAX_DIST(s) ||
-        //  s->block_start >= (long)s->w_size, "slide too late");
-  //      if (!(s.strstart < s.w_size + (s.w_size - MIN_LOOKAHEAD) ||
-  //        s.block_start >= s.w_size)) {
-  //        throw  new Error("slide too late");
-  //      }
-
-        fill_window(s);
-        if (s.lookahead === 0 && flush === Z_NO_FLUSH$1) {
-          return BS_NEED_MORE;
-        }
-
-        if (s.lookahead === 0) {
-          break;
-        }
-        /* flush the current block */
-      }
-      //Assert(s->block_start >= 0L, "block gone");
-  //    if (s.block_start < 0) throw new Error("block gone");
-
-      s.strstart += s.lookahead;
-      s.lookahead = 0;
-
-      /* Emit a stored block if pending_buf will be full: */
-      const max_start = s.block_start + max_block_size;
-
-      if (s.strstart === 0 || s.strstart >= max_start) {
-        /* strstart == 0 is possible when wraparound on 16-bit machine */
-        s.lookahead = s.strstart - max_start;
-        s.strstart = max_start;
-        /*** FLUSH_BLOCK(s, 0); ***/
-        flush_block_only(s, false);
-        if (s.strm.avail_out === 0) {
-          return BS_NEED_MORE;
-        }
-        /***/
-
-
-      }
-      /* Flush if we may have to slide, otherwise block_start may become
-       * negative and the data will be gone:
+    /* Copy as many min_block or larger stored blocks directly to next_out as
+     * possible. If flushing, copy the remaining available input to next_out as
+     * stored blocks, if there is enough space.
+     */
+    let len, left, have, last = 0;
+    let used = s.strm.avail_in;
+    do {
+      /* Set len to the maximum size block that we can copy directly with the
+       * available input data and output space. Set left to how much of that
+       * would be copied from what's left in the window.
        */
-      if (s.strstart - s.block_start >= (s.w_size - MIN_LOOKAHEAD)) {
-        /*** FLUSH_BLOCK(s, 0); ***/
-        flush_block_only(s, false);
-        if (s.strm.avail_out === 0) {
-          return BS_NEED_MORE;
-        }
-        /***/
+      len = 65535/* MAX_STORED */;     /* maximum deflate stored block length */
+      have = (s.bi_valid + 42) >> 3;     /* number of header bytes */
+      if (s.strm.avail_out < have) {         /* need room for header */
+        break;
       }
+        /* maximum stored block length that will fit in avail_out: */
+      have = s.strm.avail_out - have;
+      left = s.strstart - s.block_start;  /* bytes left in window */
+      if (len > left + s.strm.avail_in) {
+        len = left + s.strm.avail_in;   /* limit len to the input */
+      }
+      if (len > have) {
+        len = have;             /* limit len to the output */
+      }
+
+      /* If the stored block would be less than min_block in length, or if
+       * unable to copy all of the available input when flushing, then try
+       * copying to the window and the pending buffer instead. Also don't
+       * write an empty block when flushing -- deflate() does that.
+       */
+      if (len < min_block && ((len === 0 && flush !== Z_FINISH$1) ||
+                          flush === Z_NO_FLUSH$1 ||
+                          len !== left + s.strm.avail_in)) {
+        break;
+      }
+
+      /* Make a dummy stored block in pending to get the header bytes,
+       * including any pending bits. This also updates the debugging counts.
+       */
+      last = flush === Z_FINISH$1 && len === left + s.strm.avail_in ? 1 : 0;
+      _tr_stored_block(s, 0, 0, last);
+
+      /* Replace the lengths in the dummy stored block with len. */
+      s.pending_buf[s.pending - 4] = len;
+      s.pending_buf[s.pending - 3] = len >> 8;
+      s.pending_buf[s.pending - 2] = ~len;
+      s.pending_buf[s.pending - 1] = ~len >> 8;
+
+      /* Write the stored block header bytes. */
+      flush_pending(s.strm);
+
+  //#ifdef ZLIB_DEBUG
+  //    /* Update debugging counts for the data about to be copied. */
+  //    s->compressed_len += len << 3;
+  //    s->bits_sent += len << 3;
+  //#endif
+
+      /* Copy uncompressed bytes from the window to next_out. */
+      if (left) {
+        if (left > len) {
+          left = len;
+        }
+        //zmemcpy(s->strm->next_out, s->window + s->block_start, left);
+        s.strm.output.set(s.window.subarray(s.block_start, s.block_start + left), s.strm.next_out);
+        s.strm.next_out += left;
+        s.strm.avail_out -= left;
+        s.strm.total_out += left;
+        s.block_start += left;
+        len -= left;
+      }
+
+      /* Copy uncompressed bytes directly from next_in to next_out, updating
+       * the check value.
+       */
+      if (len) {
+        read_buf(s.strm, s.strm.output, s.strm.next_out, len);
+        s.strm.next_out += len;
+        s.strm.avail_out -= len;
+        s.strm.total_out += len;
+      }
+    } while (last === 0);
+
+    /* Update the sliding window with the last s->w_size bytes of the copied
+     * data, or append all of the copied data to the existing window if less
+     * than s->w_size bytes were copied. Also update the number of bytes to
+     * insert in the hash tables, in the event that deflateParams() switches to
+     * a non-zero compression level.
+     */
+    used -= s.strm.avail_in;    /* number of input bytes directly copied */
+    if (used) {
+      /* If any input was used, then no unused input remains in the window,
+       * therefore s->block_start == s->strstart.
+       */
+      if (used >= s.w_size) {  /* supplant the previous history */
+        s.matches = 2;     /* clear hash */
+        //zmemcpy(s->window, s->strm->next_in - s->w_size, s->w_size);
+        s.window.set(s.strm.input.subarray(s.strm.next_in - s.w_size, s.strm.next_in), 0);
+        s.strstart = s.w_size;
+        s.insert = s.strstart;
+      }
+      else {
+        if (s.window_size - s.strstart <= used) {
+          /* Slide the window down. */
+          s.strstart -= s.w_size;
+          //zmemcpy(s->window, s->window + s->w_size, s->strstart);
+          s.window.set(s.window.subarray(s.w_size, s.w_size + s.strstart), 0);
+          if (s.matches < 2) {
+            s.matches++;   /* add a pending slide_hash() */
+          }
+          if (s.insert > s.strstart) {
+            s.insert = s.strstart;
+          }
+        }
+        //zmemcpy(s->window + s->strstart, s->strm->next_in - used, used);
+        s.window.set(s.strm.input.subarray(s.strm.next_in - used, s.strm.next_in), s.strstart);
+        s.strstart += used;
+        s.insert += used > s.w_size - s.insert ? s.w_size - s.insert : used;
+      }
+      s.block_start = s.strstart;
+    }
+    if (s.high_water < s.strstart) {
+      s.high_water = s.strstart;
     }
 
-    s.insert = 0;
-
-    if (flush === Z_FINISH$1) {
-      /*** FLUSH_BLOCK(s, 1); ***/
-      flush_block_only(s, true);
-      if (s.strm.avail_out === 0) {
-        return BS_FINISH_STARTED;
-      }
-      /***/
+    /* If the last block was written to next_out, then done. */
+    if (last) {
       return BS_FINISH_DONE;
     }
 
-    if (s.strstart > s.block_start) {
-      /*** FLUSH_BLOCK(s, 0); ***/
-      flush_block_only(s, false);
-      if (s.strm.avail_out === 0) {
-        return BS_NEED_MORE;
-      }
-      /***/
+    /* If flushing and all input has been consumed, then done. */
+    if (flush !== Z_NO_FLUSH$1 && flush !== Z_FINISH$1 &&
+      s.strm.avail_in === 0 && s.strstart === s.block_start) {
+      return BS_BLOCK_DONE;
     }
 
-    return BS_NEED_MORE;
+    /* Fill the window with any remaining input. */
+    have = s.window_size - s.strstart;
+    if (s.strm.avail_in > have && s.block_start >= s.w_size) {
+      /* Slide the window down. */
+      s.block_start -= s.w_size;
+      s.strstart -= s.w_size;
+      //zmemcpy(s->window, s->window + s->w_size, s->strstart);
+      s.window.set(s.window.subarray(s.w_size, s.w_size + s.strstart), 0);
+      if (s.matches < 2) {
+        s.matches++;       /* add a pending slide_hash() */
+      }
+      have += s.w_size;      /* more space now */
+      if (s.insert > s.strstart) {
+        s.insert = s.strstart;
+      }
+    }
+    if (have > s.strm.avail_in) {
+      have = s.strm.avail_in;
+    }
+    if (have) {
+      read_buf(s.strm, s.window, s.strstart, have);
+      s.strstart += have;
+      s.insert += have > s.w_size - s.insert ? s.w_size - s.insert : have;
+    }
+    if (s.high_water < s.strstart) {
+      s.high_water = s.strstart;
+    }
+
+    /* There was not enough avail_out to write a complete worthy or flushed
+     * stored block to next_out. Write a stored block to pending instead, if we
+     * have enough input for a worthy block, or if flushing and there is enough
+     * room for the remaining input as a stored block in the pending buffer.
+     */
+    have = (s.bi_valid + 42) >> 3;     /* number of header bytes */
+      /* maximum stored block length that will fit in pending: */
+    have = s.pending_buf_size - have > 65535/* MAX_STORED */ ? 65535/* MAX_STORED */ : s.pending_buf_size - have;
+    min_block = have > s.w_size ? s.w_size : have;
+    left = s.strstart - s.block_start;
+    if (left >= min_block ||
+       ((left || flush === Z_FINISH$1) && flush !== Z_NO_FLUSH$1 &&
+       s.strm.avail_in === 0 && left <= have)) {
+      len = left > have ? have : left;
+      last = flush === Z_FINISH$1 && s.strm.avail_in === 0 &&
+           len === left ? 1 : 0;
+      _tr_stored_block(s, s.block_start, len, last);
+      s.block_start += len;
+      flush_pending(s.strm);
+    }
+
+    /* We've done all we can with the available input and output. */
+    return last ? BS_FINISH_STARTED : BS_NEED_MORE;
   };
+
 
   /* ===========================================================================
    * Compress as much as possible from the input stream, return the current
@@ -2132,7 +2203,7 @@
       /***/
       return BS_FINISH_DONE;
     }
-    if (s.last_lit) {
+    if (s.sym_next) {
       /*** FLUSH_BLOCK(s, 0); ***/
       flush_block_only(s, false);
       if (s.strm.avail_out === 0) {
@@ -2293,7 +2364,7 @@
       /***/
       return BS_FINISH_DONE;
     }
-    if (s.last_lit) {
+    if (s.sym_next) {
       /*** FLUSH_BLOCK(s, 0); ***/
       flush_block_only(s, false);
       if (s.strm.avail_out === 0) {
@@ -2392,7 +2463,7 @@
       /***/
       return BS_FINISH_DONE;
     }
-    if (s.last_lit) {
+    if (s.sym_next) {
       /*** FLUSH_BLOCK(s, 0); ***/
       flush_block_only(s, false);
       if (s.strm.avail_out === 0) {
@@ -2449,7 +2520,7 @@
       /***/
       return BS_FINISH_DONE;
     }
-    if (s.last_lit) {
+    if (s.sym_next) {
       /*** FLUSH_BLOCK(s, 0); ***/
       flush_block_only(s, false);
       if (s.strm.avail_out === 0) {
@@ -2650,7 +2721,7 @@
     /* Depth of each subtree used as tie breaker for trees of equal frequency
      */
 
-    this.l_buf = 0;          /* buffer index for literals or lengths */
+    this.sym_buf = 0;        /* buffer for distances and literals/lengths */
 
     this.lit_bufsize = 0;
     /* Size of match buffer for literals/lengths.  There are 4 reasons for
@@ -2672,13 +2743,8 @@
      *   - I can't count above 4
      */
 
-    this.last_lit = 0;      /* running index in l_buf */
-
-    this.d_buf = 0;
-    /* Buffer index for distances. To simplify the code, d_buf and l_buf have
-     * the same number of elements. To use different lengths, an extra flag
-     * array would be necessary.
-     */
+    this.sym_next = 0;      /* running index in sym_buf */
+    this.sym_end = 0;       /* symbol table full when sym_next reaches this */
 
     this.opt_len = 0;       /* bit length of current block with optimal trees */
     this.static_len = 0;    /* bit length of current block with static trees */
@@ -2706,9 +2772,34 @@
   }
 
 
+  /* =========================================================================
+   * Check for a valid deflate stream state. Return 0 if ok, 1 if not.
+   */
+  const deflateStateCheck = (strm) => {
+
+    if (!strm) {
+      return 1;
+    }
+    const s = strm.state;
+    if (!s || s.strm !== strm || (s.status !== INIT_STATE &&
+  //#ifdef GZIP
+                                  s.status !== GZIP_STATE &&
+  //#endif
+                                  s.status !== EXTRA_STATE &&
+                                  s.status !== NAME_STATE &&
+                                  s.status !== COMMENT_STATE &&
+                                  s.status !== HCRC_STATE &&
+                                  s.status !== BUSY_STATE &&
+                                  s.status !== FINISH_STATE)) {
+      return 1;
+    }
+    return 0;
+  };
+
+
   const deflateResetKeep = (strm) => {
 
-    if (!strm || !strm.state) {
+    if (deflateStateCheck(strm)) {
       return err(strm, Z_STREAM_ERROR);
     }
 
@@ -2723,12 +2814,16 @@
       s.wrap = -s.wrap;
       /* was made negative by deflate(..., Z_FINISH); */
     }
-    s.status = (s.wrap ? INIT_STATE : BUSY_STATE);
+    s.status =
+  //#ifdef GZIP
+      s.wrap === 2 ? GZIP_STATE :
+  //#endif
+      s.wrap ? INIT_STATE : BUSY_STATE;
     strm.adler = (s.wrap === 2) ?
       0  // crc32(0, Z_NULL, 0)
     :
       1; // adler32(0, Z_NULL, 0)
-    s.last_flush = Z_NO_FLUSH$1;
+    s.last_flush = -2;
     _tr_init(s);
     return Z_OK$1;
   };
@@ -2746,8 +2841,9 @@
 
   const deflateSetHeader = (strm, head) => {
 
-    if (!strm || !strm.state) { return Z_STREAM_ERROR; }
-    if (strm.state.wrap !== 2) { return Z_STREAM_ERROR; }
+    if (deflateStateCheck(strm) || strm.state.wrap !== 2) {
+      return Z_STREAM_ERROR;
+    }
     strm.state.gzhead = head;
     return Z_OK$1;
   };
@@ -2777,7 +2873,7 @@
 
     if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || method !== Z_DEFLATED$1 ||
       windowBits < 8 || windowBits > 15 || level < 0 || level > 9 ||
-      strategy < 0 || strategy > Z_FIXED) {
+      strategy < 0 || strategy > Z_FIXED || (windowBits === 8 && wrap !== 1)) {
       return err(strm, Z_STREAM_ERROR);
     }
 
@@ -2791,6 +2887,7 @@
 
     strm.state = s;
     s.strm = strm;
+    s.status = INIT_STATE;     /* to pass state test in deflateReset() */
 
     s.wrap = wrap;
     s.gzhead = null;
@@ -2812,18 +2909,58 @@
 
     s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
 
-    s.pending_buf_size = s.lit_bufsize * 4;
+    /* We overlay pending_buf and sym_buf. This works since the average size
+     * for length/distance pairs over any compressed block is assured to be 31
+     * bits or less.
+     *
+     * Analysis: The longest fixed codes are a length code of 8 bits plus 5
+     * extra bits, for lengths 131 to 257. The longest fixed distance codes are
+     * 5 bits plus 13 extra bits, for distances 16385 to 32768. The longest
+     * possible fixed-codes length/distance pair is then 31 bits total.
+     *
+     * sym_buf starts one-fourth of the way into pending_buf. So there are
+     * three bytes in sym_buf for every four bytes in pending_buf. Each symbol
+     * in sym_buf is three bytes -- two for the distance and one for the
+     * literal/length. As each symbol is consumed, the pointer to the next
+     * sym_buf value to read moves forward three bytes. From that symbol, up to
+     * 31 bits are written to pending_buf. The closest the written pending_buf
+     * bits gets to the next sym_buf symbol to read is just before the last
+     * code is written. At that time, 31*(n-2) bits have been written, just
+     * after 24*(n-2) bits have been consumed from sym_buf. sym_buf starts at
+     * 8*n bits into pending_buf. (Note that the symbol buffer fills when n-1
+     * symbols are written.) The closest the writing gets to what is unread is
+     * then n+14 bits. Here n is lit_bufsize, which is 16384 by default, and
+     * can range from 128 to 32768.
+     *
+     * Therefore, at a minimum, there are 142 bits of space between what is
+     * written and what is read in the overlain buffers, so the symbols cannot
+     * be overwritten by the compressed data. That space is actually 139 bits,
+     * due to the three-bit fixed-code block header.
+     *
+     * That covers the case where either Z_FIXED is specified, forcing fixed
+     * codes, or when the use of fixed codes is chosen, because that choice
+     * results in a smaller compressed block than dynamic codes. That latter
+     * condition then assures that the above analysis also covers all dynamic
+     * blocks. A dynamic-code block will only be chosen to be emitted if it has
+     * fewer bits than a fixed-code block would for the same set of symbols.
+     * Therefore its average symbol length is assured to be less than 31. So
+     * the compressed data for a dynamic block also cannot overwrite the
+     * symbols from which it is being constructed.
+     */
 
-    //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
-    //s->pending_buf = (uchf *) overlay;
+    s.pending_buf_size = s.lit_bufsize * 4;
     s.pending_buf = new Uint8Array(s.pending_buf_size);
 
     // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
-    //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
-    s.d_buf = 1 * s.lit_bufsize;
+    //s->sym_buf = s->pending_buf + s->lit_bufsize;
+    s.sym_buf = s.lit_bufsize;
 
-    //s->l_buf = s->pending_buf + (1+sizeof(ush))*s->lit_bufsize;
-    s.l_buf = (1 + 2) * s.lit_bufsize;
+    //s->sym_end = (s->lit_bufsize - 1) * 3;
+    s.sym_end = (s.lit_bufsize - 1) * 3;
+    /* We avoid equality with lit_bufsize*3 because of wraparound at 64K
+     * on 16 bit machines and because stored blocks are restricted to
+     * 64K-1 bytes.
+     */
 
     s.level = level;
     s.strategy = strategy;
@@ -2838,226 +2975,23 @@
   };
 
 
+  /* ========================================================================= */
   const deflate$1 = (strm, flush) => {
 
-    let beg, val; // for gzip header write only
-
-    if (!strm || !strm.state ||
-      flush > Z_BLOCK || flush < 0) {
+    if (deflateStateCheck(strm) || flush > Z_BLOCK || flush < 0) {
       return strm ? err(strm, Z_STREAM_ERROR) : Z_STREAM_ERROR;
     }
 
     const s = strm.state;
 
     if (!strm.output ||
-        (!strm.input && strm.avail_in !== 0) ||
+        (strm.avail_in !== 0 && !strm.input) ||
         (s.status === FINISH_STATE && flush !== Z_FINISH$1)) {
       return err(strm, (strm.avail_out === 0) ? Z_BUF_ERROR : Z_STREAM_ERROR);
     }
 
-    s.strm = strm; /* just in case */
     const old_flush = s.last_flush;
     s.last_flush = flush;
-
-    /* Write the header */
-    if (s.status === INIT_STATE) {
-
-      if (s.wrap === 2) { // GZIP header
-        strm.adler = 0;  //crc32(0L, Z_NULL, 0);
-        put_byte(s, 31);
-        put_byte(s, 139);
-        put_byte(s, 8);
-        if (!s.gzhead) { // s->gzhead == Z_NULL
-          put_byte(s, 0);
-          put_byte(s, 0);
-          put_byte(s, 0);
-          put_byte(s, 0);
-          put_byte(s, 0);
-          put_byte(s, s.level === 9 ? 2 :
-                      (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
-                       4 : 0));
-          put_byte(s, OS_CODE);
-          s.status = BUSY_STATE;
-        }
-        else {
-          put_byte(s, (s.gzhead.text ? 1 : 0) +
-                      (s.gzhead.hcrc ? 2 : 0) +
-                      (!s.gzhead.extra ? 0 : 4) +
-                      (!s.gzhead.name ? 0 : 8) +
-                      (!s.gzhead.comment ? 0 : 16)
-          );
-          put_byte(s, s.gzhead.time & 0xff);
-          put_byte(s, (s.gzhead.time >> 8) & 0xff);
-          put_byte(s, (s.gzhead.time >> 16) & 0xff);
-          put_byte(s, (s.gzhead.time >> 24) & 0xff);
-          put_byte(s, s.level === 9 ? 2 :
-                      (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
-                       4 : 0));
-          put_byte(s, s.gzhead.os & 0xff);
-          if (s.gzhead.extra && s.gzhead.extra.length) {
-            put_byte(s, s.gzhead.extra.length & 0xff);
-            put_byte(s, (s.gzhead.extra.length >> 8) & 0xff);
-          }
-          if (s.gzhead.hcrc) {
-            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending, 0);
-          }
-          s.gzindex = 0;
-          s.status = EXTRA_STATE;
-        }
-      }
-      else // DEFLATE header
-      {
-        let header = (Z_DEFLATED$1 + ((s.w_bits - 8) << 4)) << 8;
-        let level_flags = -1;
-
-        if (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2) {
-          level_flags = 0;
-        } else if (s.level < 6) {
-          level_flags = 1;
-        } else if (s.level === 6) {
-          level_flags = 2;
-        } else {
-          level_flags = 3;
-        }
-        header |= (level_flags << 6);
-        if (s.strstart !== 0) { header |= PRESET_DICT; }
-        header += 31 - (header % 31);
-
-        s.status = BUSY_STATE;
-        putShortMSB(s, header);
-
-        /* Save the adler32 of the preset dictionary: */
-        if (s.strstart !== 0) {
-          putShortMSB(s, strm.adler >>> 16);
-          putShortMSB(s, strm.adler & 0xffff);
-        }
-        strm.adler = 1; // adler32(0L, Z_NULL, 0);
-      }
-    }
-
-  //#ifdef GZIP
-    if (s.status === EXTRA_STATE) {
-      if (s.gzhead.extra/* != Z_NULL*/) {
-        beg = s.pending;  /* start of bytes to update crc */
-
-        while (s.gzindex < (s.gzhead.extra.length & 0xffff)) {
-          if (s.pending === s.pending_buf_size) {
-            if (s.gzhead.hcrc && s.pending > beg) {
-              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-            }
-            flush_pending(strm);
-            beg = s.pending;
-            if (s.pending === s.pending_buf_size) {
-              break;
-            }
-          }
-          put_byte(s, s.gzhead.extra[s.gzindex] & 0xff);
-          s.gzindex++;
-        }
-        if (s.gzhead.hcrc && s.pending > beg) {
-          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-        }
-        if (s.gzindex === s.gzhead.extra.length) {
-          s.gzindex = 0;
-          s.status = NAME_STATE;
-        }
-      }
-      else {
-        s.status = NAME_STATE;
-      }
-    }
-    if (s.status === NAME_STATE) {
-      if (s.gzhead.name/* != Z_NULL*/) {
-        beg = s.pending;  /* start of bytes to update crc */
-        //int val;
-
-        do {
-          if (s.pending === s.pending_buf_size) {
-            if (s.gzhead.hcrc && s.pending > beg) {
-              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-            }
-            flush_pending(strm);
-            beg = s.pending;
-            if (s.pending === s.pending_buf_size) {
-              val = 1;
-              break;
-            }
-          }
-          // JS specific: little magic to add zero terminator to end of string
-          if (s.gzindex < s.gzhead.name.length) {
-            val = s.gzhead.name.charCodeAt(s.gzindex++) & 0xff;
-          } else {
-            val = 0;
-          }
-          put_byte(s, val);
-        } while (val !== 0);
-
-        if (s.gzhead.hcrc && s.pending > beg) {
-          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-        }
-        if (val === 0) {
-          s.gzindex = 0;
-          s.status = COMMENT_STATE;
-        }
-      }
-      else {
-        s.status = COMMENT_STATE;
-      }
-    }
-    if (s.status === COMMENT_STATE) {
-      if (s.gzhead.comment/* != Z_NULL*/) {
-        beg = s.pending;  /* start of bytes to update crc */
-        //int val;
-
-        do {
-          if (s.pending === s.pending_buf_size) {
-            if (s.gzhead.hcrc && s.pending > beg) {
-              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-            }
-            flush_pending(strm);
-            beg = s.pending;
-            if (s.pending === s.pending_buf_size) {
-              val = 1;
-              break;
-            }
-          }
-          // JS specific: little magic to add zero terminator to end of string
-          if (s.gzindex < s.gzhead.comment.length) {
-            val = s.gzhead.comment.charCodeAt(s.gzindex++) & 0xff;
-          } else {
-            val = 0;
-          }
-          put_byte(s, val);
-        } while (val !== 0);
-
-        if (s.gzhead.hcrc && s.pending > beg) {
-          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
-        }
-        if (val === 0) {
-          s.status = HCRC_STATE;
-        }
-      }
-      else {
-        s.status = HCRC_STATE;
-      }
-    }
-    if (s.status === HCRC_STATE) {
-      if (s.gzhead.hcrc) {
-        if (s.pending + 2 > s.pending_buf_size) {
-          flush_pending(strm);
-        }
-        if (s.pending + 2 <= s.pending_buf_size) {
-          put_byte(s, strm.adler & 0xff);
-          put_byte(s, (strm.adler >> 8) & 0xff);
-          strm.adler = 0; //crc32(0L, Z_NULL, 0);
-          s.status = BUSY_STATE;
-        }
-      }
-      else {
-        s.status = BUSY_STATE;
-      }
-    }
-  //#endif
 
     /* Flush as much pending output as possible */
     if (s.pending !== 0) {
@@ -3087,13 +3021,238 @@
       return err(strm, Z_BUF_ERROR);
     }
 
+    /* Write the header */
+    if (s.status === INIT_STATE && s.wrap === 0) {
+      s.status = BUSY_STATE;
+    }
+    if (s.status === INIT_STATE) {
+      /* zlib header */
+      let header = (Z_DEFLATED$1 + ((s.w_bits - 8) << 4)) << 8;
+      let level_flags = -1;
+
+      if (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2) {
+        level_flags = 0;
+      } else if (s.level < 6) {
+        level_flags = 1;
+      } else if (s.level === 6) {
+        level_flags = 2;
+      } else {
+        level_flags = 3;
+      }
+      header |= (level_flags << 6);
+      if (s.strstart !== 0) { header |= PRESET_DICT; }
+      header += 31 - (header % 31);
+
+      putShortMSB(s, header);
+
+      /* Save the adler32 of the preset dictionary: */
+      if (s.strstart !== 0) {
+        putShortMSB(s, strm.adler >>> 16);
+        putShortMSB(s, strm.adler & 0xffff);
+      }
+      strm.adler = 1; // adler32(0L, Z_NULL, 0);
+      s.status = BUSY_STATE;
+
+      /* Compression must start with an empty pending buffer */
+      flush_pending(strm);
+      if (s.pending !== 0) {
+        s.last_flush = -1;
+        return Z_OK$1;
+      }
+    }
+  //#ifdef GZIP
+    if (s.status === GZIP_STATE) {
+      /* gzip header */
+      strm.adler = 0;  //crc32(0L, Z_NULL, 0);
+      put_byte(s, 31);
+      put_byte(s, 139);
+      put_byte(s, 8);
+      if (!s.gzhead) { // s->gzhead == Z_NULL
+        put_byte(s, 0);
+        put_byte(s, 0);
+        put_byte(s, 0);
+        put_byte(s, 0);
+        put_byte(s, 0);
+        put_byte(s, s.level === 9 ? 2 :
+                    (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
+                     4 : 0));
+        put_byte(s, OS_CODE);
+        s.status = BUSY_STATE;
+
+        /* Compression must start with an empty pending buffer */
+        flush_pending(strm);
+        if (s.pending !== 0) {
+          s.last_flush = -1;
+          return Z_OK$1;
+        }
+      }
+      else {
+        put_byte(s, (s.gzhead.text ? 1 : 0) +
+                    (s.gzhead.hcrc ? 2 : 0) +
+                    (!s.gzhead.extra ? 0 : 4) +
+                    (!s.gzhead.name ? 0 : 8) +
+                    (!s.gzhead.comment ? 0 : 16)
+        );
+        put_byte(s, s.gzhead.time & 0xff);
+        put_byte(s, (s.gzhead.time >> 8) & 0xff);
+        put_byte(s, (s.gzhead.time >> 16) & 0xff);
+        put_byte(s, (s.gzhead.time >> 24) & 0xff);
+        put_byte(s, s.level === 9 ? 2 :
+                    (s.strategy >= Z_HUFFMAN_ONLY || s.level < 2 ?
+                     4 : 0));
+        put_byte(s, s.gzhead.os & 0xff);
+        if (s.gzhead.extra && s.gzhead.extra.length) {
+          put_byte(s, s.gzhead.extra.length & 0xff);
+          put_byte(s, (s.gzhead.extra.length >> 8) & 0xff);
+        }
+        if (s.gzhead.hcrc) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending, 0);
+        }
+        s.gzindex = 0;
+        s.status = EXTRA_STATE;
+      }
+    }
+    if (s.status === EXTRA_STATE) {
+      if (s.gzhead.extra/* != Z_NULL*/) {
+        let beg = s.pending;   /* start of bytes to update crc */
+        let left = (s.gzhead.extra.length & 0xffff) - s.gzindex;
+        while (s.pending + left > s.pending_buf_size) {
+          let copy = s.pending_buf_size - s.pending;
+          // zmemcpy(s.pending_buf + s.pending,
+          //    s.gzhead.extra + s.gzindex, copy);
+          s.pending_buf.set(s.gzhead.extra.subarray(s.gzindex, s.gzindex + copy), s.pending);
+          s.pending = s.pending_buf_size;
+          //--- HCRC_UPDATE(beg) ---//
+          if (s.gzhead.hcrc && s.pending > beg) {
+            strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+          }
+          //---//
+          s.gzindex += copy;
+          flush_pending(strm);
+          if (s.pending !== 0) {
+            s.last_flush = -1;
+            return Z_OK$1;
+          }
+          beg = 0;
+          left -= copy;
+        }
+        // JS specific: s.gzhead.extra may be TypedArray or Array for backward compatibility
+        //              TypedArray.slice and TypedArray.from don't exist in IE10-IE11
+        let gzhead_extra = new Uint8Array(s.gzhead.extra);
+        // zmemcpy(s->pending_buf + s->pending,
+        //     s->gzhead->extra + s->gzindex, left);
+        s.pending_buf.set(gzhead_extra.subarray(s.gzindex, s.gzindex + left), s.pending);
+        s.pending += left;
+        //--- HCRC_UPDATE(beg) ---//
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        //---//
+        s.gzindex = 0;
+      }
+      s.status = NAME_STATE;
+    }
+    if (s.status === NAME_STATE) {
+      if (s.gzhead.name/* != Z_NULL*/) {
+        let beg = s.pending;   /* start of bytes to update crc */
+        let val;
+        do {
+          if (s.pending === s.pending_buf_size) {
+            //--- HCRC_UPDATE(beg) ---//
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            }
+            //---//
+            flush_pending(strm);
+            if (s.pending !== 0) {
+              s.last_flush = -1;
+              return Z_OK$1;
+            }
+            beg = 0;
+          }
+          // JS specific: little magic to add zero terminator to end of string
+          if (s.gzindex < s.gzhead.name.length) {
+            val = s.gzhead.name.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
+          }
+          put_byte(s, val);
+        } while (val !== 0);
+        //--- HCRC_UPDATE(beg) ---//
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        //---//
+        s.gzindex = 0;
+      }
+      s.status = COMMENT_STATE;
+    }
+    if (s.status === COMMENT_STATE) {
+      if (s.gzhead.comment/* != Z_NULL*/) {
+        let beg = s.pending;   /* start of bytes to update crc */
+        let val;
+        do {
+          if (s.pending === s.pending_buf_size) {
+            //--- HCRC_UPDATE(beg) ---//
+            if (s.gzhead.hcrc && s.pending > beg) {
+              strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+            }
+            //---//
+            flush_pending(strm);
+            if (s.pending !== 0) {
+              s.last_flush = -1;
+              return Z_OK$1;
+            }
+            beg = 0;
+          }
+          // JS specific: little magic to add zero terminator to end of string
+          if (s.gzindex < s.gzhead.comment.length) {
+            val = s.gzhead.comment.charCodeAt(s.gzindex++) & 0xff;
+          } else {
+            val = 0;
+          }
+          put_byte(s, val);
+        } while (val !== 0);
+        //--- HCRC_UPDATE(beg) ---//
+        if (s.gzhead.hcrc && s.pending > beg) {
+          strm.adler = crc32_1(strm.adler, s.pending_buf, s.pending - beg, beg);
+        }
+        //---//
+      }
+      s.status = HCRC_STATE;
+    }
+    if (s.status === HCRC_STATE) {
+      if (s.gzhead.hcrc) {
+        if (s.pending + 2 > s.pending_buf_size) {
+          flush_pending(strm);
+          if (s.pending !== 0) {
+            s.last_flush = -1;
+            return Z_OK$1;
+          }
+        }
+        put_byte(s, strm.adler & 0xff);
+        put_byte(s, (strm.adler >> 8) & 0xff);
+        strm.adler = 0; //crc32(0L, Z_NULL, 0);
+      }
+      s.status = BUSY_STATE;
+
+      /* Compression must start with an empty pending buffer */
+      flush_pending(strm);
+      if (s.pending !== 0) {
+        s.last_flush = -1;
+        return Z_OK$1;
+      }
+    }
+  //#endif
+
     /* Start a new block or continue the current one.
      */
     if (strm.avail_in !== 0 || s.lookahead !== 0 ||
       (flush !== Z_NO_FLUSH$1 && s.status !== FINISH_STATE)) {
-      let bstate = (s.strategy === Z_HUFFMAN_ONLY) ? deflate_huff(s, flush) :
-        (s.strategy === Z_RLE ? deflate_rle(s, flush) :
-          configuration_table[s.level].func(s, flush));
+      let bstate = s.level === 0 ? deflate_stored(s, flush) :
+                   s.strategy === Z_HUFFMAN_ONLY ? deflate_huff(s, flush) :
+                   s.strategy === Z_RLE ? deflate_rle(s, flush) :
+                   configuration_table[s.level].func(s, flush);
 
       if (bstate === BS_FINISH_STARTED || bstate === BS_FINISH_DONE) {
         s.status = FINISH_STATE;
@@ -3140,8 +3299,6 @@
         }
       }
     }
-    //Assert(strm->avail_out > 0, "bug2");
-    //if (strm.avail_out <= 0) { throw new Error("bug2");}
 
     if (flush !== Z_FINISH$1) { return Z_OK$1; }
     if (s.wrap <= 0) { return Z_STREAM_END$1; }
@@ -3175,21 +3332,11 @@
 
   const deflateEnd = (strm) => {
 
-    if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
+    if (deflateStateCheck(strm)) {
       return Z_STREAM_ERROR;
     }
 
     const status = strm.state.status;
-    if (status !== INIT_STATE &&
-      status !== EXTRA_STATE &&
-      status !== NAME_STATE &&
-      status !== COMMENT_STATE &&
-      status !== HCRC_STATE &&
-      status !== BUSY_STATE &&
-      status !== FINISH_STATE
-    ) {
-      return err(strm, Z_STREAM_ERROR);
-    }
 
     strm.state = null;
 
@@ -3205,7 +3352,7 @@
 
     let dictLength = dictionary.length;
 
-    if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
+    if (deflateStateCheck(strm)) {
       return Z_STREAM_ERROR;
     }
 
@@ -3291,6 +3438,7 @@
   /* Not implemented
   module.exports.deflateBound = deflateBound;
   module.exports.deflateCopy = deflateCopy;
+  module.exports.deflateGetDictionary = deflateGetDictionary;
   module.exports.deflateParams = deflateParams;
   module.exports.deflatePending = deflatePending;
   module.exports.deflatePrime = deflatePrime;
@@ -3880,7 +4028,7 @@
 
   /**
    * deflate(data[, options]) -> Uint8Array
-   * - data (Uint8Array|String): input data to compress.
+   * - data (Uint8Array|ArrayBuffer|String): input data to compress.
    * - options (Object): zlib deflate options.
    *
    * Compress `data` with deflate algorithm and `options`.
@@ -3924,7 +4072,7 @@
 
   /**
    * deflateRaw(data[, options]) -> Uint8Array
-   * - data (Uint8Array|String): input data to compress.
+   * - data (Uint8Array|ArrayBuffer|String): input data to compress.
    * - options (Object): zlib deflate options.
    *
    * The same as [[deflate]], but creates raw data, without wrapper
@@ -3939,7 +4087,7 @@
 
   /**
    * gzip(data[, options]) -> Uint8Array
-   * - data (Uint8Array|String): input data to compress.
+   * - data (Uint8Array|ArrayBuffer|String): input data to compress.
    * - options (Object): zlib deflate options.
    *
    * The same as [[deflate]], but create gzip wrapper instead of
@@ -3968,11 +4116,11 @@
 
   exports.Deflate = Deflate_1;
   exports.constants = constants;
-  exports['default'] = deflate_1;
+  exports["default"] = deflate_1;
   exports.deflate = deflate_2;
   exports.deflateRaw = deflateRaw_1;
   exports.gzip = gzip_1;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
