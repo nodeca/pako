@@ -6720,6 +6720,20 @@
 
       if (strm.avail_in === 0) break;
     }
+	/** Returns true but ends with false and msg is empty */
+	if(!this.ended && this.msg === ""){
+		/** strm is ended*/
+		if(strm && strm.avail_in === 0 && strm.avail_out > 0 && 
+			strm.total_in == strm.input.length){
+			/** chunks data size != strm.total_out*/
+			let size = this.chunks.length * chunkSize;
+			if(size < strm.total_out){
+				this.chunks.push(strm.output.slice(0, strm.total_out - size));
+				this.onEnd(Z_OK);
+				this.ended = true;
+			}
+		}
+	}
 
     return true;
   };
