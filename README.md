@@ -3,6 +3,7 @@ pako
 
 [![CI](https://github.com/nodeca/pako/workflows/CI/badge.svg)](https://github.com/nodeca/pako/actions)
 [![NPM version](https://img.shields.io/npm/v/pako.svg)](https://www.npmjs.org/package/pako)
+[![NPM downloads](https://img.shields.io/npm/dm/pako.svg)](https://npm-compare.com/pako/#timeRange=FIVE_YEARS)
 
 > zlib port to javascript, very fast!
 
