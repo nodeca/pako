@@ -103,6 +103,20 @@ describe('Encode/Decode', () => {
     assert.ok(strings.buf2string(utf8sample), utf16sample);
   });
 
+  it('0xFF byte should not consume subsequent bytes', () => {
+    TextDecoder = null;
+
+    // 0xFF is invalid UTF-8. With the bug (_utf8len[255] = 6), buf2string
+    // treats it as a 6-byte sequence, swallowing the next 5 valid bytes.
+    const buf = new Uint8Array([ 0xFF, 0x41, 0x42, 0x43, 0x44, 0x45 ]);
+    const result = strings.buf2string(buf);
+
+    // Should produce 6 characters: one for the invalid 0xFF byte,
+    // then 'A', 'B', 'C', 'D', 'E'
+    assert.strictEqual(result.length, 6);
+    assert.strictEqual(result.slice(1), 'ABCDE');
+  });
+
 });
 
 
