@@ -8,7 +8,7 @@ pako
 
 __Why pako is cool:__
 
-- Results are binary equal to well known [zlib](http://www.zlib.net/) (now contains ported zlib v1.2.8).
+- Results are binary equal to well known [zlib](http://www.zlib.net/) (now contains ported zlib v1.3.2).
 - Almost as fast in modern JS engines as C implementation (see benchmarks).
 - Works in browsers, you can browserify any separate component.
 

@@ -12,7 +12,7 @@ Key differences:
   structures, header files)
 - Specific API methods are not implemented (see notes in root readme)
 
-This port is based on zlib 1.2.8.
+This port is based on zlib 1.3.2.
 
 This port is under zlib license (see below) with contribution and addition of javascript
 port under expat license (see LICENSE at root of project)
