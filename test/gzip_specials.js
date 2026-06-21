@@ -66,11 +66,10 @@ describe('Gzip special cases', () => {
     );
   });
 
-  it.skip('Read stream with SYNC marks (multistream source, file 2)', () => {
+  it('Read stream with SYNC marks (multistream source, file 2)', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined-bgzip.gz'));
 
     assert.deepStrictEqual(
-      // Currently fails with this chunk size
       pako.ungzip(data, { chunkSize: 16384 }),
       new Uint8Array(zlib.gunzipSync(data))
     );
