@@ -2,7 +2,7 @@
 
 const pako = require('../../../');
 
-// Pako with the classic zlib hash (legacyHash), instead of fast ANZAC++.
+// Pako with default zlib hash (slower).
 exports.run = (data, level) => {
-  return pako.deflate(data.typed, { level: level, legacyHash: true });
+  return pako.deflate(data.typed, { level: level });
 };

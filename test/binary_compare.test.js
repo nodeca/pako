@@ -132,9 +132,9 @@ describe('Deflate vs canonical zlib snapshots (legacyHash)', () => {
 });
 
 
-// pako's default ANZAC++ hash matches node.js zlib output. Validate against the
-// running node directly, so no fixtures are needed.
-describe('Deflate vs node.js zlib (default hash)', () => {
+// pako's ANZAC++ hash (legacyHash: false) matches node.js zlib output. Validate
+// against the running node directly, so no fixtures are needed.
+describe('Deflate vs node.js zlib (ANZAC++ hash)', () => {
 
   function testNode(pako_result, node_result, ignore_os) {
     node_result = Buffer.from(node_result);
@@ -148,15 +148,15 @@ describe('Deflate vs node.js zlib (default hash)', () => {
   describe('Deflate defaults', () => {
 
     it('deflate, no options', () => {
-      testNode(pako.deflate(sample), zlib.deflateSync(buf));
+      testNode(pako.deflate(sample, { legacyHash: false }), zlib.deflateSync(buf));
     });
 
     it('deflate raw, no options', () => {
-      testNode(pako.deflateRaw(sample), zlib.deflateRawSync(buf));
+      testNode(pako.deflateRaw(sample, { legacyHash: false }), zlib.deflateRawSync(buf));
     });
 
     it('gzip, no options', () => {
-      testNode(pako.gzip(sample), zlib.gzipSync(buf), true);
+      testNode(pako.gzip(sample, { legacyHash: false }), zlib.gzipSync(buf), true);
     });
   });
 
@@ -165,7 +165,7 @@ describe('Deflate vs node.js zlib (default hash)', () => {
 
     for (const level of [ 9, 8, 7, 6, 5, 4, 3, 2, 1, -1 ]) {
       it(`level ${level}`, () => {
-        testNode(pako.deflate(sample, { level }), zlib.deflateSync(buf, { level }));
+        testNode(pako.deflate(sample, { level, legacyHash: false }), zlib.deflateSync(buf, { level }));
       });
     }
   });
@@ -175,11 +175,11 @@ describe('Deflate vs node.js zlib (default hash)', () => {
 
     for (const windowBits of [ 15, 14, 13, 12, 11, 10, 9, 8 ]) {
       it(`windowBits ${windowBits}`, () => {
-        testNode(pako.deflate(sample, { windowBits }), zlib.deflateSync(buf, { windowBits }));
+        testNode(pako.deflate(sample, { windowBits, legacyHash: false }), zlib.deflateSync(buf, { windowBits }));
       });
     }
     it('windowBits -15 (implicit raw)', () => {
-      testNode(pako.deflate(sample, { windowBits: -15 }), zlib.deflateRawSync(buf, { windowBits: 15 }));
+      testNode(pako.deflate(sample, { windowBits: -15, legacyHash: false }), zlib.deflateRawSync(buf, { windowBits: 15 }));
     });
 
   });
@@ -189,7 +189,7 @@ describe('Deflate vs node.js zlib (default hash)', () => {
 
     for (const memLevel of [ 9, 8, 7, 6, 5, 4, 3, 2, 1 ]) {
       it(`memLevel ${memLevel}`, () => {
-        testNode(pako.deflate(sample, { memLevel }), zlib.deflateSync(buf, { memLevel }));
+        testNode(pako.deflate(sample, { memLevel, legacyHash: false }), zlib.deflateSync(buf, { memLevel }));
       });
     }
 
@@ -199,19 +199,19 @@ describe('Deflate vs node.js zlib (default hash)', () => {
   describe('Deflate strategy', () => {
 
     it('Z_DEFAULT_STRATEGY', () => {
-      testNode(pako.deflate(sample, { strategy: 0 }), zlib.deflateSync(buf, { strategy: 0 }));
+      testNode(pako.deflate(sample, { strategy: 0, legacyHash: false }), zlib.deflateSync(buf, { strategy: 0 }));
     });
     it('Z_FILTERED', () => {
-      testNode(pako.deflate(sample, { strategy: 1 }), zlib.deflateSync(buf, { strategy: 1 }));
+      testNode(pako.deflate(sample, { strategy: 1, legacyHash: false }), zlib.deflateSync(buf, { strategy: 1 }));
     });
     it('Z_HUFFMAN_ONLY', () => {
-      testNode(pako.deflate(sample, { strategy: 2 }), zlib.deflateSync(buf, { strategy: 2 }));
+      testNode(pako.deflate(sample, { strategy: 2, legacyHash: false }), zlib.deflateSync(buf, { strategy: 2 }));
     });
     it('Z_RLE', () => {
-      testNode(pako.deflate(sample, { strategy: 3 }), zlib.deflateSync(buf, { strategy: 3 }));
+      testNode(pako.deflate(sample, { strategy: 3, legacyHash: false }), zlib.deflateSync(buf, { strategy: 3 }));
     });
     it('Z_FIXED', () => {
-      testNode(pako.deflate(sample, { strategy: 4 }), zlib.deflateSync(buf, { strategy: 4 }));
+      testNode(pako.deflate(sample, { strategy: 4, legacyHash: false }), zlib.deflateSync(buf, { strategy: 4 }));
     });
 
   });
@@ -221,7 +221,7 @@ describe('Deflate vs node.js zlib (default hash)', () => {
 
     for (const level of [ 4, 1 ]) {
       it(`level ${level}`, () => {
-        testNode(pako.deflateRaw(sample, { level }), zlib.deflateRawSync(buf, { level }));
+        testNode(pako.deflateRaw(sample, { level, legacyHash: false }), zlib.deflateRawSync(buf, { level }));
       });
     }
 
@@ -232,13 +232,13 @@ describe('Deflate vs node.js zlib (default hash)', () => {
 
     it('trivial dictionary', () => {
       const dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
-      testNode(pako.deflate(sample, { dictionary: dict }), zlib.deflateSync(buf, { dictionary: dict }));
+      testNode(pako.deflate(sample, { dictionary: dict, legacyHash: false }), zlib.deflateSync(buf, { dictionary: dict }));
     });
 
     it('spdy dictionary', () => {
       const spdyDict = fs.readFileSync(path.join(__dirname, 'fixtures', 'spdy_dict.txt'));
 
-      testNode(pako.deflate(sample, { dictionary: spdyDict }), zlib.deflateSync(buf, { dictionary: spdyDict }));
+      testNode(pako.deflate(sample, { dictionary: spdyDict, legacyHash: false }), zlib.deflateSync(buf, { dictionary: spdyDict }));
     });
   });
 });
