@@ -200,6 +200,27 @@ describe('Inflate fast', () => {
   });
 });
 
+describe('Inflate chunked input', () => {
+  // Feed compressed stream one byte at a time to exercise state re-entry
+  // branches (switch(mode) resume points) and window-wrap copy paths.
+  it('byte-by-byte gzip with header', () => {
+    const data = new Uint8Array(40000);
+    for (let i = 0; i < data.length; i++) data[i] = (i * 2654435761) & 0xff;
+
+    const compressed = pako.gzip(data, {
+      level: 9,
+      header: { name: 'chunked', comment: 'test', hcrc: true }
+    });
+
+    const inflator = new pako.Inflate();
+    for (let i = 0; i < compressed.length; i++) {
+      inflator.push(compressed.subarray(i, i + 1), i === compressed.length - 1);
+    }
+    assert.strictEqual(inflator.err, 0, msg[inflator.err]);
+    assert.deepStrictEqual(inflator.result, data);
+  });
+});
+
 describe('Inflate support', () => {
   // `inflatePrime` not implemented
   /*it('prime', function() {

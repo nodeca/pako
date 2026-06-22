@@ -52,6 +52,47 @@ describe('Deflate support', () => {
   });
 });
 
+describe('Deflate gzip header', () => {
+  // Long header fields + small memLevel force pending-buffer overflow
+  // while emitting extra / name / comment, plus hcrc update paths.
+  it('long fields overflow pending buffer', () => {
+    const deflator = new pako.Deflate({
+      gzip: true,
+      memLevel: 1,
+      chunkSize: 8,
+      header: {
+        hcrc: true,
+        name: 'n'.repeat(2000),
+        comment: 'c'.repeat(2000),
+        extra: new Uint8Array(2000).fill(7)
+      }
+    });
+    deflator.push(long_sample, true);
+    assert.strictEqual(deflator.err, 0, msg[deflator.err]);
+  });
+
+  // Exercise level-dependent XFL byte ternaries in the gzip header.
+  it('level dependent header byte', () => {
+    testDeflate(short_sample, { gzip: true, level: 9 }, 0);
+    testDeflate(short_sample, { gzip: true, level: 1 }, 0);
+    testDeflate(short_sample, { gzip: true, strategy: 2 }, 0);
+  });
+});
+
+describe('Deflate flush / data type', () => {
+  it('partial flush (_tr_align)', () => {
+    const deflator = new pako.Deflate({ chunkSize: 10 });
+    deflator.push(long_sample, c.Z_PARTIAL_FLUSH);
+    deflator.push(long_sample, true);
+    assert.strictEqual(deflator.err, 0, msg[deflator.err]);
+  });
+
+  it('binary data type detection', () => {
+    const jpeg = fs.readFileSync(path.join(__dirname, '..', 'fixtures/samples/lorem_cat.jpeg'));
+    testDeflate(jpeg, { level: 9 }, 0);
+  });
+});
+
 describe('Deflate states', () => {
   //in port checking input parameters was removed
   it('inflate bad parameters', () => {
