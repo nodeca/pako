@@ -60,7 +60,7 @@
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
-    "eslint": "^7.13.0",
+    "eslint": "^10.5.0",
     "c8": "^11.0.0",
     "gh-pages": "^3.1.0",
     "multiparty": "^4.1.3",
