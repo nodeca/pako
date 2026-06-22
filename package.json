@@ -23,6 +23,16 @@
   ],
   "license": "(MIT AND Zlib)",
   "repository": "nodeca/pako",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/puzrin"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/nodeca"
+    }
+  ],
   "module": "./dist/pako.esm.mjs",
   "exports": {
     ".": {
