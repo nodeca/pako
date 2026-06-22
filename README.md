@@ -19,30 +19,16 @@ develop native C modules for CPU-intensive tasks. Enjoy the result!
 __Benchmarks:__
 
 
-node v12.16.3 (zlib 1.2.9), 1mb input sample:
+node v24, 1mb input sample:
 
 ```
-deflate-imaya x 4.75 ops/sec ±4.93% (15 runs sampled)
-deflate-pako x 10.38 ops/sec ±0.37% (29 runs sampled)
-deflate-zlib x 17.74 ops/sec ±0.77% (46 runs sampled)
-gzip-pako x 8.86 ops/sec ±1.41% (29 runs sampled)
-inflate-imaya x 107 ops/sec ±0.69% (77 runs sampled)
-inflate-pako x 131 ops/sec ±1.74% (82 runs sampled)
-inflate-zlib x 258 ops/sec ±0.66% (88 runs sampled)
-ungzip-pako x 115 ops/sec ±1.92% (80 runs sampled)
-```
-
-node v14.15.0 (google's zlib), 1mb output sample:
-
-```
-deflate-imaya x 4.93 ops/sec ±3.09% (16 runs sampled)
-deflate-pako x 10.22 ops/sec ±0.33% (29 runs sampled)
-deflate-zlib x 18.48 ops/sec ±0.24% (48 runs sampled)
-gzip-pako x 10.16 ops/sec ±0.25% (28 runs sampled)
-inflate-imaya x 110 ops/sec ±0.41% (77 runs sampled)
-inflate-pako x 134 ops/sec ±0.66% (83 runs sampled)
-inflate-zlib x 402 ops/sec ±0.74% (87 runs sampled)
-ungzip-pako x 113 ops/sec ±0.62% (80 runs sampled)
+deflate-pako x 14.27 ops/sec ±3.41% (37 runs sampled)
+deflate-pako-zlib-hash x 10.60 ops/sec ±0.50% (29 runs sampled)
+deflate-zlib x 30.30 ops/sec ±0.61% (51 runs sampled)
+gzip-pako x 13.48 ops/sec ±0.50% (36 runs sampled)
+inflate-pako x 138 ops/sec ±1.26% (75 runs sampled)
+inflate-zlib x 397 ops/sec ±1.37% (81 runs sampled)
+ungzip-pako x 125 ops/sec ±1.46% (73 runs sampled)
 ```
 
 zlib's test is partially affected by marshalling (that make sense for inflate only).
@@ -141,14 +127,6 @@ Pako does not contain some specific zlib functions:
   `inflatePrime`, `inflateGetDictionary`, `inflateSync`, `inflateSyncPoint`, `inflateUndermine`.
 - High level inflate/deflate wrappers (classes) may not support some flush
   modes.
-
-
-pako for enterprise
--------------------
-
-Available as part of the Tidelift Subscription
-
-The maintainers of pako and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/npm-pako?utm_source=npm-pako&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
 
 Authors
