@@ -25,6 +25,34 @@ describe('inflate misc', () => {
 
     assert.deepStrictEqual(pako.inflate(deflated.buffer), sample);
   });
+
+  it('applies a dictionary early in raw mode', () => {
+    const dict = Buffer.from('abcd');
+
+    const deflate = new pako.Deflate({ raw: true, dictionary: dict });
+    deflate.push(Buffer.from('hellohello world'), true);
+    assert.ok(!deflate.err, 'deflate error: ' + deflate.err);
+
+    const inflate = new pako.Inflate({ raw: true, dictionary: dict });
+    inflate.push(Buffer.from(deflate.result), true);
+    assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
+
+    assert.strictEqual(Buffer.from(inflate.result).toString(), 'hellohello world');
+  });
+
+  it('throws on invalid init options', () => {
+    assert.throws(() => new pako.Inflate({ windowBits: 3 }));
+  });
+
+  it('forces max window for raw mode when windowBits is 0', () => {
+    const data = pako.deflateRaw(Buffer.from('hello'));
+
+    const inflate = new pako.Inflate({ raw: true, windowBits: 0 });
+    inflate.push(Buffer.from(data), true);
+    assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
+
+    assert.strictEqual(Buffer.from(inflate.result).toString(), 'hello');
+  });
 });
 
 
