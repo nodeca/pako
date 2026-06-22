@@ -222,4 +222,59 @@ describe('pako patches for inflate', () => {
 
     assert.deepStrictEqual(pako.inflate(data), new Uint8Array(unpacked));
   });
+
+  it('Read with Z_SYNC_FLUSH emits the tail', () => {
+    const text = 'hello world hello world';
+
+    // Produce a non-terminated raw deflate stream via node's Z_SYNC_FLUSH
+    const def = zlib.createDeflateRaw();
+    const comp = [];
+    def.on('data', c => comp.push(c));
+    def.write(Buffer.from(text));
+
+    return new Promise(resolve => {
+      def.flush(zlib.constants.Z_SYNC_FLUSH, () => {
+        const buf = new Uint8Array(Buffer.concat(comp));
+
+        const inflator = new pako.Inflate({ raw: true });
+        let count = 0;
+        const onData = inflator.onData;
+        inflator.onData = function () { count++; onData.apply(this, arguments); };
+
+        const ok = inflator.push(buf, pako.constants.Z_SYNC_FLUSH);
+
+        assert.ok(ok);
+        assert.ok(!inflator.err, 'inflate error: ' + inflator.err);
+        assert.ok(count > 0, 'onData was not called on Z_SYNC_FLUSH');
+        assert.strictEqual(Buffer.concat(inflator.chunks.map(Buffer.from)).toString(), text);
+        resolve();
+      });
+    });
+  });
+
+  it('Read with Z_SYNC_FLUSH across multiple pushes (no double emit)', () => {
+    const def = zlib.createDeflateRaw();
+    let seg = [];
+    const take = () => { const b = Buffer.concat(seg); seg = []; return new Uint8Array(b); };
+    def.on('data', c => seg.push(c));
+
+    return new Promise(resolve => {
+      def.write(Buffer.from('AAAA first '));
+      def.flush(zlib.constants.Z_SYNC_FLUSH, () => {
+        const p1 = take();
+        def.write(Buffer.from('BBBB second'));
+        def.flush(zlib.constants.Z_SYNC_FLUSH, () => {
+          const p2 = take();
+
+          const inflator = new pako.Inflate({ raw: true, to: 'string' });
+          inflator.push(p1, pako.constants.Z_SYNC_FLUSH);
+          inflator.push(p2, pako.constants.Z_SYNC_FLUSH);
+
+          assert.ok(!inflator.err, 'inflate error: ' + inflator.err);
+          assert.deepStrictEqual(inflator.chunks, [ 'AAAA first ', 'BBBB second' ]);
+          resolve();
+        });
+      });
+    });
+  });
 });
