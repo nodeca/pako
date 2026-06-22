@@ -1,5 +1,5 @@
 
-/*! pako 2.1.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
+/*! pako 2.2.0 https://github.com/nodeca/pako @license (MIT AND Zlib) */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -492,7 +492,7 @@
 
   const lext = new Uint8Array([ /* Length codes 257..285 extra */
     16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18,
-    19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78
+    19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 199, 75
   ]);
 
   const dbase = new Uint16Array([ /* Distance codes 0..29 base */
@@ -896,7 +896,7 @@
 
   const {
     Z_FINISH: Z_FINISH$1, Z_BLOCK, Z_TREES,
-    Z_OK: Z_OK$1, Z_STREAM_END: Z_STREAM_END$1, Z_NEED_DICT: Z_NEED_DICT$1, Z_STREAM_ERROR: Z_STREAM_ERROR$1, Z_DATA_ERROR: Z_DATA_ERROR$1, Z_MEM_ERROR: Z_MEM_ERROR$1, Z_BUF_ERROR,
+    Z_OK: Z_OK$1, Z_STREAM_END: Z_STREAM_END$1, Z_NEED_DICT: Z_NEED_DICT$1, Z_STREAM_ERROR: Z_STREAM_ERROR$1, Z_DATA_ERROR: Z_DATA_ERROR$1, Z_MEM_ERROR: Z_MEM_ERROR$1, Z_BUF_ERROR: Z_BUF_ERROR$1,
     Z_DEFLATED
   } = constants$1;
 
@@ -1206,11 +1206,14 @@
 
     /* if it hasn't been done already, allocate space for the window */
     if (state.window === null) {
+      state.window = new Uint8Array(1 << state.wbits);
+    }
+
+    /* if window not in use yet, initialize */
+    if (state.wsize === 0) {
       state.wsize = 1 << state.wbits;
       state.wnext = 0;
       state.whave = 0;
-
-      state.window = new Uint8Array(state.wsize);
     }
 
     /* copy state->wsize or less output bytes into the circular window */
@@ -2336,7 +2339,7 @@
                       (state.mode === TYPE ? 128 : 0) +
                       (state.mode === LEN_ || state.mode === COPY_ ? 256 : 0);
     if (((_in === 0 && _out === 0) || flush === Z_FINISH$1) && ret === Z_OK$1) {
-      ret = Z_BUF_ERROR;
+      ret = Z_BUF_ERROR$1;
     }
     return ret;
   };
@@ -2515,7 +2518,7 @@
   for (let q = 0; q < 256; q++) {
     _utf8len[q] = (q >= 252 ? 6 : q >= 248 ? 5 : q >= 240 ? 4 : q >= 224 ? 3 : q >= 192 ? 2 : 1);
   }
-  _utf8len[254] = _utf8len[254] = 1; // Invalid sequence start
+  _utf8len[254] = _utf8len[255] = 1; // Invalid sequence start
 
 
   // convert string to array (typed, when possible)
@@ -2816,11 +2819,16 @@
 
   const {
     Z_NO_FLUSH, Z_FINISH,
-    Z_OK, Z_STREAM_END, Z_NEED_DICT, Z_STREAM_ERROR, Z_DATA_ERROR, Z_MEM_ERROR
+    Z_OK, Z_STREAM_END, Z_NEED_DICT, Z_STREAM_ERROR, Z_DATA_ERROR, Z_MEM_ERROR, Z_BUF_ERROR
   } = constants$1;
 
   /* ===========================================================================*/
 
+  const defaultOptions = {
+    chunkSize: 1024 * 64,
+    windowBits: 15,
+    to: ''
+  };
 
   /**
    * class Inflate
@@ -2900,11 +2908,7 @@
    * ```
    **/
   function Inflate(options) {
-    this.options = common.assign({
-      chunkSize: 1024 * 64,
-      windowBits: 15,
-      to: ''
-    }, options || {});
+    this.options = common.assign({}, defaultOptions, options || {});
 
     const opt = this.options;
 
@@ -3035,11 +3039,19 @@
         }
       }
 
-      // Skip snyc markers if more data follows and not raw mode
+      // Only the gzip format defines concatenated members (RFC 1952: a gzip file
+      // is "a series of members"). A zlib stream (RFC 1950) ends after its
+      // ADLER32, and a raw DEFLATE stream (RFC 1951) ends after its final block -
+      // neither format allows anything to follow, so bytes after the end are not
+      // ours to interpret and must be left in the input. Restart decoding only
+      // for a gzip member: `state.flags` is non-zero only once a gzip header has
+      // actually been decoded (it stays 0 for a zlib member, even when the format
+      // was auto-detected and the gzip bit of `wrap` is set). A trailing zero
+      // byte is padding, not the start of a member (no member can begin with 0).
       while (strm.avail_in > 0 &&
              status === Z_STREAM_END &&
-             strm.state.wrap > 0 &&
-             data[strm.next_in] !== 0)
+             (strm.state.wrap & 2) && strm.state.flags !== 0 &&
+             strm.input[strm.next_in] !== 0)
       {
         inflate_1$1.inflateReset(strm);
         status = inflate_1$1.inflate(strm, _flush_mode);
@@ -3060,7 +3072,9 @@
       last_avail_out = strm.avail_out;
 
       if (strm.next_out) {
-        if (strm.avail_out === 0 || status === Z_STREAM_END) {
+        // Flush output if buffer is full, stream ended, or an explicit flush was
+        // requested (e.g. Z_SYNC_FLUSH) - to push out the tail, same as node's zlib.
+        if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
 
           if (this.options.to === 'string') {
 
@@ -3078,12 +3092,22 @@
 
           } else {
             this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
+
+            // Force a fresh output buffer on next iteration / next push, so the
+            // already emitted tail is not sent again.
+            strm.avail_out = 0;
+            strm.next_out = 0;
           }
         }
       }
 
-      // Must repeat iteration if out buffer is full
-      if (status === Z_OK && last_avail_out === 0) continue;
+      // A full output buffer means there may be more to produce - allocate a new
+      // one and call inflate again. The status depends on the flush mode: with
+      // Z_NO_FLUSH a full buffer is reported as Z_OK, but with Z_FINISH the same
+      // situation is reported as Z_BUF_ERROR ("could not make progress now",
+      // non-fatal) even though output is still pending. Both must continue; the
+      // distinction that matters is purely "was the output buffer exhausted".
+      if ((status === Z_OK || status === Z_BUF_ERROR) && last_avail_out === 0) continue;
 
       // Finalize if end of stream reached.
       if (status === Z_STREAM_END) {
@@ -3093,7 +3117,23 @@
         return true;
       }
 
-      if (strm.avail_in === 0) break;
+      if (strm.avail_in === 0) {
+        // Input is exhausted. If the caller declared this the end of the stream
+        // (Z_FINISH) but we never saw Z_STREAM_END, the compressed data ended
+        // before its terminating marker - i.e. it is truncated/incomplete. That
+        // is an error: returning the partial output as success would be
+        // indistinguishable from a complete decode, hiding the data loss. Report
+        // it via Z_BUF_ERROR. (Reached only when the output buffer still had room
+        // - a full buffer is handled by the `continue` above - so this genuinely
+        // means "ran out of input", not "ran out of output".)
+        if (_flush_mode === Z_FINISH) {
+          status = inflate_1$1.inflateEnd(this.strm);
+          this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
+          this.ended = true;
+          return false;
+        }
+        break;
+      }
     }
 
     return true;
@@ -3179,7 +3219,7 @@
   function inflate(input, options) {
     const inflator = new Inflate(options);
 
-    inflator.push(input);
+    inflator.push(input, true);
 
     // That will never happens, if you don't cheat with options :)
     if (inflator.err) throw inflator.msg || messages[inflator.err];
