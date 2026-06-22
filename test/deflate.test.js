@@ -1,6 +1,7 @@
 'use strict';
 
 
+const { describe, it } = require('node:test');
 const pako    = require('../index');
 const assert  = require('assert');
 const fs      = require('fs');
