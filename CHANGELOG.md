@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [UNRELEASED]
+### Added
+
+- Alternate deflate hash (ANZAC++) - for nodejs zlib compatibility.
+  A nice bonus ~ 40% speed boost.
+
+### Fixed
+
+- Inflate: fix window not updated after `inflateReset` (multistream/bgzip), #139.
+- Inflate: emit chunk on flush, #259.
+- Inflate: only continue to next stream for gzip; error on truncated input.
+
+
 ## [2.1.0] - 2022-11-07
 ### Changed
 
