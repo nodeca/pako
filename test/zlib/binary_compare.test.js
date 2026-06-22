@@ -6,8 +6,8 @@ const fs      = require('fs');
 const path    = require('path');
 const zlib    = require('zlib');
 
-const pako        = require('../index');
-const loadSamples = require('./helpers').loadSamples;
+const pako        = require('../../index');
+const loadSamples = require('../helpers').loadSamples;
 
 const sample = loadSamples().lorem_en_100k;
 const buf    = Buffer.from(sample);
@@ -18,7 +18,7 @@ const buf    = Buffer.from(sample);
 describe('Deflate vs canonical zlib snapshots (legacyHash)', () => {
 
   function testSample(pako_method, sample, options, filename) {
-    const dir = path.join(__dirname, 'fixtures', 'binary_compare');
+    const dir = path.join(__dirname, 'zlib_snapshots');
 
     const pako_result = pako_method(sample, Object.assign({ legacyHash: true }, options));
     const zlib_result = fs.readFileSync(path.join(dir, filename));
@@ -124,7 +124,7 @@ describe('Deflate vs canonical zlib snapshots (legacyHash)', () => {
     });
 
     it('spdy dictionary', () => {
-      const spdyDict = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'spdy_dict.txt'));
+      const spdyDict = require('fs').readFileSync(require('path').join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
 
       testSample(pako.deflate, sample, { dictionary: spdyDict }, 'deflate_dictionary=spdy.bin');
     });
@@ -236,7 +236,7 @@ describe('Deflate vs node.js zlib (ANZAC++ hash)', () => {
     });
 
     it('spdy dictionary', () => {
-      const spdyDict = fs.readFileSync(path.join(__dirname, 'fixtures', 'spdy_dict.txt'));
+      const spdyDict = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
 
       testNode(pako.deflate(sample, { dictionary: spdyDict, legacyHash: false }), zlib.deflateSync(buf, { dictionary: spdyDict }));
     });

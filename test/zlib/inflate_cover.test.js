@@ -5,13 +5,13 @@
 const { describe, it } = require('node:test');
 const assert = require('assert');
 
-const c = require('../lib/zlib/constants');
-const msg = require('../lib/zlib/messages');
-//const zlib_stream = require('../lib/zlib/zstream');
-const zlib_inflate = require('../lib/zlib/inflate');
-const inflate_table = require('../lib/zlib/inftrees');
+const c = require('../../lib/zlib/constants');
+const msg = require('../../lib/zlib/messages');
+//const zlib_stream = require('../../lib/zlib/zstream');
+const zlib_inflate = require('../../lib/zlib/inflate');
+const inflate_table = require('../../lib/zlib/inftrees');
 
-const pako  = require('../index');
+const pako  = require('../../index');
 
 
 function h2b(hex) {

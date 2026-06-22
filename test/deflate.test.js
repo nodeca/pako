@@ -8,9 +8,9 @@ const fs      = require('fs');
 const path    = require('path');
 
 
-describe('Deflate dictionary', () => {
+describe('deflate misc', () => {
 
-  it('handles multiple pushes', () => {
+  it('handles a dictionary across multiple pushes', () => {
     const dict = Buffer.from('abcd');
     const deflate = new pako.Deflate({ dictionary: dict });
 
@@ -27,10 +27,12 @@ describe('Deflate dictionary', () => {
       uncompressed
     );
   });
-});
 
+  it('accepts an ArrayBuffer the same as a Uint8Array', () => {
+    const sample = new Uint8Array(fs.readFileSync(path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt')));
 
-describe('Deflate issues', () => {
+    assert.deepStrictEqual(pako.deflate(sample.buffer), pako.deflate(sample));
+  });
 
   it('#78', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures', 'issue_78.bin'));

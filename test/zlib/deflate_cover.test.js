@@ -7,16 +7,16 @@ const assert = require('assert');
 const fs = require('fs');
 const path  = require('path');
 
-const c = require('../lib/zlib/constants');
-const msg = require('../lib/zlib/messages');
-const zlib_deflate = require('../lib/zlib/deflate');
-const ZStream = require('../lib/zlib/zstream');
+const c = require('../../lib/zlib/constants');
+const msg = require('../../lib/zlib/messages');
+const zlib_deflate = require('../../lib/zlib/deflate');
+const ZStream = require('../../lib/zlib/zstream');
 
-const pako  = require('../index');
+const pako  = require('../../index');
 
 
 const short_sample = 'hello world';
-const long_sample = fs.readFileSync(path.join(__dirname, 'fixtures/samples/lorem_en_100k.txt'));
+const long_sample = fs.readFileSync(path.join(__dirname, '..', 'fixtures/samples/lorem_en_100k.txt'));
 
 function testDeflate(data, opts, flush) {
   const deflator = new pako.Deflate(opts);
