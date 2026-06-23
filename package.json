@@ -57,7 +57,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && node --test",
+    "test": "npm run lint && npm run build && node --test",
     "coverage": "npm run lint && c8 -r text -r html node --test",
     "build": "node support/build-dist.mjs",
     "build_fixtures": "node support/build_fixtures.mjs",
