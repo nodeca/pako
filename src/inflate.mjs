@@ -7,7 +7,7 @@ import {
   zlibInflateEnd
 } from './zlib.mjs';
 import { flattenChunks } from './utils/common.mjs';
-import { buf2string, utf8border } from './utils/strings.mjs';
+import { utf8border } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 import GZheader from './zlib/gzheader.mjs';
@@ -274,7 +274,7 @@ class Inflate {
             let next_out_utf8 = utf8border(strm.output, strm.next_out);
 
             let tail = strm.next_out - next_out_utf8;
-            let utf8str = buf2string(strm.output, next_out_utf8);
+            let utf8str = new TextDecoder().decode(strm.output.subarray(0, next_out_utf8));
 
             // move tail & realign counters
             strm.next_out = tail;

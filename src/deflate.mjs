@@ -4,7 +4,6 @@ import {
   zlibDeflateEnd
 } from './zlib.mjs';
 import { flattenChunks } from './utils/common.mjs';
-import { string2buf } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 
@@ -188,7 +187,7 @@ class Deflate {
     // Convert data if needed
     if (typeof data === 'string') {
       // If we need to compress text, change encoding to utf8.
-      strm.input = string2buf(data);
+      strm.input = new TextEncoder().encode(data);
     } else if (toString.call(data) === '[object ArrayBuffer]') {
       strm.input = new Uint8Array(data);
     } else {

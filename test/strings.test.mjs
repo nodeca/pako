@@ -1,10 +1,10 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it } from 'node:test';
 import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
 import { deflate, inflate } from '../src/index.mjs';
-import { buf2string, string2buf, utf8border } from '../src/utils/strings.mjs';
+import { utf8border } from '../src/utils/strings.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -41,19 +41,6 @@ describe('Encode/Decode', () => {
   // use node Buffer internal conversion as "done right"
   const utf8sample = new Uint8Array(Buffer.from(utf16sample));
 
-  let _TextEncoder, _TextDecoder;
-
-  /* eslint-disable no-global-assign, no-native-reassign */
-  beforeEach(() => {
-    _TextEncoder = TextEncoder;
-    _TextDecoder = TextDecoder;
-  });
-
-  afterEach(() => {
-    TextEncoder = _TextEncoder;
-    TextDecoder = _TextDecoder;
-  });
-
   it('utf-8 border detect', () => {
     const ub = utf8border;
     assert.strictEqual(ub(utf8sample, 1), 1);
@@ -82,40 +69,6 @@ describe('Encode/Decode', () => {
     assert.strictEqual(ub(utf8sample, 18), 16);
     assert.strictEqual(ub(utf8sample, 19), 16);
     assert.strictEqual(ub(utf8sample, 20), 20);
-  });
-
-  it('Encode string to utf8 buf', () => {
-    assert.deepStrictEqual(
-      string2buf(utf16sample),
-      utf8sample
-    );
-
-    TextEncoder = null;
-    assert.deepStrictEqual(
-      string2buf(utf16sample),
-      utf8sample
-    );
-  });
-
-  it('Decode utf8 buf to string', () => {
-    assert.ok(buf2string(utf8sample), utf16sample);
-
-    TextDecoder = null;
-    assert.ok(buf2string(utf8sample), utf16sample);
-  });
-
-  it('0xFF byte should not consume subsequent bytes', () => {
-    TextDecoder = null;
-
-    // 0xFF is invalid UTF-8. With the bug (_utf8len[255] = 6), buf2string
-    // treats it as a 6-byte sequence, swallowing the next 5 valid bytes.
-    const buf = new Uint8Array([ 0xFF, 0x41, 0x42, 0x43, 0x44, 0x45 ]);
-    const result = buf2string(buf);
-
-    // Should produce 6 characters: one for the invalid 0xFF byte,
-    // then 'A', 'B', 'C', 'D', 'E'
-    assert.strictEqual(result.length, 6);
-    assert.strictEqual(result.slice(1), 'ABCDE');
   });
 
 });
