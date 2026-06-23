@@ -6,7 +6,7 @@ import {
   zlibInflateReset,
   zlibInflateEnd
 } from './zlib.mjs';
-import { assign, flattenChunks } from './utils/common.mjs';
+import { flattenChunks } from './utils/common.mjs';
 import { string2buf, buf2string, utf8border } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
@@ -27,6 +27,7 @@ import {
 const defaultOptions = {
   chunkSize: 1024 * 64,
   windowBits: 15,
+  raw: false,
   to: ''
 };
 
@@ -109,7 +110,7 @@ const defaultOptions = {
  **/
 class Inflate {
   constructor(options) {
-    this.options = assign({}, defaultOptions, options || {});
+    this.options = Object.assign({}, defaultOptions, options || {});
 
     const opt = this.options;
 
@@ -439,9 +440,7 @@ function inflate(input, options) {
  * (header and adler32 crc).
  **/
 function inflateRaw(input, options) {
-  options = options || {};
-  options.raw = true;
-  return inflate(input, options);
+  return inflate(input, Object.assign({}, options || {}, { raw: true }));
 }
 
 

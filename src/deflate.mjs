@@ -5,7 +5,7 @@ import {
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
-import { assign, flattenChunks } from './utils/common.mjs';
+import { flattenChunks } from './utils/common.mjs';
 import { string2buf } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
@@ -32,6 +32,8 @@ const defaultOptions = {
   windowBits: 15,
   memLevel: 8,
   strategy: Z_DEFAULT_STRATEGY,
+  raw: false,
+  gzip: false,
   legacyHash: true
 };
 
@@ -126,7 +128,7 @@ const defaultOptions = {
  **/
 class Deflate {
   constructor(options) {
-    this.options = assign({}, defaultOptions, options || {});
+    this.options = Object.assign({}, defaultOptions, options || {});
 
     let opt = this.options;
 
@@ -364,9 +366,7 @@ function deflate(input, options) {
  * (header and adler32 crc).
  **/
 function deflateRaw(input, options) {
-  options = options || {};
-  options.raw = true;
-  return deflate(input, options);
+  return deflate(input, Object.assign({}, options || {}, { raw: true }));
 }
 
 
@@ -379,9 +379,7 @@ function deflateRaw(input, options) {
  * deflate one.
  **/
 function gzip(input, options) {
-  options = options || {};
-  options.gzip = true;
-  return deflate(input, options);
+  return deflate(input, Object.assign({}, options || {}, { gzip: true }));
 }
 
 
