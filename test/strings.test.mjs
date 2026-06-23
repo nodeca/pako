@@ -1,0 +1,145 @@
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import fs from 'fs';
+import path from 'path';
+import assert from 'assert';
+
+import { deflate, inflate } from '../index.mjs';
+import * as strings from '../lib/utils/strings.mjs';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// fromCharCode, but understands right > 0xffff values
+function fixedFromCharCode(code) {
+  /*jshint bitwise: false*/
+  if (code > 0xffff) {
+    code -= 0x10000;
+
+    const surrogate1 = 0xd800 + (code >> 10);
+    const surrogate2 = 0xdc00 + (code & 0x3ff);
+
+    return String.fromCharCode(surrogate1, surrogate2);
+  }
+  return String.fromCharCode(code);
+}
+
+// Converts array of codes / chars / strings to utf16 string
+function a2utf16(arr) {
+  let result = '';
+  arr.forEach(function (item) {
+    if (typeof item === 'string') { result += item; return; }
+    result += fixedFromCharCode(item);
+  });
+  return result;
+}
+
+
+describe('Encode/Decode', () => {
+
+  // Create sample, that contains all types of utf8 (1-4byte) after conversion
+  const utf16sample = a2utf16([ 0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff ]);
+  // use node Buffer internal conversion as "done right"
+  const utf8sample = new Uint8Array(Buffer.from(utf16sample));
+
+  let _TextEncoder, _TextDecoder;
+
+  /* eslint-disable no-global-assign, no-native-reassign */
+  beforeEach(() => {
+    _TextEncoder = TextEncoder;
+    _TextDecoder = TextDecoder;
+  });
+
+  afterEach(() => {
+    TextEncoder = _TextEncoder;
+    TextDecoder = _TextDecoder;
+  });
+
+  it('utf-8 border detect', () => {
+    const ub = strings.utf8border;
+    assert.strictEqual(ub(utf8sample, 1), 1);
+    assert.strictEqual(ub(utf8sample, 2), 2);
+    assert.strictEqual(ub(utf8sample, 3), 3);
+    assert.strictEqual(ub(utf8sample, 4), 4);
+
+    assert.strictEqual(ub(utf8sample, 5), 5);
+
+    assert.strictEqual(ub(utf8sample, 6), 5);
+    assert.strictEqual(ub(utf8sample, 7), 5);
+    assert.strictEqual(ub(utf8sample, 8), 8);
+
+    assert.strictEqual(ub(utf8sample, 9), 9);
+
+    assert.strictEqual(ub(utf8sample, 10), 9);
+    assert.strictEqual(ub(utf8sample, 11), 9);
+    assert.strictEqual(ub(utf8sample, 12), 12);
+
+    assert.strictEqual(ub(utf8sample, 13), 12);
+    assert.strictEqual(ub(utf8sample, 14), 12);
+    assert.strictEqual(ub(utf8sample, 15), 12);
+    assert.strictEqual(ub(utf8sample, 16), 16);
+
+    assert.strictEqual(ub(utf8sample, 17), 16);
+    assert.strictEqual(ub(utf8sample, 18), 16);
+    assert.strictEqual(ub(utf8sample, 19), 16);
+    assert.strictEqual(ub(utf8sample, 20), 20);
+  });
+
+  it('Encode string to utf8 buf', () => {
+    assert.deepStrictEqual(
+      strings.string2buf(utf16sample),
+      utf8sample
+    );
+
+    TextEncoder = null;
+    assert.deepStrictEqual(
+      strings.string2buf(utf16sample),
+      utf8sample
+    );
+  });
+
+  it('Decode utf8 buf to string', () => {
+    assert.ok(strings.buf2string(utf8sample), utf16sample);
+
+    TextDecoder = null;
+    assert.ok(strings.buf2string(utf8sample), utf16sample);
+  });
+
+  it('0xFF byte should not consume subsequent bytes', () => {
+    TextDecoder = null;
+
+    // 0xFF is invalid UTF-8. With the bug (_utf8len[255] = 6), buf2string
+    // treats it as a 6-byte sequence, swallowing the next 5 valid bytes.
+    const buf = new Uint8Array([ 0xFF, 0x41, 0x42, 0x43, 0x44, 0x45 ]);
+    const result = strings.buf2string(buf);
+
+    // Should produce 6 characters: one for the invalid 0xFF byte,
+    // then 'A', 'B', 'C', 'D', 'E'
+    assert.strictEqual(result.length, 6);
+    assert.strictEqual(result.slice(1), 'ABCDE');
+  });
+
+});
+
+
+describe('Deflate/Inflate strings', () => {
+
+  const file = path.join(__dirname, 'fixtures/samples/lorem_utf_100k.txt');
+  const sampleString = fs.readFileSync(file, 'utf8');
+  const sampleArray  = new Uint8Array(fs.readFileSync(file));
+
+  it('Deflate javascript string (utf16) on input', () => {
+    assert.deepStrictEqual(
+      deflate(sampleString),
+      deflate(sampleArray)
+    );
+  });
+
+  it('Inflate with javascript string (utf16) output', () => {
+    const deflatedArray  = deflate(sampleArray);
+    const data = inflate(deflatedArray, { to: 'string', chunkSize: 99 });
+
+    assert.strictEqual(typeof data, 'string');
+    assert.strictEqual(data, sampleString);
+  });
+
+});

@@ -8,12 +8,13 @@
 --output        "doc"
 --render        "html"
 --broken-links  "throw"
+--alias         "mjs:js"
 
 
 #
 # Paths with sources
 ################################################################################
 
-lib/deflate.js
-lib/inflate.js
-index.js
+lib/deflate.mjs
+lib/inflate.mjs
+index.mjs

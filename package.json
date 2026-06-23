@@ -17,7 +17,7 @@
     "Mark Adler"
   ],
   "files": [
-    "index.js",
+    "index.mjs",
     "dist/",
     "lib/"
   ],
@@ -37,7 +37,7 @@
   "exports": {
     ".": {
       "import": "./dist/pako.esm.mjs",
-      "require": "./index.js"
+      "require": "./dist/pako.cjs"
     },
     "./package.json": "./package.json",
     "./dist/*": "./dist/*",
@@ -46,12 +46,12 @@
     "./lib/utils/*": "./lib/utils/*"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js,.mjs",
     "test": "npm run lint && node --test",
     "coverage": "npm run lint && c8 -r text -r html node --test",
     "build": "rollup -c",
-    "build_fixtures": "node support/build_fixtures.js",
-    "doc": "node support/build_doc.js",
+    "build_fixtures": "node support/build_fixtures.mjs",
+    "doc": "node support/build_doc.mjs",
     "gh-doc": "npm run doc && gh-pages -d doc -f",
     "prepublishOnly": "npm run gh-doc"
   },
