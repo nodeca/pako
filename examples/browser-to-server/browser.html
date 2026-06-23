@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Send compressed JSON to a server</title>
+<script src="https://cdn.jsdelivr.net/pako/1.0.3/pako.min.js"></script>
+</head>
+<body>
+Sending compressed JSON to the server. Open the browser console and the server
+terminal to see the result.
+
+<script>
+'use strict';
+
+// Initial object //////////////////////////////////////////////////////////////
+
+const obj = [
+  { foo: 'bar', baz: 'БАТ' },
+  { abra: 1, cadabra: null }
+];
+
+// Convert to JSON and compress ////////////////////////////////////////////////
+
+const json = JSON.stringify(obj);
+const compressed = window.pako.deflate(json);
+
+// Send the compressed JSON as the request body ///////////////////////////////
+
+function send() {
+  const xhr = new XMLHttpRequest();
+
+  console.log('Sending data...');
+
+  xhr.open('POST', '/data', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Content-Encoding', 'deflate');
+  xhr.onload = function () {
+    console.log('Server response:', xhr.responseText);
+  };
+  xhr.send(compressed);
+
+  setTimeout(send, 5000);
+}
+
+send();
+
+</script>
+</body>
+</html>
