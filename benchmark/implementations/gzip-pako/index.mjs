@@ -1,5 +1,5 @@
-import pako from '../../../src/index.mjs';
+import { gzip } from '../../../src/index.mjs';
 
 export const run = (data, level) => {
-  return pako.gzip(data.typed, { level: level });
+  return gzip(data.typed, { level: level });
 };

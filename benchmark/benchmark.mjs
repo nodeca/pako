@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import Benchmark from 'benchmark';
 import ansi from 'ansi';
 
-import pako from '../src/index.mjs';
+import { deflate, deflateRaw, gzip } from '../src/index.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -36,10 +36,10 @@ function addSample(sample) {
   content.typed  = new Uint8Array(content.buffer);
   content.string = fs.readFileSync(filepath, 'utf8');
 
-  content.deflateTyped = pako.deflate(content.typed, { level: LEVEL });
-  content.gzipTyped = pako.gzip(content.typed, { level: LEVEL });
+  content.deflateTyped = deflate(content.typed, { level: LEVEL });
+  content.gzipTyped = gzip(content.typed, { level: LEVEL });
 
-  content.deflateRawTyped = pako.deflateRaw(content.typed, { level: LEVEL });
+  content.deflateRawTyped = deflateRaw(content.typed, { level: LEVEL });
 
   const title    = util.format('(%d bytes raw / ~%d bytes compressed)', content.typed.length, content.deflateTyped.length);
 

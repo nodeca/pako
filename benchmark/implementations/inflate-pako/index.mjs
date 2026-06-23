@@ -1,5 +1,5 @@
-import pako from '../../../src/index.mjs';
+import { inflate } from '../../../src/index.mjs';
 
 export const run = (data) => {
-  return pako.inflate(data.deflateTyped, {});
+  return inflate(data.deflateTyped, {});
 };

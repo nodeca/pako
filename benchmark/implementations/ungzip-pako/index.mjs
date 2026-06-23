@@ -1,6 +1,6 @@
-import pako from '../../../src/index.mjs';
+import { ungzip } from '../../../src/index.mjs';
 
 export const run = (data) => {
-  return pako.ungzip(data.gzipTyped, {
+  return ungzip(data.gzipTyped, {
   });
 };
