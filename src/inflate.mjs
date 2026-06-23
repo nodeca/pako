@@ -7,7 +7,6 @@ import {
   zlibInflateEnd
 } from './zlib.mjs';
 import { flattenChunks } from './utils/common.mjs';
-import { utf8border } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 import GZheader from './zlib/gzheader.mjs';
@@ -140,6 +139,7 @@ class Inflate {
     this.ended  = false;  // used to avoid multiple onEnd() calls
     this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
+    this.textDecoder = opt.to === 'string' ? new TextDecoder() : null;
 
     this.strm   = new ZStream();
     this.strm.avail_out = 0;
@@ -260,8 +260,7 @@ class Inflate {
           return false;
       }
 
-      // Remember real `avail_out` value, because we may patch out buffer content
-      // to align utf8 strings boundaries.
+      // Remember real `avail_out` value before output buffer counters are reset.
       last_avail_out = strm.avail_out;
 
       if (strm.next_out) {
@@ -271,17 +270,12 @@ class Inflate {
 
           if (this.options.to === 'string') {
 
-            let next_out_utf8 = utf8border(strm.output, strm.next_out);
+            let str = this.textDecoder.decode(strm.output.subarray(0, strm.next_out), { stream: true });
 
-            let tail = strm.next_out - next_out_utf8;
-            let utf8str = new TextDecoder().decode(strm.output.subarray(0, next_out_utf8));
+            strm.next_out = 0;
+            strm.avail_out = chunkSize;
 
-            // move tail & realign counters
-            strm.next_out = tail;
-            strm.avail_out = chunkSize - tail;
-            if (tail) strm.output.set(strm.output.subarray(next_out_utf8, next_out_utf8 + tail), 0);
-
-            this.onData(utf8str);
+            if (str) this.onData(str);
 
           } else {
             this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
@@ -305,6 +299,10 @@ class Inflate {
       // Finalize if end of stream reached.
       if (status === Z_STREAM_END) {
         status = zlibInflateEnd(this.strm);
+        if (status === Z_OK && this.options.to === 'string') {
+          const str = this.textDecoder.decode();
+          if (str) this.onData(str);
+        }
         this.onEnd(status);
         this.ended = true;
         return true;

@@ -4,7 +4,6 @@ import path from 'path';
 import assert from 'assert';
 
 import { deflate, inflate } from '../src/index.mjs';
-import { utf8border } from '../src/utils/strings.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,37 +37,11 @@ describe('Encode/Decode', () => {
 
   // Create sample, that contains all types of utf8 (1-4byte) after conversion
   const utf16sample = a2utf16([ 0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff ]);
-  // use node Buffer internal conversion as "done right"
-  const utf8sample = new Uint8Array(Buffer.from(utf16sample));
 
-  it('utf-8 border detect', () => {
-    const ub = utf8border;
-    assert.strictEqual(ub(utf8sample, 1), 1);
-    assert.strictEqual(ub(utf8sample, 2), 2);
-    assert.strictEqual(ub(utf8sample, 3), 3);
-    assert.strictEqual(ub(utf8sample, 4), 4);
+  it('Inflate string output handles utf8 split across chunks', () => {
+    const data = inflate(deflate(utf16sample), { to: 'string', chunkSize: 1 });
 
-    assert.strictEqual(ub(utf8sample, 5), 5);
-
-    assert.strictEqual(ub(utf8sample, 6), 5);
-    assert.strictEqual(ub(utf8sample, 7), 5);
-    assert.strictEqual(ub(utf8sample, 8), 8);
-
-    assert.strictEqual(ub(utf8sample, 9), 9);
-
-    assert.strictEqual(ub(utf8sample, 10), 9);
-    assert.strictEqual(ub(utf8sample, 11), 9);
-    assert.strictEqual(ub(utf8sample, 12), 12);
-
-    assert.strictEqual(ub(utf8sample, 13), 12);
-    assert.strictEqual(ub(utf8sample, 14), 12);
-    assert.strictEqual(ub(utf8sample, 15), 12);
-    assert.strictEqual(ub(utf8sample, 16), 16);
-
-    assert.strictEqual(ub(utf8sample, 17), 16);
-    assert.strictEqual(ub(utf8sample, 18), 16);
-    assert.strictEqual(ub(utf8sample, 19), 16);
-    assert.strictEqual(ub(utf8sample, 20), 20);
+    assert.strictEqual(data, utf16sample);
   });
 
 });
