@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 
-import shell from 'shelljs';
+import { execFileSync } from 'node:child_process';
+import { rm } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 
-shell.rm('-rf', 'doc');
+const require = createRequire(import.meta.url);
 
-const head = shell.exec('git show-ref --hash HEAD').stdout.slice(0, 6);
+async function main() {
+  await rm('doc', { recursive: true, force: true });
 
-const link_format = `https://github.com/{package.repository}/blob/${head}/{file}#L{line}`;
+  const head = execFileSync('git', [ 'rev-parse', '--short=6', 'HEAD' ], { encoding: 'utf8' }).trim();
+  const linkFormat = `https://github.com/{package.repository}/blob/${head}/{file}#L{line}`;
+  const ndoc = require.resolve('ndoc/bin/ndoc.js');
 
-shell.exec(`node node_modules/.bin/ndoc --link-format "${link_format}"`);
+  execFileSync(process.execPath, [ ndoc, '--link-format', linkFormat ], { stdio: 'inherit' });
+}
+
+main();
