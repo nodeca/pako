@@ -52,7 +52,8 @@
     "build_fixtures": "node support/build_fixtures.mjs",
     "doc": "node support/build_doc.mjs",
     "gh-doc": "npm run doc && gh-pages -d doc -f",
-    "prepublishOnly": "npm run gh-doc"
+    "prepack": "npm test && npm run build && npm run doc",
+    "postpublish": "npm run gh-doc"
   },
   "devDependencies": {
     "c8": "^11.0.0",
