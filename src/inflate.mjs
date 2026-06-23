@@ -1,4 +1,11 @@
-import { inflateInit2, inflateGetHeader, inflateSetDictionary, inflate as _inflate, inflateReset, inflateEnd } from './zlib/inflate.mjs';
+import {
+  zlibInflateInit2,
+  zlibInflateGetHeader,
+  zlibInflateSetDictionary,
+  zlibInflate,
+  zlibInflateReset,
+  zlibInflateEnd
+} from './zlib.mjs';
 import { assign, flattenChunks } from './utils/common.mjs';
 import { string2buf, buf2string, utf8border } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
@@ -137,7 +144,7 @@ class Inflate {
     this.strm   = new ZStream();
     this.strm.avail_out = 0;
 
-    let status  = inflateInit2(
+    let status  = zlibInflateInit2(
       this.strm,
       opt.windowBits
     );
@@ -148,7 +155,7 @@ class Inflate {
 
     this.header = new GZheader();
 
-    inflateGetHeader(this.strm, this.header);
+    zlibInflateGetHeader(this.strm, this.header);
 
     // Setup dictionary
     if (opt.dictionary) {
@@ -159,7 +166,7 @@ class Inflate {
         opt.dictionary = new Uint8Array(opt.dictionary);
       }
       if (opt.raw) { //In raw mode we need to set the dictionary early
-        status = inflateSetDictionary(this.strm, opt.dictionary);
+        status = zlibInflateSetDictionary(this.strm, opt.dictionary);
         if (status !== Z_OK) {
           throw new Error(msg[status]);
         }
@@ -220,13 +227,13 @@ class Inflate {
         strm.avail_out = chunkSize;
       }
 
-      status = _inflate(strm, _flush_mode);
+      status = zlibInflate(strm, _flush_mode);
 
       if (status === Z_NEED_DICT && dictionary) {
-        status = inflateSetDictionary(strm, dictionary);
+        status = zlibInflateSetDictionary(strm, dictionary);
 
         if (status === Z_OK) {
-          status = _inflate(strm, _flush_mode);
+          status = zlibInflate(strm, _flush_mode);
         } else if (status === Z_DATA_ERROR) {
           // Replace code with more verbose
           status = Z_NEED_DICT;
@@ -247,8 +254,8 @@ class Inflate {
              (strm.state.wrap & 2) && strm.state.flags !== 0 &&
              strm.input[strm.next_in] !== 0)
       {
-        inflateReset(strm);
-        status = _inflate(strm, _flush_mode);
+        zlibInflateReset(strm);
+        status = zlibInflate(strm, _flush_mode);
       }
 
       switch (status) {
@@ -305,7 +312,7 @@ class Inflate {
 
       // Finalize if end of stream reached.
       if (status === Z_STREAM_END) {
-        status = inflateEnd(this.strm);
+        status = zlibInflateEnd(this.strm);
         this.onEnd(status);
         this.ended = true;
         return true;
@@ -321,7 +328,7 @@ class Inflate {
         // - a full buffer is handled by the `continue` above - so this genuinely
         // means "ran out of input", not "ran out of output".)
         if (_flush_mode === Z_FINISH) {
-          status = inflateEnd(this.strm);
+          status = zlibInflateEnd(this.strm);
           this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
           this.ended = true;
           return false;

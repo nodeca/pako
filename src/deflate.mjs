@@ -1,4 +1,10 @@
-import { deflateInit2, deflateSetHeader, deflateSetDictionary, deflate as _deflate, deflateEnd } from './zlib/deflate.mjs';
+import {
+  zlibDeflateInit2,
+  zlibDeflateSetHeader,
+  zlibDeflateSetDictionary,
+  zlibDeflate,
+  zlibDeflateEnd
+} from './zlib.mjs';
 import { assign, flattenChunks } from './utils/common.mjs';
 import { string2buf } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
@@ -140,7 +146,7 @@ class Deflate {
     this.strm = new ZStream();
     this.strm.avail_out = 0;
 
-    let status = deflateInit2(
+    let status = zlibDeflateInit2(
       this.strm,
       opt.level,
       opt.method,
@@ -155,7 +161,7 @@ class Deflate {
     }
 
     if (opt.header) {
-      deflateSetHeader(this.strm, opt.header);
+      zlibDeflateSetHeader(this.strm, opt.header);
     }
 
     if (opt.dictionary) {
@@ -170,7 +176,7 @@ class Deflate {
         dict = opt.dictionary;
       }
 
-      status = deflateSetDictionary(this.strm, dict);
+      status = zlibDeflateSetDictionary(this.strm, dict);
 
       if (status !== Z_OK) {
         throw new Error(msg[status]);
@@ -239,14 +245,14 @@ class Deflate {
         continue;
       }
 
-      status = _deflate(strm, _flush_mode);
+      status = zlibDeflate(strm, _flush_mode);
 
       // Ended => flush and finish
       if (status === Z_STREAM_END) {
         if (strm.next_out > 0) {
           this.onData(strm.output.subarray(0, strm.next_out));
         }
-        status = deflateEnd(this.strm);
+        status = zlibDeflateEnd(this.strm);
         this.onEnd(status);
         this.ended = true;
         return status === Z_OK;
