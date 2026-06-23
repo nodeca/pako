@@ -100,71 +100,72 @@ const defaultOptions = {
  * console.log(inflate.result);
  * ```
  **/
-function Inflate(options) {
-  this.options = assign({}, defaultOptions, options || {});
+class Inflate {
+  constructor(options) {
+    this.options = assign({}, defaultOptions, options || {});
 
-  const opt = this.options;
+    const opt = this.options;
 
-  // Force window size for `raw` data, if not set directly,
-  // because we have no header for autodetect.
-  if (opt.raw && (opt.windowBits >= 0) && (opt.windowBits < 16)) {
-    opt.windowBits = -opt.windowBits;
-    if (opt.windowBits === 0) { opt.windowBits = -15; }
-  }
-
-  // If `windowBits` not defined (and mode not raw) - set autodetect flag for gzip/deflate
-  if ((opt.windowBits >= 0) && (opt.windowBits < 16) &&
-      !(options && options.windowBits)) {
-    opt.windowBits += 32;
-  }
-
-  // Gzip header has no info about windows size, we can do autodetect only
-  // for deflate. So, if window size not set, force it to max when gzip possible
-  if ((opt.windowBits > 15) && (opt.windowBits < 48)) {
-    // bit 3 (16) -> gzipped data
-    // bit 4 (32) -> autodetect gzip/deflate
-    if ((opt.windowBits & 15) === 0) {
-      opt.windowBits |= 15;
+    // Force window size for `raw` data, if not set directly,
+    // because we have no header for autodetect.
+    if (opt.raw && (opt.windowBits >= 0) && (opt.windowBits < 16)) {
+      opt.windowBits = -opt.windowBits;
+      if (opt.windowBits === 0) { opt.windowBits = -15; }
     }
-  }
 
-  this.err    = 0;      // error code, if happens (0 = Z_OK)
-  this.msg    = '';     // error message
-  this.ended  = false;  // used to avoid multiple onEnd() calls
-  this.chunks = [];     // chunks of compressed data
-
-  this.strm   = new ZStream();
-  this.strm.avail_out = 0;
-
-  let status  = inflateInit2(
-    this.strm,
-    opt.windowBits
-  );
-
-  if (status !== Z_OK) {
-    throw new Error(msg[status]);
-  }
-
-  this.header = new GZheader();
-
-  inflateGetHeader(this.strm, this.header);
-
-  // Setup dictionary
-  if (opt.dictionary) {
-    // Convert data if needed
-    if (typeof opt.dictionary === 'string') {
-      opt.dictionary = string2buf(opt.dictionary);
-    } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
-      opt.dictionary = new Uint8Array(opt.dictionary);
+    // If `windowBits` not defined (and mode not raw) - set autodetect flag for gzip/deflate
+    if ((opt.windowBits >= 0) && (opt.windowBits < 16) &&
+        !(options && options.windowBits)) {
+      opt.windowBits += 32;
     }
-    if (opt.raw) { //In raw mode we need to set the dictionary early
-      status = inflateSetDictionary(this.strm, opt.dictionary);
-      if (status !== Z_OK) {
-        throw new Error(msg[status]);
+
+    // Gzip header has no info about windows size, we can do autodetect only
+    // for deflate. So, if window size not set, force it to max when gzip possible
+    if ((opt.windowBits > 15) && (opt.windowBits < 48)) {
+      // bit 3 (16) -> gzipped data
+      // bit 4 (32) -> autodetect gzip/deflate
+      if ((opt.windowBits & 15) === 0) {
+        opt.windowBits |= 15;
+      }
+    }
+
+    this.err    = 0;      // error code, if happens (0 = Z_OK)
+    this.msg    = '';     // error message
+    this.ended  = false;  // used to avoid multiple onEnd() calls
+    this.chunks = [];     // chunks of compressed data
+
+    this.strm   = new ZStream();
+    this.strm.avail_out = 0;
+
+    let status  = inflateInit2(
+      this.strm,
+      opt.windowBits
+    );
+
+    if (status !== Z_OK) {
+      throw new Error(msg[status]);
+    }
+
+    this.header = new GZheader();
+
+    inflateGetHeader(this.strm, this.header);
+
+    // Setup dictionary
+    if (opt.dictionary) {
+      // Convert data if needed
+      if (typeof opt.dictionary === 'string') {
+        opt.dictionary = string2buf(opt.dictionary);
+      } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
+        opt.dictionary = new Uint8Array(opt.dictionary);
+      }
+      if (opt.raw) { //In raw mode we need to set the dictionary early
+        status = inflateSetDictionary(this.strm, opt.dictionary);
+        if (status !== Z_OK) {
+          throw new Error(msg[status]);
+        }
       }
     }
   }
-}
 
 /**
  * Inflate#push(data[, flush_mode]) -> Boolean
@@ -191,146 +192,146 @@ function Inflate(options) {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-Inflate.prototype.push = function (data, flush_mode) {
-  const strm = this.strm;
-  const chunkSize = this.options.chunkSize;
-  const dictionary = this.options.dictionary;
-  let status, _flush_mode, last_avail_out;
+  push(data, flush_mode) {
+    const strm = this.strm;
+    const chunkSize = this.options.chunkSize;
+    const dictionary = this.options.dictionary;
+    let status, _flush_mode, last_avail_out;
 
-  if (this.ended) return false;
+    if (this.ended) return false;
 
-  if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
-  else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;
+    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
+    else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;
 
-  // Convert data if needed
-  if (toString.call(data) === '[object ArrayBuffer]') {
-    strm.input = new Uint8Array(data);
-  } else {
-    strm.input = data;
-  }
-
-  strm.next_in = 0;
-  strm.avail_in = strm.input.length;
-
-  for (;;) {
-    if (strm.avail_out === 0) {
-      strm.output = new Uint8Array(chunkSize);
-      strm.next_out = 0;
-      strm.avail_out = chunkSize;
+    // Convert data if needed
+    if (toString.call(data) === '[object ArrayBuffer]') {
+      strm.input = new Uint8Array(data);
+    } else {
+      strm.input = data;
     }
 
-    status = _inflate(strm, _flush_mode);
+    strm.next_in = 0;
+    strm.avail_in = strm.input.length;
 
-    if (status === Z_NEED_DICT && dictionary) {
-      status = inflateSetDictionary(strm, dictionary);
-
-      if (status === Z_OK) {
-        status = _inflate(strm, _flush_mode);
-      } else if (status === Z_DATA_ERROR) {
-        // Replace code with more verbose
-        status = Z_NEED_DICT;
+    for (;;) {
+      if (strm.avail_out === 0) {
+        strm.output = new Uint8Array(chunkSize);
+        strm.next_out = 0;
+        strm.avail_out = chunkSize;
       }
-    }
 
-    // Only the gzip format defines concatenated members (RFC 1952: a gzip file
-    // is "a series of members"). A zlib stream (RFC 1950) ends after its
-    // ADLER32, and a raw DEFLATE stream (RFC 1951) ends after its final block -
-    // neither format allows anything to follow, so bytes after the end are not
-    // ours to interpret and must be left in the input. Restart decoding only
-    // for a gzip member: `state.flags` is non-zero only once a gzip header has
-    // actually been decoded (it stays 0 for a zlib member, even when the format
-    // was auto-detected and the gzip bit of `wrap` is set). A trailing zero
-    // byte is padding, not the start of a member (no member can begin with 0).
-    while (strm.avail_in > 0 &&
-           status === Z_STREAM_END &&
-           (strm.state.wrap & 2) && strm.state.flags !== 0 &&
-           strm.input[strm.next_in] !== 0)
-    {
-      inflateReset(strm);
       status = _inflate(strm, _flush_mode);
-    }
 
-    switch (status) {
-      case Z_STREAM_ERROR:
-      case Z_DATA_ERROR:
-      case Z_NEED_DICT:
-      case Z_MEM_ERROR:
-        this.onEnd(status);
-        this.ended = true;
-        return false;
-    }
+      if (status === Z_NEED_DICT && dictionary) {
+        status = inflateSetDictionary(strm, dictionary);
 
-    // Remember real `avail_out` value, because we may patch out buffer content
-    // to align utf8 strings boundaries.
-    last_avail_out = strm.avail_out;
-
-    if (strm.next_out) {
-      // Flush output if buffer is full, stream ended, or an explicit flush was
-      // requested (e.g. Z_SYNC_FLUSH) - to push out the tail, same as node's zlib.
-      if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
-
-        if (this.options.to === 'string') {
-
-          let next_out_utf8 = utf8border(strm.output, strm.next_out);
-
-          let tail = strm.next_out - next_out_utf8;
-          let utf8str = buf2string(strm.output, next_out_utf8);
-
-          // move tail & realign counters
-          strm.next_out = tail;
-          strm.avail_out = chunkSize - tail;
-          if (tail) strm.output.set(strm.output.subarray(next_out_utf8, next_out_utf8 + tail), 0);
-
-          this.onData(utf8str);
-
-        } else {
-          this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
-
-          // Force a fresh output buffer on next iteration / next push, so the
-          // already emitted tail is not sent again.
-          strm.avail_out = 0;
-          strm.next_out = 0;
+        if (status === Z_OK) {
+          status = _inflate(strm, _flush_mode);
+        } else if (status === Z_DATA_ERROR) {
+          // Replace code with more verbose
+          status = Z_NEED_DICT;
         }
       }
-    }
 
-    // A full output buffer means there may be more to produce - allocate a new
-    // one and call inflate again. The status depends on the flush mode: with
-    // Z_NO_FLUSH a full buffer is reported as Z_OK, but with Z_FINISH the same
-    // situation is reported as Z_BUF_ERROR ("could not make progress now",
-    // non-fatal) even though output is still pending. Both must continue; the
-    // distinction that matters is purely "was the output buffer exhausted".
-    if ((status === Z_OK || status === Z_BUF_ERROR) && last_avail_out === 0) continue;
-
-    // Finalize if end of stream reached.
-    if (status === Z_STREAM_END) {
-      status = inflateEnd(this.strm);
-      this.onEnd(status);
-      this.ended = true;
-      return true;
-    }
-
-    if (strm.avail_in === 0) {
-      // Input is exhausted. If the caller declared this the end of the stream
-      // (Z_FINISH) but we never saw Z_STREAM_END, the compressed data ended
-      // before its terminating marker - i.e. it is truncated/incomplete. That
-      // is an error: returning the partial output as success would be
-      // indistinguishable from a complete decode, hiding the data loss. Report
-      // it via Z_BUF_ERROR. (Reached only when the output buffer still had room
-      // - a full buffer is handled by the `continue` above - so this genuinely
-      // means "ran out of input", not "ran out of output".)
-      if (_flush_mode === Z_FINISH) {
-        status = inflateEnd(this.strm);
-        this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
-        this.ended = true;
-        return false;
+      // Only the gzip format defines concatenated members (RFC 1952: a gzip file
+      // is "a series of members"). A zlib stream (RFC 1950) ends after its
+      // ADLER32, and a raw DEFLATE stream (RFC 1951) ends after its final block -
+      // neither format allows anything to follow, so bytes after the end are not
+      // ours to interpret and must be left in the input. Restart decoding only
+      // for a gzip member: `state.flags` is non-zero only once a gzip header has
+      // actually been decoded (it stays 0 for a zlib member, even when the format
+      // was auto-detected and the gzip bit of `wrap` is set). A trailing zero
+      // byte is padding, not the start of a member (no member can begin with 0).
+      while (strm.avail_in > 0 &&
+             status === Z_STREAM_END &&
+             (strm.state.wrap & 2) && strm.state.flags !== 0 &&
+             strm.input[strm.next_in] !== 0)
+      {
+        inflateReset(strm);
+        status = _inflate(strm, _flush_mode);
       }
-      break;
-    }
-  }
 
-  return true;
-};
+      switch (status) {
+        case Z_STREAM_ERROR:
+        case Z_DATA_ERROR:
+        case Z_NEED_DICT:
+        case Z_MEM_ERROR:
+          this.onEnd(status);
+          this.ended = true;
+          return false;
+      }
+
+      // Remember real `avail_out` value, because we may patch out buffer content
+      // to align utf8 strings boundaries.
+      last_avail_out = strm.avail_out;
+
+      if (strm.next_out) {
+        // Flush output if buffer is full, stream ended, or an explicit flush was
+        // requested (e.g. Z_SYNC_FLUSH) - to push out the tail, same as node's zlib.
+        if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
+
+          if (this.options.to === 'string') {
+
+            let next_out_utf8 = utf8border(strm.output, strm.next_out);
+
+            let tail = strm.next_out - next_out_utf8;
+            let utf8str = buf2string(strm.output, next_out_utf8);
+
+            // move tail & realign counters
+            strm.next_out = tail;
+            strm.avail_out = chunkSize - tail;
+            if (tail) strm.output.set(strm.output.subarray(next_out_utf8, next_out_utf8 + tail), 0);
+
+            this.onData(utf8str);
+
+          } else {
+            this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
+
+            // Force a fresh output buffer on next iteration / next push, so the
+            // already emitted tail is not sent again.
+            strm.avail_out = 0;
+            strm.next_out = 0;
+          }
+        }
+      }
+
+      // A full output buffer means there may be more to produce - allocate a new
+      // one and call inflate again. The status depends on the flush mode: with
+      // Z_NO_FLUSH a full buffer is reported as Z_OK, but with Z_FINISH the same
+      // situation is reported as Z_BUF_ERROR ("could not make progress now",
+      // non-fatal) even though output is still pending. Both must continue; the
+      // distinction that matters is purely "was the output buffer exhausted".
+      if ((status === Z_OK || status === Z_BUF_ERROR) && last_avail_out === 0) continue;
+
+      // Finalize if end of stream reached.
+      if (status === Z_STREAM_END) {
+        status = inflateEnd(this.strm);
+        this.onEnd(status);
+        this.ended = true;
+        return true;
+      }
+
+      if (strm.avail_in === 0) {
+        // Input is exhausted. If the caller declared this the end of the stream
+        // (Z_FINISH) but we never saw Z_STREAM_END, the compressed data ended
+        // before its terminating marker - i.e. it is truncated/incomplete. That
+        // is an error: returning the partial output as success would be
+        // indistinguishable from a complete decode, hiding the data loss. Report
+        // it via Z_BUF_ERROR. (Reached only when the output buffer still had room
+        // - a full buffer is handled by the `continue` above - so this genuinely
+        // means "ran out of input", not "ran out of output".)
+        if (_flush_mode === Z_FINISH) {
+          status = inflateEnd(this.strm);
+          this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
+          this.ended = true;
+          return false;
+        }
+        break;
+      }
+    }
+
+    return true;
+  }
 
 
 /**
@@ -341,9 +342,9 @@ Inflate.prototype.push = function (data, flush_mode) {
  * By default, stores data blocks in `chunks[]` property and glue
  * those in `onEnd`. Override this handler, if you need another behaviour.
  **/
-Inflate.prototype.onData = function (chunk) {
-  this.chunks.push(chunk);
-};
+  onData(chunk) {
+    this.chunks.push(chunk);
+  }
 
 
 /**
@@ -355,19 +356,20 @@ Inflate.prototype.onData = function (chunk) {
  * complete (Z_FINISH). By default - join collected chunks,
  * free memory and fill `results` / `err` properties.
  **/
-Inflate.prototype.onEnd = function (status) {
-  // On success - join
-  if (status === Z_OK) {
-    if (this.options.to === 'string') {
-      this.result = this.chunks.join('');
-    } else {
-      this.result = flattenChunks(this.chunks);
+  onEnd(status) {
+    // On success - join
+    if (status === Z_OK) {
+      if (this.options.to === 'string') {
+        this.result = this.chunks.join('');
+      } else {
+        this.result = flattenChunks(this.chunks);
+      }
     }
+    this.chunks = [];
+    this.err = status;
+    this.msg = this.strm.msg;
   }
-  this.chunks = [];
-  this.err = status;
-  this.msg = this.strm.msg;
-};
+}
 
 
 /**
