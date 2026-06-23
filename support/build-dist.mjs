@@ -1,52 +1,99 @@
 import { rm } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import { build } from 'vite';
 
-const require = createRequire(import.meta.url);
-const pkg = require('../package.json');
+const common = {
+  configFile: false,
+  logLevel: 'info',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: false,
+    sourcemap: true
+  }
+};
 
-const outDir = process.env.PAKO_BUILD_OUT_DIR || 'dist';
-const banner = `/*! ${pkg.name} ${pkg.version} https://github.com/${pkg.repository} @license ${pkg.license} */`;
+async function main() {
+  await rm('dist', { recursive: true, force: true });
 
-const entries = [
-  [ 'src/index.mjs', 'pako' ],
-  [ 'src/deflate.mjs', 'pako_deflate' ],
-  [ 'src/inflate.mjs', 'pako_inflate' ]
-];
-
-async function buildBundle({ entry, fileName, format, minify = false }) {
   await build({
-    configFile: false,
+    ...common,
     build: {
-      outDir,
-      emptyOutDir: false,
-      minify,
+      ...common.build,
+      target: 'es2015',
+      minify: false,
       lib: {
-        entry,
-        name: 'pako',
-        formats: [ format ],
-        fileName: () => fileName
+        entry: 'src/index.mjs',
+        formats: [ 'cjs' ],
+        fileName: () => 'pako.cjs.js'
       },
       rollupOptions: {
         output: {
-          banner,
           exports: 'named'
         }
       }
     }
   });
-}
 
-async function main() {
-  await rm(outDir, { recursive: true, force: true });
+  await build({
+    ...common,
+    build: {
+      ...common.build,
+      minify: false,
+      lib: {
+        entry: 'src/index.mjs',
+        formats: [ 'es' ],
+        fileName: () => 'pako.mjs'
+      },
+      rollupOptions: {
+        output: {}
+      }
+    }
+  });
 
-  for (const [ entry, name ] of entries) {
-    await buildBundle({ entry, fileName: `${name}.js`, format: 'umd' });
-    await buildBundle({ entry, fileName: `${name}.min.js`, format: 'umd', minify: true });
+  for (const [ entry, name ] of [
+    [ 'src/index.mjs', 'pako' ],
+    [ 'src/deflate.mjs', 'pako_deflate' ],
+    [ 'src/inflate.mjs', 'pako_inflate' ]
+  ]) {
+    await build({
+      ...common,
+      build: {
+        ...common.build,
+        target: 'es2015',
+        outDir: 'dist/browser',
+        minify: true,
+        lib: {
+          entry,
+          name: 'pako',
+          formats: [ 'umd' ],
+          fileName: () => `${name}.umd.min.js`
+        },
+        rollupOptions: {
+          output: {
+            exports: 'named',
+            name: 'pako'
+          }
+        }
+      }
+    });
+
+    await build({
+      ...common,
+      build: {
+        ...common.build,
+        target: 'es2015',
+        outDir: 'dist/browser',
+        minify: true,
+        lib: {
+          entry,
+          formats: [ 'es' ],
+          fileName: () => `${name}.esm.min.mjs`
+        },
+        rollupOptions: {
+          output: { minify: true }
+        }
+      }
+    });
   }
-
-  await buildBundle({ entry: 'src/index.mjs', fileName: 'pako.esm.mjs', format: 'es' });
-  await buildBundle({ entry: 'src/index.mjs', fileName: 'pako.cjs', format: 'cjs' });
 }
 
 main();

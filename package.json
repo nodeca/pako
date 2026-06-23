@@ -17,8 +17,7 @@
     "Mark Adler"
   ],
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "license": "(MIT AND Zlib)",
   "repository": "nodeca/pako",
@@ -32,17 +31,29 @@
       "url": "https://github.com/sponsors/nodeca"
     }
   ],
-  "module": "./dist/pako.esm.mjs",
+  "main": "./dist/pako.cjs.js",
+  "module": "./dist/pako.mjs",
   "exports": {
     ".": {
-      "import": "./dist/pako.esm.mjs",
-      "require": "./dist/pako.cjs"
+      "import": "./dist/pako.mjs",
+      "require": "./dist/pako.cjs.js"
     },
-    "./package.json": "./package.json",
-    "./dist/*": "./dist/*",
-    "./src/*": "./src/*",
-    "./src/zlib/*": "./src/zlib/*",
-    "./src/utils/*": "./src/utils/*"
+    "./browser": {
+      "import": "./dist/browser/pako.esm.min.mjs",
+      "require": "./dist/browser/pako.umd.min.js",
+      "default": "./dist/browser/pako.umd.min.js"
+    },
+    "./browser/deflate": {
+      "import": "./dist/browser/pako_deflate.esm.min.mjs",
+      "require": "./dist/browser/pako_deflate.umd.min.js",
+      "default": "./dist/browser/pako_deflate.umd.min.js"
+    },
+    "./browser/inflate": {
+      "import": "./dist/browser/pako_inflate.esm.min.mjs",
+      "require": "./dist/browser/pako_inflate.umd.min.js",
+      "default": "./dist/browser/pako_inflate.umd.min.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "lint": "eslint . --ext .js,.mjs",

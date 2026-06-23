@@ -447,4 +447,3 @@ function inflateRaw(input, options) {
 
 
 export { Inflate, inflate, inflateRaw, inflate as ungzip };
-export * as constants from './zlib/constants.mjs';

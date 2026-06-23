@@ -378,4 +378,3 @@ function gzip(input, options) {
 
 
 export { Deflate, deflate, deflateRaw, gzip };
-export * as constants from './zlib/constants.mjs';
