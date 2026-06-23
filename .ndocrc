@@ -15,6 +15,6 @@
 # Paths with sources
 ################################################################################
 
-lib/deflate.mjs
-lib/inflate.mjs
-index.mjs
+src/deflate.mjs
+src/inflate.mjs
+src/index.mjs

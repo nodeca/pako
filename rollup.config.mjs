@@ -30,7 +30,7 @@ const umd_out_base = { format: 'umd', name: 'pako', exports: 'named' };
 export default [
   // es6
   {
-    input: 'index.mjs',
+    input: 'src/index.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako.js' },
       { ...umd_out_base, file: 'dist/pako.min.js', plugins: [ terser() ] }
@@ -38,7 +38,7 @@ export default [
     plugins: plugins
   },
   {
-    input: 'lib/deflate.mjs',
+    input: 'src/deflate.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako_deflate.js' },
       { ...umd_out_base, file: 'dist/pako_deflate.min.js', plugins: [ terser() ] }
@@ -46,7 +46,7 @@ export default [
     plugins: plugins
   },
   {
-    input: 'lib/inflate.mjs',
+    input: 'src/inflate.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako_inflate.js' },
       { ...umd_out_base, file: 'dist/pako_inflate.min.js', plugins: [ terser() ] }
@@ -55,7 +55,7 @@ export default [
   },
   // es5
   {
-    input: 'index.mjs',
+    input: 'src/index.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako.es5.js' },
       { ...umd_out_base, file: 'dist/pako.es5.min.js', plugins: [ terser() ] }
@@ -63,7 +63,7 @@ export default [
     plugins: plugins_es5
   },
   {
-    input: 'lib/deflate.mjs',
+    input: 'src/deflate.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako_deflate.es5.js' },
       { ...umd_out_base, file: 'dist/pako_deflate.es5.min.js', plugins: [ terser() ] }
@@ -71,7 +71,7 @@ export default [
     plugins: plugins_es5
   },
   {
-    input: 'lib/inflate.mjs',
+    input: 'src/inflate.mjs',
     output: [
       { ...umd_out_base, file: 'dist/pako_inflate.es5.js' },
       { ...umd_out_base, file: 'dist/pako_inflate.es5.min.js', plugins: [ terser() ] }
@@ -80,7 +80,7 @@ export default [
   },
   // esm
   {
-    input: 'index.mjs',
+    input: 'src/index.mjs',
     output: [
       { file: 'dist/pako.esm.mjs', format: 'esm' }
     ],
@@ -88,7 +88,7 @@ export default [
   },
   // cjs (entry for `require('pako')`)
   {
-    input: 'index.mjs',
+    input: 'src/index.mjs',
     output: [
       { file: 'dist/pako.cjs', format: 'cjs', exports: 'named' }
     ],

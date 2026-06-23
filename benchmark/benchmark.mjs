@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import Benchmark from 'benchmark';
 import ansi from 'ansi';
 
-import pako from '../index.mjs';
+import pako from '../src/index.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

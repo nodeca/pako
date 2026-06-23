@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'assert';
 import { loadSamples } from './helpers.mjs';
-import { Deflate, Inflate, deflate, inflate } from '../index.mjs';
+import { Deflate, Inflate, deflate, inflate } from '../src/index.mjs';
 
 
 const samples = loadSamples();

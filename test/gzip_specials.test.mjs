@@ -4,8 +4,8 @@ import path from 'path';
 import assert from 'assert';
 import zlib from 'zlib';
 
-import { Deflate, Inflate, gzip, ungzip } from '../index.mjs';
-import { Z_SYNC_FLUSH } from '../lib/zlib/constants.mjs';
+import { Deflate, Inflate, gzip, ungzip } from '../src/index.mjs';
+import { Z_SYNC_FLUSH } from '../src/zlib/constants.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

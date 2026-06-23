@@ -1,5 +1,5 @@
 import { describe, it } from 'node:test';
-import { Deflate, constants, deflate, deflateRaw, inflate, inflateRaw } from '../index.mjs';
+import { Deflate, constants, deflate, deflateRaw, inflate, inflateRaw } from '../src/index.mjs';
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';

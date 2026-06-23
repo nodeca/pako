@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 
-import { inflate, inflateRaw } from '../../index.mjs';
+import { inflate, inflateRaw } from '../../src/index.mjs';
 import { testInflate, loadSamples } from '../helpers.mjs';
 import { fileURLToPath } from 'node:url';
 

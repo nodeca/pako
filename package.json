@@ -17,9 +17,8 @@
     "Mark Adler"
   ],
   "files": [
-    "index.mjs",
     "dist/",
-    "lib/"
+    "src/"
   ],
   "license": "(MIT AND Zlib)",
   "repository": "nodeca/pako",
@@ -41,9 +40,9 @@
     },
     "./package.json": "./package.json",
     "./dist/*": "./dist/*",
-    "./lib/*": "./lib/*",
-    "./lib/zlib/*": "./lib/zlib/*",
-    "./lib/utils/*": "./lib/utils/*"
+    "./src/*": "./src/*",
+    "./src/zlib/*": "./src/zlib/*",
+    "./src/utils/*": "./src/utils/*"
   },
   "scripts": {
     "lint": "eslint . --ext .js,.mjs",

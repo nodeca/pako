@@ -3,13 +3,13 @@
 import { describe, it } from 'node:test';
 import assert from 'assert';
 
-import * as c from '../../lib/zlib/constants.mjs';
-import msg from '../../lib/zlib/messages.mjs';
-//import zlib_stream from '../../lib/zlib/zstream.mjs';
-import * as zlib_inflate from '../../lib/zlib/inflate.mjs';
-import inflate_table from '../../lib/zlib/inftrees.mjs';
+import * as c from '../../src/zlib/constants.mjs';
+import msg from '../../src/zlib/messages.mjs';
+//import zlib_stream from '../../src/zlib/zstream.mjs';
+import * as zlib_inflate from '../../src/zlib/inflate.mjs';
+import inflate_table from '../../src/zlib/inftrees.mjs';
 
-import { Inflate, gzip } from '../../index.mjs';
+import { Inflate, gzip } from '../../src/index.mjs';
 
 
 function h2b(hex) {

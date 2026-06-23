@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 
-import { Deflate, Inflate, constants, deflate, deflateRaw, inflate, inflateRaw, ungzip } from '../index.mjs';
+import { Deflate, Inflate, constants, deflate, deflateRaw, inflate, inflateRaw, ungzip } from '../src/index.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

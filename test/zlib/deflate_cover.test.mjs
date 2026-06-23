@@ -5,12 +5,12 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 
-import * as c from '../../lib/zlib/constants.mjs';
-import msg from '../../lib/zlib/messages.mjs';
-import * as zlib_deflate from '../../lib/zlib/deflate.mjs';
-import ZStream from '../../lib/zlib/zstream.mjs';
+import * as c from '../../src/zlib/constants.mjs';
+import msg from '../../src/zlib/messages.mjs';
+import * as zlib_deflate from '../../src/zlib/deflate.mjs';
+import ZStream from '../../src/zlib/zstream.mjs';
 
-import { Deflate } from '../../index.mjs';
+import { Deflate } from '../../src/index.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

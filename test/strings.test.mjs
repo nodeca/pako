@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
-import { deflate, inflate } from '../index.mjs';
-import * as strings from '../lib/utils/strings.mjs';
+import { deflate, inflate } from '../src/index.mjs';
+import * as strings from '../src/utils/strings.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
