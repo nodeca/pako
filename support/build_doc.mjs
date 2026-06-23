@@ -6,14 +6,10 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-async function main() {
-  await rm('doc', { recursive: true, force: true });
+await rm('doc', { recursive: true, force: true });
 
-  const head = execFileSync('git', [ 'rev-parse', '--short=6', 'HEAD' ], { encoding: 'utf8' }).trim();
-  const linkFormat = `https://github.com/{package.repository}/blob/${head}/{file}#L{line}`;
-  const ndoc = require.resolve('ndoc/bin/ndoc.js');
+const head = execFileSync('git', [ 'rev-parse', '--short=6', 'HEAD' ], { encoding: 'utf8' }).trim();
+const linkFormat = `https://github.com/{package.repository}/blob/${head}/{file}#L{line}`;
+const ndoc = require.resolve('ndoc/bin/ndoc.js');
 
-  execFileSync(process.execPath, [ ndoc, '--link-format', linkFormat ], { stdio: 'inherit' });
-}
-
-main();
+execFileSync(process.execPath, [ ndoc, '--link-format', linkFormat ], { stdio: 'inherit' });

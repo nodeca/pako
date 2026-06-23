@@ -140,20 +140,19 @@ function run(files) {
 export { IMPLS_DIRECTORY, IMPLS_PATHS, IMPLS, SAMPLES_DIRECTORY, SAMPLES, select, run };
 
 // Load implementations (ESM, async), then build samples and run.
-Promise.all(fs.readdirSync(IMPLS_DIRECTORY).sort().map(function (name) {
+for (const name of fs.readdirSync(IMPLS_DIRECTORY).sort()) {
   const file = path.join(IMPLS_DIRECTORY, name, 'index.mjs');
-  if (!fs.existsSync(file)) return null; // skip implementations without sources
+  if (!fs.existsSync(file)) continue; // skip implementations without sources
 
-  return import(pathToFileURL(file)).then(function (code) {
-    IMPLS_PATHS[name] = file;
-    IMPLS.push({ name: name, code: code });
-  });
-})).then(function () {
-  IMPLS.sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+  const code = await import(pathToFileURL(file));
+  IMPLS_PATHS[name] = file;
+  IMPLS.push({ name: name, code: code });
+}
 
-  fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(addSample);
+IMPLS.sort(function (a, b) { return a.name < b.name ? -1 : 1; });
 
-  run(process.argv.slice(2).map(function (source) {
-    return new RegExp(source, 'i');
-  }));
-});
+fs.readdirSync(SAMPLES_DIRECTORY).sort().forEach(addSample);
+
+run(process.argv.slice(2).map(function (source) {
+  return new RegExp(source, 'i');
+}));

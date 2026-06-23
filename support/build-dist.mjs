@@ -11,89 +11,85 @@ const common = {
   }
 };
 
-async function main() {
-  await rm('dist', { recursive: true, force: true });
+await rm('dist', { recursive: true, force: true });
+
+await build({
+  ...common,
+  build: {
+    ...common.build,
+    target: 'es2015',
+    minify: false,
+    lib: {
+      entry: 'src/index.mjs',
+      formats: [ 'cjs' ],
+      fileName: () => 'pako.cjs.js'
+    },
+    rollupOptions: {
+      output: {
+        exports: 'named'
+      }
+    }
+  }
+});
+
+await build({
+  ...common,
+  build: {
+    ...common.build,
+    minify: false,
+    lib: {
+      entry: 'src/index.mjs',
+      formats: [ 'es' ],
+      fileName: () => 'pako.mjs'
+    },
+    rollupOptions: {
+      output: {}
+    }
+  }
+});
+
+for (const [ entry, name ] of [
+  [ 'src/index.mjs', 'pako' ],
+  [ 'src/deflate.mjs', 'pako_deflate' ],
+  [ 'src/inflate.mjs', 'pako_inflate' ]
+]) {
+  await build({
+    ...common,
+    build: {
+      ...common.build,
+      target: 'es2015',
+      outDir: 'dist/browser',
+      minify: true,
+      lib: {
+        entry,
+        name: 'pako',
+        formats: [ 'umd' ],
+        fileName: () => `${name}.umd.min.js`
+      },
+      rollupOptions: {
+        output: {
+          exports: 'named',
+          name: 'pako'
+        }
+      }
+    }
+  });
 
   await build({
     ...common,
     build: {
       ...common.build,
       target: 'es2015',
-      minify: false,
+      outDir: 'dist/browser',
+      minify: true,
       lib: {
-        entry: 'src/index.mjs',
-        formats: [ 'cjs' ],
-        fileName: () => 'pako.cjs.js'
-      },
-      rollupOptions: {
-        output: {
-          exports: 'named'
-        }
-      }
-    }
-  });
-
-  await build({
-    ...common,
-    build: {
-      ...common.build,
-      minify: false,
-      lib: {
-        entry: 'src/index.mjs',
+        entry,
         formats: [ 'es' ],
-        fileName: () => 'pako.mjs'
+        fileName: () => `${name}.esm.min.mjs`
       },
       rollupOptions: {
-        output: {}
+        output: { minify: true }
       }
     }
   });
-
-  for (const [ entry, name ] of [
-    [ 'src/index.mjs', 'pako' ],
-    [ 'src/deflate.mjs', 'pako_deflate' ],
-    [ 'src/inflate.mjs', 'pako_inflate' ]
-  ]) {
-    await build({
-      ...common,
-      build: {
-        ...common.build,
-        target: 'es2015',
-        outDir: 'dist/browser',
-        minify: true,
-        lib: {
-          entry,
-          name: 'pako',
-          formats: [ 'umd' ],
-          fileName: () => `${name}.umd.min.js`
-        },
-        rollupOptions: {
-          output: {
-            exports: 'named',
-            name: 'pako'
-          }
-        }
-      }
-    });
-
-    await build({
-      ...common,
-      build: {
-        ...common.build,
-        target: 'es2015',
-        outDir: 'dist/browser',
-        minify: true,
-        lib: {
-          entry,
-          formats: [ 'es' ],
-          fileName: () => `${name}.esm.min.mjs`
-        },
-        rollupOptions: {
-          output: { minify: true }
-        }
-      }
-    });
-  }
 }
-
-main();

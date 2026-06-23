@@ -56,7 +56,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "lint": "eslint . --ext .js,.mjs",
+    "lint": "eslint .",
     "test": "npm run lint && node --test",
     "coverage": "npm run lint && c8 -r text -r html node --test",
     "build": "node support/build-dist.mjs",
@@ -68,9 +68,10 @@
   },
   "devDependencies": {
     "c8": "^11.0.0",
-    "eslint": "^7.13.0",
+    "eslint": "^9.39.4",
     "gh-pages": "^6.3.0",
     "ndoc": "^6.0.0",
+    "neostandard": "^0.13.0",
     "vite": "^8.0.14"
   }
 }
