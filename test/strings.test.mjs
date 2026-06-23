@@ -4,7 +4,7 @@ import path from 'path';
 import assert from 'assert';
 
 import { deflate, inflate } from '../src/index.mjs';
-import * as strings from '../src/utils/strings.mjs';
+import { buf2string, string2buf, utf8border } from '../src/utils/strings.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -55,7 +55,7 @@ describe('Encode/Decode', () => {
   });
 
   it('utf-8 border detect', () => {
-    const ub = strings.utf8border;
+    const ub = utf8border;
     assert.strictEqual(ub(utf8sample, 1), 1);
     assert.strictEqual(ub(utf8sample, 2), 2);
     assert.strictEqual(ub(utf8sample, 3), 3);
@@ -86,22 +86,22 @@ describe('Encode/Decode', () => {
 
   it('Encode string to utf8 buf', () => {
     assert.deepStrictEqual(
-      strings.string2buf(utf16sample),
+      string2buf(utf16sample),
       utf8sample
     );
 
     TextEncoder = null;
     assert.deepStrictEqual(
-      strings.string2buf(utf16sample),
+      string2buf(utf16sample),
       utf8sample
     );
   });
 
   it('Decode utf8 buf to string', () => {
-    assert.ok(strings.buf2string(utf8sample), utf16sample);
+    assert.ok(buf2string(utf8sample), utf16sample);
 
     TextDecoder = null;
-    assert.ok(strings.buf2string(utf8sample), utf16sample);
+    assert.ok(buf2string(utf8sample), utf16sample);
   });
 
   it('0xFF byte should not consume subsequent bytes', () => {
@@ -110,7 +110,7 @@ describe('Encode/Decode', () => {
     // 0xFF is invalid UTF-8. With the bug (_utf8len[255] = 6), buf2string
     // treats it as a 6-byte sequence, swallowing the next 5 valid bytes.
     const buf = new Uint8Array([ 0xFF, 0x41, 0x42, 0x43, 0x44, 0x45 ]);
-    const result = strings.buf2string(buf);
+    const result = buf2string(buf);
 
     // Should produce 6 characters: one for the invalid 0xFF byte,
     // then 'A', 'B', 'C', 'D', 'E'

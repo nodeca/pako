@@ -7,7 +7,7 @@ import {
   zlibInflateEnd
 } from './zlib.mjs';
 import { flattenChunks } from './utils/common.mjs';
-import { string2buf, buf2string, utf8border } from './utils/strings.mjs';
+import { buf2string, utf8border } from './utils/strings.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 import GZheader from './zlib/gzheader.mjs';
@@ -75,8 +75,6 @@ const defaultOptions = {
  * on bad params. Supported options:
  *
  * - `windowBits`
- * - `dictionary`
- *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
  *
@@ -140,6 +138,7 @@ class Inflate {
     this.err    = 0;      // error code, if happens (0 = Z_OK)
     this.msg    = '';     // error message
     this.ended  = false;  // used to avoid multiple onEnd() calls
+    this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
 
     this.strm   = new ZStream();
@@ -157,22 +156,6 @@ class Inflate {
     this.header = new GZheader();
 
     zlibInflateGetHeader(this.strm, this.header);
-
-    // Setup dictionary
-    if (opt.dictionary) {
-      // Convert data if needed
-      if (typeof opt.dictionary === 'string') {
-        opt.dictionary = string2buf(opt.dictionary);
-      } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
-        opt.dictionary = new Uint8Array(opt.dictionary);
-      }
-      if (opt.raw) { //In raw mode we need to set the dictionary early
-        status = zlibInflateSetDictionary(this.strm, opt.dictionary);
-        if (status !== Z_OK) {
-          throw new Error(msg[status]);
-        }
-      }
-    }
   }
 
 /**
@@ -203,7 +186,6 @@ class Inflate {
   push(data, flush_mode) {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
-    const dictionary = this.options.dictionary;
     let status, _flush_mode, last_avail_out;
 
     if (this.ended) return false;
@@ -221,6 +203,11 @@ class Inflate {
     strm.next_in = 0;
     strm.avail_in = strm.input.length;
 
+    if (!this.started) {
+      this.started = true;
+      this.onStart(strm);
+    }
+
     for (;;) {
       if (strm.avail_out === 0) {
         strm.output = new Uint8Array(chunkSize);
@@ -230,14 +217,18 @@ class Inflate {
 
       status = zlibInflate(strm, _flush_mode);
 
-      if (status === Z_NEED_DICT && dictionary) {
-        status = zlibInflateSetDictionary(strm, dictionary);
+      if (status === Z_NEED_DICT) {
+        const dictionary = this.onNeedDict(strm);
 
-        if (status === Z_OK) {
-          status = zlibInflate(strm, _flush_mode);
-        } else if (status === Z_DATA_ERROR) {
-          // Replace code with more verbose
-          status = Z_NEED_DICT;
+        if (dictionary?.length) {
+          status = zlibInflateSetDictionary(strm, dictionary);
+
+          if (status === Z_OK) {
+            status = zlibInflate(strm, _flush_mode);
+          } else if (status === Z_DATA_ERROR) {
+            // Replace code with more verbose
+            status = Z_NEED_DICT;
+          }
         }
       }
 
@@ -340,6 +331,24 @@ class Inflate {
 
     return true;
   }
+
+
+/**
+ * Inflate#onStart(strm) -> Void
+ * - strm (ZStream): low-level zlib stream.
+ *
+ * Called once before the first low-level inflate call.
+ **/
+  onStart(strm) {}
+
+
+/**
+ * Inflate#onNeedDict(strm) -> Uint8Array
+ * - strm (ZStream): low-level zlib stream.
+ *
+ * Called when inflate needs a preset dictionary. Return a Uint8Array dictionary.
+ **/
+  onNeedDict(strm) { return new Uint8Array(0); }
 
 
 /**

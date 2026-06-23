@@ -1,7 +1,5 @@
 import {
   zlibDeflateInit2,
-  zlibDeflateSetHeader,
-  zlibDeflateSetDictionary,
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
@@ -86,7 +84,6 @@ const defaultOptions = {
  * - `windowBits`
  * - `memLevel`
  * - `strategy`
- * - `dictionary`
  *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
@@ -100,14 +97,6 @@ const defaultOptions = {
  * - `chunkSize` - size of generated data chunks (16K by default)
  * - `raw` (Boolean) - do raw deflate
  * - `gzip` (Boolean) - create gzip wrapper
- * - `header` (Object) - custom header for gzip
- *   - `text` (Boolean) - true if compressed data believed to be text
- *   - `time` (Number) - modification time, unix timestamp
- *   - `os` (Number) - operation system code
- *   - `extra` (Array) - array of bytes with extra data (max 65536)
- *   - `name` (String) - file name (binary string)
- *   - `comment` (String) - comment (binary string)
- *   - `hcrc` (Boolean) - true if header crc should be added
  *
  * ##### Example:
  *
@@ -143,6 +132,7 @@ class Deflate {
     this.err    = 0;      // error code, if happens (0 = Z_OK)
     this.msg    = '';     // error message
     this.ended  = false;  // used to avoid multiple onEnd() calls
+    this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
 
     this.strm = new ZStream();
@@ -160,31 +150,6 @@ class Deflate {
 
     if (status !== Z_OK) {
       throw new Error(msg[status]);
-    }
-
-    if (opt.header) {
-      zlibDeflateSetHeader(this.strm, opt.header);
-    }
-
-    if (opt.dictionary) {
-      let dict;
-      // Convert data if needed
-      if (typeof opt.dictionary === 'string') {
-        // If we need to compress text, change encoding to utf8.
-        dict = string2buf(opt.dictionary);
-      } else if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
-        dict = new Uint8Array(opt.dictionary);
-      } else {
-        dict = opt.dictionary;
-      }
-
-      status = zlibDeflateSetDictionary(this.strm, dict);
-
-      if (status !== Z_OK) {
-        throw new Error(msg[status]);
-      }
-
-      this._dict_set = true;
     }
   }
 
@@ -232,6 +197,11 @@ class Deflate {
 
     strm.next_in = 0;
     strm.avail_in = strm.input.length;
+
+    if (!this.started) {
+      this.started = true;
+      this.onStart(strm);
+    }
 
     for (;;) {
       if (strm.avail_out === 0) {
@@ -281,6 +251,15 @@ class Deflate {
 
 
 /**
+ * Deflate#onStart(strm) -> Void
+ * - strm (ZStream): low-level zlib stream.
+ *
+ * Called once before the first low-level deflate call.
+ **/
+  onStart(strm) {}
+
+
+/**
  * Deflate#onData(chunk) -> Void
  * - chunk (Uint8Array): output data.
  *
@@ -326,7 +305,6 @@ class Deflate {
  * - windowBits
  * - memLevel
  * - strategy
- * - dictionary
  *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.

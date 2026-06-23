@@ -1,5 +1,16 @@
 import { describe, it } from 'node:test';
-import { Deflate, constants, deflate, deflateRaw, inflate, inflateRaw } from '../src/index.mjs';
+import {
+  Deflate,
+  Inflate,
+  deflate,
+  deflateRaw,
+  inflate,
+  inflateRaw,
+  zlibDeflateSetDictionary,
+  Z_FULL_FLUSH,
+  Z_OK,
+  Z_SYNC_FLUSH
+} from '../src/index.mjs';
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +23,10 @@ describe('deflate misc', () => {
 
   it('handles a dictionary across multiple pushes', () => {
     const dict = Buffer.from('abcd');
-    const deflate = new Deflate({ dictionary: dict });
+    const deflate = new Deflate();
+    deflate.onStart = function (strm) {
+      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
+    };
 
     deflate.push(Buffer.from('hello'), false);
     deflate.push(Buffer.from('hello'), false);
@@ -20,11 +34,14 @@ describe('deflate misc', () => {
 
     if (deflate.err) { throw new Error(deflate.err); }
 
-    const uncompressed = inflate(Buffer.from(deflate.result), { dictionary: dict });
+    const inflate = new Inflate();
+    inflate.onNeedDict = function () { return dict; };
+    inflate.push(Buffer.from(deflate.result), true);
+    assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
 
     assert.deepStrictEqual(
       new Uint8Array(Buffer.from('hellohello world')),
-      uncompressed
+      inflate.result
     );
   });
 
@@ -34,22 +51,28 @@ describe('deflate misc', () => {
     assert.deepStrictEqual(deflate(sample.buffer), deflate(sample));
   });
 
-  it('accepts a dictionary passed as ArrayBuffer', () => {
+  it('sets a dictionary from onStart', () => {
     const dict = new Uint8Array([ 0x61, 0x62, 0x63, 0x64 ]); // 'abcd'
 
-    const fromBuffer = new Deflate({ dictionary: dict.buffer });
-    fromBuffer.push(Buffer.from('hellohello world'), true);
-    assert.ok(!fromBuffer.err, 'deflate error: ' + fromBuffer.err);
+    const withDictionary = new Deflate();
+    withDictionary.onStart = function (strm) {
+      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
+    };
+    withDictionary.push(Buffer.from('hellohello world'), true);
+    assert.ok(!withDictionary.err, 'deflate error: ' + withDictionary.err);
 
-    const fromArray = new Deflate({ dictionary: dict });
-    fromArray.push(Buffer.from('hellohello world'), true);
+    const withoutDictionary = new Deflate();
+    withoutDictionary.push(Buffer.from('hellohello world'), true);
 
-    assert.deepStrictEqual(fromBuffer.result, fromArray.result);
+    assert.notDeepStrictEqual(withDictionary.result, withoutDictionary.result);
 
-    const uncompressed = inflate(Buffer.from(fromBuffer.result), { dictionary: dict });
+    const inflate = new Inflate();
+    inflate.onNeedDict = function () { return dict; };
+    inflate.push(Buffer.from(withDictionary.result), true);
+    assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
     assert.deepStrictEqual(
       new Uint8Array(Buffer.from('hellohello world')),
-      uncompressed
+      inflate.result
     );
   });
 
@@ -57,8 +80,13 @@ describe('deflate misc', () => {
     assert.throws(() => new Deflate({ level: 42 }));
   });
 
-  it('throws when a dictionary is used with gzip (unsupported)', () => {
-    assert.throws(() => new Deflate({ gzip: true, dictionary: Buffer.from('abcd') }));
+  it('reports gzip dictionary errors from onStart', () => {
+    const deflate = new Deflate({ gzip: true });
+    deflate.onStart = function (strm) {
+      assert.notStrictEqual(zlibDeflateSetDictionary(strm, Buffer.from('abcd')), Z_OK);
+    };
+    deflate.push(Buffer.from('hello'), true);
+    assert.ok(!deflate.err, 'deflate error: ' + deflate.err);
   });
 
   it('returns false when pushing after the stream has ended', () => {
@@ -76,12 +104,12 @@ describe('deflate misc', () => {
 
   // chunkSize 7 leaves avail_out at 5 after the first (non-flushing) push, so
   // the next flush hits the "avail_out <= 6" guard that avoids repeating markers.
-  for (const flush of [ 'Z_SYNC_FLUSH', 'Z_FULL_FLUSH' ]) {
-    it(`emits a partially filled buffer on ${flush} without corrupting output`, () => {
+  for (const [ name, flush ] of [ [ 'Z_SYNC_FLUSH', Z_SYNC_FLUSH ], [ 'Z_FULL_FLUSH', Z_FULL_FLUSH ] ]) {
+    it(`emits a partially filled buffer on ${name} without corrupting output`, () => {
       const deflate = new Deflate({ chunkSize: 7 });
 
       deflate.push(Buffer.from('hello'), false);
-      deflate.push(Buffer.from(' world'), constants[flush]);
+      deflate.push(Buffer.from(' world'), flush);
       deflate.push(Buffer.from('!'), true);
 
       assert.ok(!deflate.err, 'deflate error: ' + deflate.err);

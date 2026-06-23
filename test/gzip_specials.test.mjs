@@ -4,8 +4,7 @@ import path from 'path';
 import assert from 'assert';
 import zlib from 'zlib';
 
-import { Deflate, Inflate, gzip, ungzip } from '../src/index.mjs';
-import { Z_SYNC_FLUSH } from '../src/zlib/constants.mjs';
+import { Deflate, GZheader, Inflate, gzip, ungzip, zlibDeflateSetHeader, Z_OK, Z_SYNC_FLUSH } from '../src/index.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,17 +30,18 @@ describe('Gzip special cases', () => {
   it('Write custom headers', () => {
     const data = '           ';
 
-    const deflator = new Deflate({
-      gzip: true,
-      header: {
-        hcrc: true,
-        time: 1234567,
-        os: 15,
-        name: 'test name',
-        comment: 'test comment',
-        extra: [ 4, 5, 6 ]
-      }
-    });
+    const deflator = new Deflate({ gzip: true });
+    deflator.onStart = function (strm) {
+      const header = new GZheader();
+      header.hcrc = true;
+      header.time = 1234567;
+      header.os = 15;
+      header.name = 'test name';
+      header.comment = 'test comment';
+      header.extra = [ 4, 5, 6 ];
+
+      assert.strictEqual(zlibDeflateSetHeader(strm, header), Z_OK);
+    };
     deflator.push(data, true);
 
     const inflator = new Inflate({ to: 'string' });

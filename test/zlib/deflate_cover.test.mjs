@@ -5,10 +5,20 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 
-import * as c from '../../src/zlib/constants.mjs';
-import msg from '../../src/zlib/messages.mjs';
-import * as zlib_deflate from '../../src/zlib/deflate.mjs';
-import ZStream from '../../src/zlib/zstream.mjs';
+import {
+  GZheader,
+  messages,
+  Z_BUF_ERROR,
+  Z_FINISH,
+  Z_OK,
+  Z_PARTIAL_FLUSH,
+  Z_STREAM_ERROR,
+  ZStream,
+  zlibDeflate,
+  zlibDeflateEnd,
+  zlibDeflateInit,
+  zlibDeflateSetHeader
+} from '../../src/zlib.mjs';
 
 import { Deflate } from '../../src/index.mjs';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +34,7 @@ function testDeflate(data, opts, flush) {
   deflator.push(data, flush);
   deflator.push(data, true);
 
-  assert.strictEqual(deflator.err, 0, msg[deflator.err]);
+  assert.strictEqual(deflator.err, 0, messages[deflator.err]);
 }
 
 describe('Deflate support', () => {
@@ -60,16 +70,19 @@ describe('Deflate gzip header', () => {
     const deflator = new Deflate({
       gzip: true,
       memLevel: 1,
-      chunkSize: 8,
-      header: {
-        hcrc: true,
-        name: 'n'.repeat(2000),
-        comment: 'c'.repeat(2000),
-        extra: new Uint8Array(2000).fill(7)
-      }
+      chunkSize: 8
     });
+    deflator.onStart = function (strm) {
+      const header = new GZheader();
+      header.hcrc = true;
+      header.name = 'n'.repeat(2000);
+      header.comment = 'c'.repeat(2000);
+      header.extra = new Uint8Array(2000).fill(7);
+
+      assert.strictEqual(zlibDeflateSetHeader(strm, header), Z_OK);
+    };
     deflator.push(long_sample, true);
-    assert.strictEqual(deflator.err, 0, msg[deflator.err]);
+    assert.strictEqual(deflator.err, 0, messages[deflator.err]);
   });
 
   // Exercise level-dependent XFL byte ternaries in the gzip header.
@@ -83,9 +96,9 @@ describe('Deflate gzip header', () => {
 describe('Deflate flush / data type', () => {
   it('partial flush (_tr_align)', () => {
     const deflator = new Deflate({ chunkSize: 10 });
-    deflator.push(long_sample, c.Z_PARTIAL_FLUSH);
+    deflator.push(long_sample, Z_PARTIAL_FLUSH);
     deflator.push(long_sample, true);
-    assert.strictEqual(deflator.err, 0, msg[deflator.err]);
+    assert.strictEqual(deflator.err, 0, messages[deflator.err]);
   });
 
   it('binary data type detection', () => {
@@ -99,37 +112,37 @@ describe('Deflate states', () => {
   it('inflate bad parameters', () => {
     let ret, strm;
 
-    ret = zlib_deflate.deflate(null, 0);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflate(null, 0);
+    assert(ret === Z_STREAM_ERROR);
 
     strm = new ZStream();
 
-    ret = zlib_deflate.deflateInit(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflateInit(null);
+    assert(ret === Z_STREAM_ERROR);
 
-    ret = zlib_deflate.deflateInit(strm, 6);
-    assert(ret === c.Z_OK);
+    ret = zlibDeflateInit(strm, 6);
+    assert(ret === Z_OK);
 
-    ret = zlib_deflate.deflateSetHeader(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflateSetHeader(null);
+    assert(ret === Z_STREAM_ERROR);
 
     strm.state.wrap = 1;
-    ret = zlib_deflate.deflateSetHeader(strm, null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflateSetHeader(strm, null);
+    assert(ret === Z_STREAM_ERROR);
 
     strm.state.wrap = 2;
-    ret = zlib_deflate.deflateSetHeader(strm, null);
-    assert(ret === c.Z_OK);
+    ret = zlibDeflateSetHeader(strm, null);
+    assert(ret === Z_OK);
 
-    ret = zlib_deflate.deflate(strm, c.Z_FINISH);
-    assert(ret === c.Z_BUF_ERROR);
+    ret = zlibDeflate(strm, Z_FINISH);
+    assert(ret === Z_BUF_ERROR);
 
-    ret = zlib_deflate.deflateEnd(null);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflateEnd(null);
+    assert(ret === Z_STREAM_ERROR);
 
     //BS_NEED_MORE
     strm.state.status = 5;
-    ret = zlib_deflate.deflateEnd(strm);
-    assert(ret === c.Z_STREAM_ERROR);
+    ret = zlibDeflateEnd(strm);
+    assert(ret === Z_STREAM_ERROR);
   });
 });

@@ -4,7 +4,19 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 
-import { Deflate, Inflate, constants, deflate, deflateRaw, inflate, inflateRaw, ungzip } from '../src/index.mjs';
+import {
+  Deflate,
+  Inflate,
+  deflate,
+  deflateRaw,
+  inflate,
+  inflateRaw,
+  ungzip,
+  zlibDeflateSetDictionary,
+  zlibInflateSetDictionary,
+  Z_OK,
+  Z_SYNC_FLUSH
+} from '../src/index.mjs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,11 +41,17 @@ describe('inflate misc', () => {
   it('applies a dictionary early in raw mode', () => {
     const dict = Buffer.from('abcd');
 
-    const deflate = new Deflate({ raw: true, dictionary: dict });
+    const deflate = new Deflate({ raw: true });
+    deflate.onStart = function (strm) {
+      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
+    };
     deflate.push(Buffer.from('hellohello world'), true);
     assert.ok(!deflate.err, 'deflate error: ' + deflate.err);
 
-    const inflate = new Inflate({ raw: true, dictionary: dict });
+    const inflate = new Inflate({ raw: true });
+    inflate.onStart = function (strm) {
+      assert.strictEqual(zlibInflateSetDictionary(strm, dict), Z_OK);
+    };
     inflate.push(Buffer.from(deflate.result), true);
     assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
 
@@ -76,7 +94,7 @@ describe('Inflate emits buffered output on Z_SYNC_FLUSH', () => {
         const onData = inflator.onData;
         inflator.onData = function () { count++; onData.apply(this, arguments); };
 
-        const ok = inflator.push(buf, constants.Z_SYNC_FLUSH);
+        const ok = inflator.push(buf, Z_SYNC_FLUSH);
 
         assert.ok(ok);
         assert.ok(!inflator.err, 'inflate error: ' + inflator.err);
@@ -102,8 +120,8 @@ describe('Inflate emits buffered output on Z_SYNC_FLUSH', () => {
           const p2 = take();
 
           const inflator = new Inflate({ raw: true, to: 'string' });
-          inflator.push(p1, constants.Z_SYNC_FLUSH);
-          inflator.push(p2, constants.Z_SYNC_FLUSH);
+          inflator.push(p1, Z_SYNC_FLUSH);
+          inflator.push(p2, Z_SYNC_FLUSH);
 
           assert.ok(!inflator.err, 'inflate error: ' + inflator.err);
           assert.deepStrictEqual(inflator.chunks, [ 'AAAA first ', 'BBBB second' ]);

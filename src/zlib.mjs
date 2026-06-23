@@ -23,6 +23,10 @@ export {
   inflateInfo as zlibInflateInfo
 } from './zlib/inflate.mjs';
 
+export { default as ZStream } from './zlib/zstream.mjs';
+export { default as GZheader } from './zlib/gzheader.mjs';
+export { default as messages } from './zlib/messages.mjs';
+
 export {
   Z_NO_FLUSH,
   Z_PARTIAL_FLUSH,

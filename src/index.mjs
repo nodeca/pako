@@ -4,8 +4,6 @@ export { Deflate, deflate, deflateRaw, gzip } from './deflate.mjs';
 
 export { Inflate, inflate, inflateRaw, ungzip } from './inflate.mjs';
 
-export * as constants from './zlib/constants.mjs';
-
 export {
   zlibDeflateInit,
   zlibDeflateInit2,
@@ -27,6 +25,9 @@ export {
   zlibInflate,
   zlibInflateEnd,
   zlibInflateInfo,
+
+  ZStream,
+  GZheader,
 
   Z_NO_FLUSH,
   Z_PARTIAL_FLUSH,
