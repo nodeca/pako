@@ -6,11 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+
+- Generated type definitions.
+- Low-level `zlib` API exports.
+- `.onStart()` hooks for advanced stream setup.
+
+### Changed
+
+- Switched sources to TypeScript, and tests, examples and benchmarks to ESM.
+- Changed exports to named-only. Use `import * as pako from 'pako'` instead of
+  default import if you need the whole API as an object.
+- Changed package files layout. See `package.json` for supported entry points.
+- `legacyHash` default is now `false`. Binary output is now compatible with
+  `nodejs` by default.
+- `dictionary` option now accepts only `Uint8Array` / `ArrayBuffer`
+  (no `String` anymore).
+- Use native `TextEncoder` / `TextDecoder` for string conversion. Removed shims.
+- Build `dist/` on publish instead of keeping generated bundles in git.
+
+### Removed
+
+- Default export. `import pako from 'pako'` is no longer supported.
+- Prebuilt `dist/` bundles from repository.
+
+
 ## [2.2.0] - 2026-06-22
 ### Added
 
 - Alternate deflate hash (ANZAC++) - for nodejs zlib compatibility.
   A nice bonus ~ 40% speed boost.
+- `legacyHash` (default: true) deflate option, to switch between original `zlib`
+  and `nodejs` binary-compatible output.
 
 ### Fixed
 
