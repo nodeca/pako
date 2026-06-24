@@ -11,7 +11,8 @@ export default [
     env: ['browser', 'node'],
     ignores: [
       'coverage/**',
-      'dist/**'
+      'dist/**',
+      'doc/**'
     ]
   }),
 
