@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import Benchmark from 'benchmark';
 import ansi from 'ansi';
 
-import { deflate, deflateRaw, gzip } from '../src/index.mjs';
+import { deflate, deflateRaw, gzip } from '../src/index.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

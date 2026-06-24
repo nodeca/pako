@@ -16,7 +16,7 @@ import {
   zlibInflateSetDictionary,
   Z_OK,
   Z_SYNC_FLUSH
-} from '../src/index.mjs';
+} from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

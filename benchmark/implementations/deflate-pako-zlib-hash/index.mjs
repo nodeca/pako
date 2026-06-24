@@ -1,4 +1,4 @@
-import { deflate } from '../../../src/index.mjs';
+import { deflate } from '../../../src/index.ts';
 
 // Pako with default zlib hash (slower).
 export const run = (data, level) => {

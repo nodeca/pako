@@ -11,7 +11,7 @@ import {
   gzip,
   zlibDeflateSetDictionary,
   Z_OK
-} from '../../src/index.mjs';
+} from '../../src/index.ts';
 import { loadSamples } from '../helpers.mjs';
 import { fileURLToPath } from 'node:url';
 

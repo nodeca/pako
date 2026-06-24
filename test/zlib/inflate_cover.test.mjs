@@ -13,10 +13,10 @@ import {
   zlibDeflateSetHeader,
   zlibInflate,
   zlibInflateEnd
-} from '../../src/zlib.mjs';
+} from '../../src/zlib.ts';
 import inflate_table from '../../src/zlib/inftrees.mjs';
 
-import { Deflate, Inflate } from '../../src/index.mjs';
+import { Deflate, Inflate } from '../../src/index.ts';
 
 
 function h2b(hex) {

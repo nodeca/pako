@@ -1,8 +1,8 @@
 // Top level file is just a mixin of submodules & constants
 
-export { Deflate, deflate, deflateRaw, gzip } from './deflate.mjs';
+export { Deflate, deflate, deflateRaw, gzip } from './deflate.ts';
 
-export { Inflate, inflate, inflateRaw, ungzip } from './inflate.mjs';
+export { Inflate, inflate, inflateRaw, ungzip } from './inflate.ts';
 
 export {
   zlibDeflateInit,
@@ -45,4 +45,4 @@ export {
   Z_DATA_ERROR,
   Z_MEM_ERROR,
   Z_BUF_ERROR
-} from './zlib.mjs';
+} from './zlib.ts';

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
-import { deflate, inflate } from '../src/index.mjs';
+import { deflate, inflate } from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

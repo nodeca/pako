@@ -5,8 +5,8 @@ import {
   zlibInflate,
   zlibInflateReset,
   zlibInflateEnd
-} from './zlib.mjs';
-import { flattenChunks } from './utils.mjs';
+} from './zlib.ts';
+import { flattenChunks } from './utils.ts';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 import GZheader from './zlib/gzheader.mjs';
@@ -106,6 +106,8 @@ const defaultOptions = {
  * ```
  **/
 class Inflate {
+  [key: string]: any;
+
   constructor(options) {
     this.options = Object.assign({}, defaultOptions, options || {});
 

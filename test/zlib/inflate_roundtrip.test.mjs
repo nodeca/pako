@@ -11,7 +11,7 @@ import {
   zlibDeflateSetDictionary,
   zlibInflateSetDictionary,
   Z_OK
-} from '../../src/index.mjs';
+} from '../../src/index.ts';
 import { testInflate, loadSamples } from '../helpers.mjs';
 import { fileURLToPath } from 'node:url';
 

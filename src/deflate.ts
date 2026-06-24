@@ -2,8 +2,8 @@ import {
   zlibDeflateInit2,
   zlibDeflate,
   zlibDeflateEnd
-} from './zlib.mjs';
-import { flattenChunks } from './utils.mjs';
+} from './zlib.ts';
+import { flattenChunks } from './utils.ts';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 
@@ -115,6 +115,8 @@ const defaultOptions = {
  * ```
  **/
 class Deflate {
+  [key: string]: any;
+
   constructor(options) {
     this.options = Object.assign({}, defaultOptions, options || {});
 

@@ -57,7 +57,8 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "npm run lint && npm run build && node --test",
+    "type-check": "tsc --noEmit",
+    "test": "npm run lint && npm run build && npm run type-check && node --test",
     "coverage": "npm run lint && c8 -r text -r html node --test",
     "build": "node support/build-dist.mjs",
     "build_fixtures": "node support/build_fixtures.mjs",
@@ -67,11 +68,13 @@
     "postpublish": "npm run gh-doc"
   },
   "devDependencies": {
+    "@types/node": "^26.0.0",
     "c8": "^11.0.0",
     "eslint": "^9.39.4",
     "gh-pages": "^6.3.0",
     "ndoc": "^6.0.0",
     "neostandard": "^0.13.0",
+    "typescript": "^6.0.3",
     "vite": "^8.0.14"
   }
 }

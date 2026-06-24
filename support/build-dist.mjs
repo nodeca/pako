@@ -20,7 +20,7 @@ await build({
     target: 'es2015',
     minify: false,
     lib: {
-      entry: 'src/index.mjs',
+      entry: 'src/index.ts',
       formats: [ 'cjs' ],
       fileName: () => 'pako.cjs.js'
     },
@@ -38,7 +38,7 @@ await build({
     ...common.build,
     minify: false,
     lib: {
-      entry: 'src/index.mjs',
+      entry: 'src/index.ts',
       formats: [ 'es' ],
       fileName: () => 'pako.mjs'
     },
@@ -49,9 +49,9 @@ await build({
 });
 
 for (const [ entry, name ] of [
-  [ 'src/index.mjs', 'pako' ],
-  [ 'src/deflate.mjs', 'pako_deflate' ],
-  [ 'src/inflate.mjs', 'pako_inflate' ]
+  [ 'src/index.ts', 'pako' ],
+  [ 'src/deflate.ts', 'pako_deflate' ],
+  [ 'src/inflate.ts', 'pako_inflate' ]
 ]) {
   await build({
     ...common,

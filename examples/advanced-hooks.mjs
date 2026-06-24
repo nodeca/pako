@@ -6,7 +6,7 @@ import {
   zlibDeflateSetHeader,
   zlibInflateSetDictionary,
   Z_OK
-} from '../src/index.mjs';
+} from '../src/index.ts';
 
 const data = new Uint8Array([ 1, 2, 3, 1, 2, 3 ]);
 const dict = new Uint8Array([ 1, 2, 3 ]);

@@ -1,4 +1,4 @@
-import { deflate } from '../../../src/index.mjs';
+import { deflate } from '../../../src/index.ts';
 
 // Pako with the fast ANZAC++ hash, instead of the default classic zlib hash.
 export const run = (data, level) => {

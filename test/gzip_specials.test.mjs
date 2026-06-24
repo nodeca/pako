@@ -4,7 +4,7 @@ import path from 'path';
 import assert from 'assert';
 import zlib from 'zlib';
 
-import { Deflate, GZheader, Inflate, gzip, ungzip, zlibDeflateSetHeader, Z_OK, Z_SYNC_FLUSH } from '../src/index.mjs';
+import { Deflate, GZheader, Inflate, gzip, ungzip, zlibDeflateSetHeader, Z_OK, Z_SYNC_FLUSH } from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

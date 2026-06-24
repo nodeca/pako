@@ -10,7 +10,7 @@ import {
   Z_FULL_FLUSH,
   Z_OK,
   Z_SYNC_FLUSH
-} from '../src/index.mjs';
+} from '../src/index.ts';
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
