@@ -3,7 +3,7 @@ import {
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
-import { flattenChunks } from './utils/common.mjs';
+import { flattenChunks } from './utils.mjs';
 import msg from './zlib/messages.mjs';
 import ZStream from './zlib/zstream.mjs';
 
