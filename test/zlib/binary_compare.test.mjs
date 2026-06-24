@@ -5,12 +5,9 @@ import path from 'path';
 import zlib from 'zlib';
 
 import {
-  Deflate,
   deflate,
   deflateRaw,
-  gzip,
-  zlibDeflateSetDictionary,
-  Z_OK
+  gzip
 } from '../../src/index.ts';
 import { loadSamples } from '../helpers.mjs';
 import { fileURLToPath } from 'node:url';
@@ -19,16 +16,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const sample = loadSamples().lorem_en_100k;
 const buf    = Buffer.from(sample);
-
-function deflateWithDictionary(data, options, dictionary) {
-  const deflator = new Deflate(options);
-  deflator.onStart = function (strm) {
-    assert.strictEqual(zlibDeflateSetDictionary(strm, dictionary), Z_OK);
-  };
-  deflator.push(data, true);
-  if (deflator.err) throw deflator.msg;
-  return deflator.result;
-}
 
 
 // pako `legacyHash` output must match canonical zlib (pre-chromium node.js)
@@ -139,9 +126,9 @@ describe('Deflate vs canonical zlib snapshots (legacyHash)', () => {
     it('trivial dictionary', () => {
       const dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
       testSample(
-        (data, options) => deflateWithDictionary(data, options, dict),
+        deflate,
         sample,
-        {},
+        { dictionary: dict },
         'deflate_dictionary=trivial.bin'
       );
     });
@@ -150,9 +137,9 @@ describe('Deflate vs canonical zlib snapshots (legacyHash)', () => {
       const spdyDict = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
 
       testSample(
-        (data, options) => deflateWithDictionary(data, options, spdyDict),
+        deflate,
         sample,
-        {},
+        { dictionary: spdyDict },
         'deflate_dictionary=spdy.bin'
       );
     });
@@ -260,13 +247,13 @@ describe('Deflate vs node.js zlib (ANZAC++ hash)', () => {
 
     it('trivial dictionary', () => {
       const dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
-      testNode(deflateWithDictionary(sample, { legacyHash: false }, dict), zlib.deflateSync(buf, { dictionary: dict }));
+      testNode(deflate(sample, { legacyHash: false, dictionary: dict }), zlib.deflateSync(buf, { dictionary: dict }));
     });
 
     it('spdy dictionary', () => {
       const spdyDict = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
 
-      testNode(deflateWithDictionary(sample, { legacyHash: false }, spdyDict), zlib.deflateSync(buf, { dictionary: spdyDict }));
+      testNode(deflate(sample, { legacyHash: false, dictionary: spdyDict }), zlib.deflateSync(buf, { dictionary: spdyDict }));
     });
   });
 });

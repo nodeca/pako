@@ -2,6 +2,7 @@ import {
   messages,
   ZStream,
   zlibDeflateInit2,
+  zlibDeflateSetDictionary,
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
@@ -36,6 +37,7 @@ interface DeflateOptions {
   raw?: boolean;
   gzip?: boolean;
   legacyHash?: boolean;
+  dictionary?: Uint8Array | ArrayBuffer;
 }
 
 const defaultOptions: Required<DeflateOptions> = {
@@ -47,7 +49,8 @@ const defaultOptions: Required<DeflateOptions> = {
   strategy: Z_DEFAULT_STRATEGY,
   raw: false,
   gzip: false,
-  legacyHash: false
+  legacyHash: false,
+  dictionary: new Uint8Array(0)
 };
 
 /**
@@ -99,6 +102,7 @@ const defaultOptions: Required<DeflateOptions> = {
  * - `windowBits`
  * - `memLevel`
  * - `strategy`
+ * - `dictionary`
  *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
@@ -174,6 +178,24 @@ class Deflate {
 
     if (status !== Z_OK) {
       throw new Error(messages[status]);
+    }
+
+    if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
+      opt.dictionary = new Uint8Array(opt.dictionary as ArrayBuffer);
+    }
+
+    const dictionary = opt.dictionary as Uint8Array;
+
+    if (dictionary.length) {
+      if (opt.gzip) {
+        throw new Error('dictionary is not supported with gzip');
+      }
+
+      status = zlibDeflateSetDictionary(this.strm, dictionary);
+
+      if (status !== Z_OK) {
+        throw new Error(messages[status]);
+      }
     }
   }
 
@@ -330,6 +352,7 @@ class Deflate {
  * - windowBits
  * - memLevel
  * - strategy
+ * - dictionary
  *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.

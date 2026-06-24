@@ -33,13 +33,15 @@ interface InflateOptions {
   windowBits?: number;
   raw?: boolean;
   to?: string;
+  dictionary?: Uint8Array | ArrayBuffer;
 }
 
 const defaultOptions: Required<InflateOptions> = {
   chunkSize: 1024 * 64,
   windowBits: 15,
   raw: false,
-  to: ''
+  to: '',
+  dictionary: new Uint8Array(0)
 };
 
 /**
@@ -86,6 +88,7 @@ const defaultOptions: Required<InflateOptions> = {
  * on bad params. Supported options:
  *
  * - `windowBits`
+ * - `dictionary`
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
  *
@@ -179,6 +182,19 @@ class Inflate {
     this.header = new GZheader();
 
     zlibInflateGetHeader(this.strm, this.header);
+
+    if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
+      opt.dictionary = new Uint8Array(opt.dictionary as ArrayBuffer);
+    }
+
+    const dictionary = opt.dictionary as Uint8Array;
+
+    if (opt.raw && dictionary.length) {
+      status = zlibInflateSetDictionary(this.strm, dictionary);
+      if (status !== Z_OK) {
+        throw new Error(messages[status]);
+      }
+    }
   }
 
 /**
@@ -243,9 +259,9 @@ class Inflate {
       status = zlibInflate(strm, _flush_mode);
 
       if (status === Z_NEED_DICT) {
-        const dictionary = this.onNeedDict(strm);
+        const dictionary = this.options.dictionary as Uint8Array;
 
-        if (dictionary?.length) {
+        if (dictionary.length) {
           status = zlibInflateSetDictionary(strm, dictionary);
 
           if (status === Z_OK) {
@@ -366,15 +382,6 @@ class Inflate {
 
 
 /**
- * Inflate#onNeedDict(strm) -> Uint8Array
- * - strm (ZStream): low-level zlib stream.
- *
- * Called when inflate needs a preset dictionary. Return a Uint8Array dictionary.
- **/
-  onNeedDict(strm: ZStream): Uint8Array { return new Uint8Array(0); }
-
-
-/**
  * Inflate#onData(chunk) -> Void
  * - chunk (Uint8Array|String): output data. When string output requested,
  *   each chunk will be string.
@@ -424,6 +431,7 @@ class Inflate {
  * Supported options are:
  *
  * - windowBits
+ * - dictionary
  *
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information.

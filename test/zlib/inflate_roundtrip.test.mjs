@@ -5,12 +5,9 @@ import path from 'path';
 import zlib from 'zlib';
 
 import {
-  Deflate,
-  Inflate,
   inflateRaw,
-  zlibDeflateSetDictionary,
-  zlibInflateSetDictionary,
-  Z_OK
+  deflate,
+  inflate
 } from '../../src/index.ts';
 import { testInflate, loadSamples } from '../helpers.mjs';
 import { fileURLToPath } from 'node:url';
@@ -20,39 +17,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const samples = loadSamples();
 
-function deflateWithDictionary(data, options, dictionary) {
-  const deflator = new Deflate(options);
-  deflator.onStart = function (strm) {
-    assert.strictEqual(zlibDeflateSetDictionary(strm, dictionary), Z_OK);
-  };
-  deflator.push(data, true);
-  if (deflator.err) throw deflator.msg;
-  return deflator.result;
-}
-
-function inflateWithDictionary(data, options, dictionary) {
-  const inflator = new Inflate(options);
-  if (options && options.raw) {
-    inflator.onStart = function (strm) {
-      assert.strictEqual(zlibInflateSetDictionary(strm, dictionary), Z_OK);
-    };
-  } else {
-    inflator.onNeedDict = function () { return dictionary; };
-  }
-  inflator.push(data, true);
-  if (inflator.err) throw inflator.msg || 'need dictionary';
-  return inflator.result;
-}
-
-function testInflateWithDictionary(samples, inflateOptions, deflateOptions, dictionary) {
+function testDictionaryRoundtrip(samples, inflateOptions, deflateOptions, dictionary) {
   let name, data, deflated, inflated;
 
   for (name in samples) {
     if (!samples.hasOwnProperty(name)) continue;
     data = samples[name];
 
-    deflated = deflateWithDictionary(data, deflateOptions, dictionary);
-    inflated = inflateWithDictionary(deflated, inflateOptions, dictionary);
+    deflated = deflate(data, Object.assign({}, deflateOptions, { dictionary }));
+    inflated = inflate(deflated, Object.assign({}, inflateOptions, { dictionary }));
 
     assert.deepStrictEqual(inflated, data);
   }
@@ -219,25 +192,25 @@ describe('Inflate with dictionary', () => {
     const zCompressed = new Uint8Array([ 120, 187, 6, 44, 2, 21, 43, 207, 47, 202, 73, 1, 0, 6, 166, 2, 41 ]);
 
     assert.throws(function () {
-      inflateWithDictionary(zCompressed, {}, Buffer.from('world'));
+      inflate(zCompressed, { dictionary: Buffer.from('world') });
     }, /need dictionary/);
   });
 
   it('trivial dictionary', () => {
     const dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
-    testInflateWithDictionary(samples, {}, {}, dict);
+    testDictionaryRoundtrip(samples, {}, {}, dict);
   });
 
   it('spdy dictionary', () => {
     const spdyDict = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
-    testInflateWithDictionary(samples, {}, {}, spdyDict);
+    testDictionaryRoundtrip(samples, {}, {}, spdyDict);
   });
 
   it('should throw if directory is not supplied to raw inflate', () => {
     const dict = Buffer.from('abcdefghijklmnoprstuvwxyz');
     assert.throws(function () {
       for (const data of Object.values(samples)) {
-        const deflated = deflateWithDictionary(data, { raw: true }, dict);
+        const deflated = deflate(data, { raw: true, dictionary: dict });
         inflateRaw(deflated);
       }
     });
@@ -245,12 +218,12 @@ describe('Inflate with dictionary', () => {
 
   it('tests raw inflate with spdy dictionary', () => {
     const spdyDict = fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'spdy_dict.txt'));
-    testInflateWithDictionary(samples, { raw: true }, { raw: true }, spdyDict);
+    testDictionaryRoundtrip(samples, { raw: true }, { raw: true }, spdyDict);
   });
 
   it('tests dictionary as Uint8Array', () => {
     const dict = new Uint8Array(100);
     for (let i = 0; i < 100; i++) dict[i] = Math.random() * 256;
-    testInflateWithDictionary(samples, {}, {}, dict);
+    testDictionaryRoundtrip(samples, {}, {}, dict);
   });
 });

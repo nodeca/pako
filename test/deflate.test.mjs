@@ -4,11 +4,10 @@ import {
   Inflate,
   deflate,
   deflateRaw,
+  gzip,
   inflate,
   inflateRaw,
-  zlibDeflateSetDictionary,
   Z_FULL_FLUSH,
-  Z_OK,
   Z_SYNC_FLUSH
 } from '../src/index.ts';
 import assert from 'assert';
@@ -23,10 +22,7 @@ describe('deflate misc', () => {
 
   it('handles a dictionary across multiple pushes', () => {
     const dict = Buffer.from('abcd');
-    const deflate = new Deflate();
-    deflate.onStart = function (strm) {
-      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
-    };
+    const deflate = new Deflate({ dictionary: dict });
 
     deflate.push(Buffer.from('hello'), false);
     deflate.push(Buffer.from('hello'), false);
@@ -34,8 +30,7 @@ describe('deflate misc', () => {
 
     if (deflate.err) { throw new Error(deflate.err); }
 
-    const inflate = new Inflate();
-    inflate.onNeedDict = function () { return dict; };
+    const inflate = new Inflate({ dictionary: dict });
     inflate.push(Buffer.from(deflate.result), true);
     assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
 
@@ -51,28 +46,14 @@ describe('deflate misc', () => {
     assert.deepStrictEqual(deflate(sample.buffer), deflate(sample));
   });
 
-  it('sets a dictionary from onStart', () => {
-    const dict = new Uint8Array([ 0x61, 0x62, 0x63, 0x64 ]); // 'abcd'
+  it('accepts a dictionary passed as ArrayBuffer', () => {
+    const dict = Uint8Array.from('abcd', c => c.charCodeAt(0));
 
-    const withDictionary = new Deflate();
-    withDictionary.onStart = function (strm) {
-      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
-    };
-    withDictionary.push(Buffer.from('hellohello world'), true);
-    assert.ok(!withDictionary.err, 'deflate error: ' + withDictionary.err);
-
-    const withoutDictionary = new Deflate();
-    withoutDictionary.push(Buffer.from('hellohello world'), true);
-
-    assert.notDeepStrictEqual(withDictionary.result, withoutDictionary.result);
-
-    const inflate = new Inflate();
-    inflate.onNeedDict = function () { return dict; };
-    inflate.push(Buffer.from(withDictionary.result), true);
-    assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
+    const compressed = deflate(Buffer.from('hellohello world'), { dictionary: dict.buffer });
+    const uncompressed = inflate(compressed, { dictionary: dict });
     assert.deepStrictEqual(
       new Uint8Array(Buffer.from('hellohello world')),
-      inflate.result
+      uncompressed
     );
   });
 
@@ -80,13 +61,9 @@ describe('deflate misc', () => {
     assert.throws(() => new Deflate({ level: 42 }));
   });
 
-  it('reports gzip dictionary errors from onStart', () => {
-    const deflate = new Deflate({ gzip: true });
-    deflate.onStart = function (strm) {
-      assert.notStrictEqual(zlibDeflateSetDictionary(strm, Buffer.from('abcd')), Z_OK);
-    };
-    deflate.push(Buffer.from('hello'), true);
-    assert.ok(!deflate.err, 'deflate error: ' + deflate.err);
+  it('throws when a dictionary is used with gzip compression', () => {
+    assert.throws(() => new Deflate({ gzip: true, dictionary: Buffer.from('abcd') }), /dictionary is not supported with gzip/);
+    assert.throws(() => gzip(Buffer.from('hello'), { dictionary: Buffer.from('abcd') }), /dictionary is not supported with gzip/);
   });
 
   it('returns false when pushing after the stream has ended', () => {

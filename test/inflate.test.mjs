@@ -12,9 +12,6 @@ import {
   inflate,
   inflateRaw,
   ungzip,
-  zlibDeflateSetDictionary,
-  zlibInflateSetDictionary,
-  Z_OK,
   Z_SYNC_FLUSH
 } from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
@@ -41,17 +38,11 @@ describe('inflate misc', () => {
   it('applies a dictionary early in raw mode', () => {
     const dict = Buffer.from('abcd');
 
-    const deflate = new Deflate({ raw: true });
-    deflate.onStart = function (strm) {
-      assert.strictEqual(zlibDeflateSetDictionary(strm, dict), Z_OK);
-    };
+    const deflate = new Deflate({ raw: true, dictionary: dict });
     deflate.push(Buffer.from('hellohello world'), true);
     assert.ok(!deflate.err, 'deflate error: ' + deflate.err);
 
-    const inflate = new Inflate({ raw: true });
-    inflate.onStart = function (strm) {
-      assert.strictEqual(zlibInflateSetDictionary(strm, dict), Z_OK);
-    };
+    const inflate = new Inflate({ raw: true, dictionary: dict });
     inflate.push(Buffer.from(deflate.result), true);
     assert.ok(!inflate.err, 'inflate error: ' + inflate.err);
 
