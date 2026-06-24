@@ -31,7 +31,7 @@ const defaultOptions = {
   strategy: Z_DEFAULT_STRATEGY,
   raw: false,
   gzip: false,
-  legacyHash: true
+  legacyHash: false
 };
 
 /**
@@ -87,9 +87,9 @@ const defaultOptions = {
  * [http://zlib.net/manual.html#Advanced](http://zlib.net/manual.html#Advanced)
  * for more information on these.
  *
- * - `legacyHash` (Boolean) - use the classic zlib hash (default), which matches
- *   canonical zlib output byte-for-byte. Set to `false` to use the faster
- *   ANZAC++ hash, which matches recent (chromium) node.js output instead.
+ * - `legacyHash` (Boolean) - set to `true` to use the classic zlib hash, which
+ *   matches canonical zlib output byte-for-byte. The default `false` uses the
+ *   faster ANZAC++ hash, which matches recent (chromium) node.js output instead.
  *
  * Additional options, for internal needs:
  *
