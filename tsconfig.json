@@ -6,7 +6,7 @@
     "allowImportingTsExtensions": true,
     "allowJs": true,
     "checkJs": false,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
     "types": [ "node" ]

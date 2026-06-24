@@ -33,17 +33,21 @@
   ],
   "main": "./dist/pako.cjs.js",
   "module": "./dist/pako.mjs",
+  "types": "./dist/pako.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/pako.d.ts",
       "import": "./dist/pako.mjs",
       "require": "./dist/pako.cjs.js"
     },
     "./browser": {
+      "types": "./dist/pako.d.ts",
       "import": "./dist/browser/pako.esm.min.mjs",
       "require": "./dist/browser/pako.umd.min.js",
       "default": "./dist/browser/pako.umd.min.js"
     },
     "./browser/deflate": {
+      "types": "./dist/pako.d.ts",
       "import": "./dist/browser/pako_deflate.esm.min.mjs",
       "require": "./dist/browser/pako_deflate.umd.min.js",
       "default": "./dist/browser/pako_deflate.umd.min.js"
@@ -74,6 +78,8 @@
     "gh-pages": "^6.3.0",
     "ndoc": "^6.0.0",
     "neostandard": "^0.13.0",
+    "rollup": "^4.62.2",
+    "rollup-plugin-dts": "^6.4.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"
   }

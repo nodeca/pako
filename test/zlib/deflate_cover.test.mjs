@@ -18,7 +18,7 @@ import {
   zlibDeflateEnd,
   zlibDeflateInit,
   zlibDeflateSetHeader
-} from '../../src/zlib.ts';
+} from '../../src/zlib.mjs';
 
 import { Deflate } from '../../src/index.ts';
 import { fileURLToPath } from 'node:url';

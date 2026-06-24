@@ -1,4 +1,6 @@
-import { rm } from 'node:fs/promises';
+import { rmSync } from 'node:fs';
+import { rollup } from 'rollup';
+import dts from 'rollup-plugin-dts';
 import { build } from 'vite';
 
 const common = {
@@ -11,7 +13,7 @@ const common = {
   }
 };
 
-await rm('dist', { recursive: true, force: true });
+rmSync('dist', { recursive: true, force: true });
 
 await build({
   ...common,
@@ -92,4 +94,15 @@ for (const [ entry, name ] of [
       }
     }
   });
+}
+
+const bundle = await rollup({
+  input: 'src/index.ts',
+  plugins: [ dts({ tsconfig: './tsconfig.json' }) ]
+});
+
+try {
+  await bundle.write({ file: 'dist/pako.d.ts', format: 'es' });
+} finally {
+  await bundle.close();
 }

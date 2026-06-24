@@ -1,15 +1,16 @@
 import {
+  GZheader,
+  messages,
+  ZStream,
   zlibInflateInit2,
   zlibInflateGetHeader,
   zlibInflateSetDictionary,
   zlibInflate,
   zlibInflateReset,
   zlibInflateEnd
-} from './zlib.ts';
+} from './zlib.mjs';
+import type { FlushMode, InflateStream } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
-import msg from './zlib/messages.mjs';
-import ZStream from './zlib/zstream.mjs';
-import GZheader from './zlib/gzheader.mjs';
 
 const toString = Object.prototype.toString;
 
@@ -23,7 +24,18 @@ import {
 
 /* ===========================================================================*/
 
-const defaultOptions = {
+type InflateInput = Uint8Array | ArrayBuffer;
+type InflateChunk = Uint8Array | string;
+type PushFlushMode = FlushMode | boolean;
+
+interface InflateOptions {
+  chunkSize?: number;
+  windowBits?: number;
+  raw?: boolean;
+  to?: string;
+}
+
+const defaultOptions: Required<InflateOptions> = {
   chunkSize: 1024 * 64,
   windowBits: 15,
   raw: false,
@@ -106,9 +118,18 @@ const defaultOptions = {
  * ```
  **/
 class Inflate {
-  [key: string]: any;
+  options: Required<InflateOptions>;
+  err: number;
+  msg: string;
+  ended: boolean;
+  started: boolean;
+  chunks: InflateChunk[];
+  textDecoder: TextDecoder | null;
+  strm: InflateStream;
+  header: GZheader;
+  result?: Uint8Array | string;
 
-  constructor(options) {
+  constructor(options?: InflateOptions) {
     this.options = Object.assign({}, defaultOptions, options || {});
 
     const opt = this.options;
@@ -143,7 +164,7 @@ class Inflate {
     this.chunks = [];     // chunks of compressed data
     this.textDecoder = opt.to === 'string' ? new TextDecoder() : null;
 
-    this.strm   = new ZStream();
+    this.strm   = new ZStream() as InflateStream;
     this.strm.avail_out = 0;
 
     let status  = zlibInflateInit2(
@@ -152,7 +173,7 @@ class Inflate {
     );
 
     if (status !== Z_OK) {
-      throw new Error(msg[status]);
+      throw new Error(messages[status]);
     }
 
     this.header = new GZheader();
@@ -185,21 +206,23 @@ class Inflate {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-  push(data, flush_mode) {
+  push(data: InflateInput, flush_mode: PushFlushMode = false): boolean {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
-    let status, _flush_mode, last_avail_out;
+    let status: number;
+    let _flush_mode: FlushMode;
+    let last_avail_out: number;
 
     if (this.ended) return false;
 
-    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
+    if (typeof flush_mode === 'number') _flush_mode = flush_mode;
     else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;
 
     // Convert data if needed
     if (toString.call(data) === '[object ArrayBuffer]') {
-      strm.input = new Uint8Array(data);
+      strm.input = new Uint8Array(data as ArrayBuffer);
     } else {
-      strm.input = data;
+      strm.input = data as Uint8Array;
     }
 
     strm.next_in = 0;
@@ -272,7 +295,7 @@ class Inflate {
 
           if (this.options.to === 'string') {
 
-            let str = this.textDecoder.decode(strm.output.subarray(0, strm.next_out), { stream: true });
+            let str = this.textDecoder!.decode(strm.output.subarray(0, strm.next_out), { stream: true });
 
             strm.next_out = 0;
             strm.avail_out = chunkSize;
@@ -302,7 +325,7 @@ class Inflate {
       if (status === Z_STREAM_END) {
         status = zlibInflateEnd(this.strm);
         if (status === Z_OK && this.options.to === 'string') {
-          const str = this.textDecoder.decode();
+          const str = this.textDecoder!.decode();
           if (str) this.onData(str);
         }
         this.onEnd(status);
@@ -339,7 +362,7 @@ class Inflate {
  *
  * Called once before the first low-level inflate call.
  **/
-  onStart(strm) {}
+  onStart(strm: ZStream): void {}
 
 
 /**
@@ -348,7 +371,7 @@ class Inflate {
  *
  * Called when inflate needs a preset dictionary. Return a Uint8Array dictionary.
  **/
-  onNeedDict(strm) { return new Uint8Array(0); }
+  onNeedDict(strm: ZStream): Uint8Array { return new Uint8Array(0); }
 
 
 /**
@@ -359,7 +382,7 @@ class Inflate {
  * By default, stores data blocks in `chunks[]` property and glue
  * those in `onEnd`. Override this handler, if you need another behaviour.
  **/
-  onData(chunk) {
+  onData(chunk: InflateChunk): void {
     this.chunks.push(chunk);
   }
 
@@ -373,13 +396,13 @@ class Inflate {
  * complete (Z_FINISH). By default - join collected chunks,
  * free memory and fill `results` / `err` properties.
  **/
-  onEnd(status) {
+  onEnd(status: number): void {
     // On success - join
     if (status === Z_OK) {
       if (this.options.to === 'string') {
         this.result = this.chunks.join('');
       } else {
-        this.result = flattenChunks(this.chunks);
+        this.result = flattenChunks(this.chunks as Uint8Array[]);
       }
     }
     this.chunks = [];
@@ -428,15 +451,17 @@ class Inflate {
  * }
  * ```
  **/
-function inflate(input, options) {
+function inflate(input: InflateInput, options: InflateOptions & { to: 'string' }): string;
+function inflate(input: InflateInput, options?: InflateOptions): Uint8Array;
+function inflate(input: InflateInput, options: InflateOptions = {}): Uint8Array | string {
   const inflator = new Inflate(options);
 
   inflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (inflator.err) throw inflator.msg || msg[inflator.err];
+  if (inflator.err) throw inflator.msg || messages[inflator.err];
 
-  return inflator.result;
+  return inflator.result as Uint8Array | string;
 }
 
 
@@ -448,8 +473,10 @@ function inflate(input, options) {
  * The same as [[inflate]], but creates raw data, without wrapper
  * (header and adler32 crc).
  **/
-function inflateRaw(input, options) {
-  return inflate(input, Object.assign({}, options || {}, { raw: true }));
+function inflateRaw(input: InflateInput, options: InflateOptions & { to: 'string' }): string;
+function inflateRaw(input: InflateInput, options?: InflateOptions): Uint8Array;
+function inflateRaw(input: InflateInput, options: InflateOptions = {}): Uint8Array | string {
+  return inflate(input, Object.assign({}, options, { raw: true }));
 }
 
 
@@ -464,3 +491,4 @@ function inflateRaw(input, options) {
 
 
 export { Inflate, inflate, inflateRaw, inflate as ungzip };
+export type { InflateInput, InflateOptions };

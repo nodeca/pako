@@ -1,11 +1,12 @@
 import {
+  messages,
+  ZStream,
   zlibDeflateInit2,
   zlibDeflate,
   zlibDeflateEnd
-} from './zlib.ts';
+} from './zlib.mjs';
+import type { DeflateStream, FlushMode } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
-import msg from './zlib/messages.mjs';
-import ZStream from './zlib/zstream.mjs';
 
 const toString = Object.prototype.toString;
 
@@ -22,7 +23,22 @@ import {
 
 /* ===========================================================================*/
 
-const defaultOptions = {
+type DeflateInput = Uint8Array | ArrayBuffer | string;
+type PushFlushMode = FlushMode | boolean;
+
+interface DeflateOptions {
+  level?: number;
+  method?: number;
+  chunkSize?: number;
+  windowBits?: number;
+  memLevel?: number;
+  strategy?: number;
+  raw?: boolean;
+  gzip?: boolean;
+  legacyHash?: boolean;
+}
+
+const defaultOptions: Required<DeflateOptions> = {
   level: Z_DEFAULT_COMPRESSION,
   method: Z_DEFLATED,
   chunkSize: 16384,
@@ -115,12 +131,19 @@ const defaultOptions = {
  * ```
  **/
 class Deflate {
-  [key: string]: any;
+  options: Required<DeflateOptions>;
+  err: number;
+  msg: string;
+  ended: boolean;
+  started: boolean;
+  chunks: Uint8Array[];
+  strm: DeflateStream;
+  result?: Uint8Array;
 
-  constructor(options) {
+  constructor(options?: DeflateOptions) {
     this.options = Object.assign({}, defaultOptions, options || {});
 
-    let opt = this.options;
+    const opt = this.options;
 
     if (opt.raw && (opt.windowBits > 0)) {
       opt.windowBits = -opt.windowBits;
@@ -136,7 +159,7 @@ class Deflate {
     this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
 
-    this.strm = new ZStream();
+    this.strm = new ZStream() as DeflateStream;
     this.strm.avail_out = 0;
 
     let status = zlibDeflateInit2(
@@ -150,7 +173,7 @@ class Deflate {
     );
 
     if (status !== Z_OK) {
-      throw new Error(msg[status]);
+      throw new Error(messages[status]);
     }
   }
 
@@ -176,14 +199,15 @@ class Deflate {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-  push(data, flush_mode) {
+  push(data: DeflateInput, flush_mode: PushFlushMode = false): boolean {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
-    let status, _flush_mode;
+    let status: number;
+    let _flush_mode: FlushMode;
 
     if (this.ended) { return false; }
 
-    if (flush_mode === ~~flush_mode) _flush_mode = flush_mode;
+    if (typeof flush_mode === 'number') _flush_mode = flush_mode;
     else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;
 
     // Convert data if needed
@@ -191,9 +215,9 @@ class Deflate {
       // If we need to compress text, change encoding to utf8.
       strm.input = new TextEncoder().encode(data);
     } else if (toString.call(data) === '[object ArrayBuffer]') {
-      strm.input = new Uint8Array(data);
+      strm.input = new Uint8Array(data as ArrayBuffer);
     } else {
-      strm.input = data;
+      strm.input = data as Uint8Array;
     }
 
     strm.next_in = 0;
@@ -257,7 +281,7 @@ class Deflate {
  *
  * Called once before the first low-level deflate call.
  **/
-  onStart(strm) {}
+  onStart(strm: ZStream): void {}
 
 
 /**
@@ -267,7 +291,7 @@ class Deflate {
  * By default, stores data blocks in `chunks[]` property and glue
  * those in `onEnd`. Override this handler, if you need another behaviour.
  **/
-  onData(chunk) {
+  onData(chunk: Uint8Array): void {
     this.chunks.push(chunk);
   }
 
@@ -281,7 +305,7 @@ class Deflate {
  * complete (Z_FINISH). By default - join collected chunks,
  * free memory and fill `results` / `err` properties.
  **/
-  onEnd(status) {
+  onEnd(status: number): void {
     // On success - join
     if (status === Z_OK) {
       this.result = flattenChunks(this.chunks);
@@ -324,15 +348,15 @@ class Deflate {
  * console.log(pako.deflate(data));
  * ```
  **/
-function deflate(input, options) {
+function deflate(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {
   const deflator = new Deflate(options);
 
   deflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (deflator.err) { throw deflator.msg || msg[deflator.err]; }
+  if (deflator.err) { throw deflator.msg || messages[deflator.err]; }
 
-  return deflator.result;
+  return deflator.result as Uint8Array;
 }
 
 
@@ -344,8 +368,8 @@ function deflate(input, options) {
  * The same as [[deflate]], but creates raw data, without wrapper
  * (header and adler32 crc).
  **/
-function deflateRaw(input, options) {
-  return deflate(input, Object.assign({}, options || {}, { raw: true }));
+function deflateRaw(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {
+  return deflate(input, Object.assign({}, options, { raw: true }));
 }
 
 
@@ -357,9 +381,10 @@ function deflateRaw(input, options) {
  * The same as [[deflate]], but create gzip wrapper instead of
  * deflate one.
  **/
-function gzip(input, options) {
-  return deflate(input, Object.assign({}, options || {}, { gzip: true }));
+function gzip(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {
+  return deflate(input, Object.assign({}, options, { gzip: true }));
 }
 
 
 export { Deflate, deflate, deflateRaw, gzip };
+export type { DeflateInput, DeflateOptions };

@@ -13,7 +13,7 @@ import {
   zlibDeflateSetHeader,
   zlibInflate,
   zlibInflateEnd
-} from '../../src/zlib.ts';
+} from '../../src/zlib.mjs';
 import inflate_table from '../../src/zlib/inftrees.mjs';
 
 import { Deflate, Inflate } from '../../src/index.ts';
