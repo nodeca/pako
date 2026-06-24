@@ -6,6 +6,8 @@ export type { DeflateInput, DeflateOptions } from './deflate.ts';
 export { Inflate, inflate, inflateRaw, ungzip } from './inflate.ts';
 export type { InflateInput, InflateOptions } from './inflate.ts';
 
+export type { FlushMode } from './zlib.mjs';
+
 export {
   zlibDeflateInit,
   zlibDeflateInit2,

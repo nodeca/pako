@@ -9,7 +9,7 @@ import {
   zlibInflateReset,
   zlibInflateEnd
 } from './zlib.mjs';
-import type { FlushMode, InflateStream } from './zlib.mjs';
+import type { FlushMode } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
 
 const toString = Object.prototype.toString;
@@ -24,9 +24,10 @@ import {
 
 /* ===========================================================================*/
 
+/** @inline */
 type InflateInput = Uint8Array | ArrayBuffer;
+/** @inline */
 type InflateChunk = Uint8Array | string;
-type PushFlushMode = FlushMode | boolean;
 
 interface InflateOptions {
   chunkSize?: number;
@@ -121,14 +122,14 @@ const defaultOptions: Required<InflateOptions> = {
  * ```
  **/
 class Inflate {
-  options: Required<InflateOptions>;
+  private options: Required<InflateOptions>;
   err: number;
   msg: string;
-  ended: boolean;
-  started: boolean;
+  private ended: boolean;
+  private started: boolean;
   chunks: InflateChunk[];
-  textDecoder: TextDecoder | null;
-  strm: InflateStream;
+  private textDecoder: TextDecoder | null;
+  private strm: ZStream;
   header: GZheader;
   result?: Uint8Array | string;
 
@@ -167,7 +168,7 @@ class Inflate {
     this.chunks = [];     // chunks of compressed data
     this.textDecoder = opt.to === 'string' ? new TextDecoder() : null;
 
-    this.strm   = new ZStream() as InflateStream;
+    this.strm   = new ZStream();
     this.strm.avail_out = 0;
 
     let status  = zlibInflateInit2(
@@ -222,7 +223,7 @@ class Inflate {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-  push(data: InflateInput, flush_mode: PushFlushMode = false): boolean {
+  push(data: InflateInput, flush_mode: FlushMode | boolean = false): boolean {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
     let status: number;
@@ -284,7 +285,7 @@ class Inflate {
       // byte is padding, not the start of a member (no member can begin with 0).
       while (strm.avail_in > 0 &&
              status === Z_STREAM_END &&
-             (strm.state.wrap & 2) && strm.state.flags !== 0 &&
+             (strm.state.wrap & 2) && (strm.state as any).flags !== 0 &&
              strm.input[strm.next_in] !== 0)
       {
         zlibInflateReset(strm);

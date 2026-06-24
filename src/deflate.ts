@@ -6,7 +6,7 @@ import {
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
-import type { DeflateStream, FlushMode } from './zlib.mjs';
+import type { FlushMode } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
 
 const toString = Object.prototype.toString;
@@ -24,8 +24,8 @@ import {
 
 /* ===========================================================================*/
 
+/** @inline */
 type DeflateInput = Uint8Array | ArrayBuffer | string;
-type PushFlushMode = FlushMode | boolean;
 
 interface DeflateOptions {
   level?: number;
@@ -135,13 +135,13 @@ const defaultOptions: Required<DeflateOptions> = {
  * ```
  **/
 class Deflate {
-  options: Required<DeflateOptions>;
+  private options: Required<DeflateOptions>;
   err: number;
   msg: string;
-  ended: boolean;
-  started: boolean;
+  private ended: boolean;
+  private started: boolean;
   chunks: Uint8Array[];
-  strm: DeflateStream;
+  private strm: ZStream;
   result?: Uint8Array;
 
   constructor(options?: DeflateOptions) {
@@ -163,7 +163,7 @@ class Deflate {
     this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
 
-    this.strm = new ZStream() as DeflateStream;
+    this.strm = new ZStream();
     this.strm.avail_out = 0;
 
     let status = zlibDeflateInit2(
@@ -221,7 +221,7 @@ class Deflate {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-  push(data: DeflateInput, flush_mode: PushFlushMode = false): boolean {
+  push(data: DeflateInput, flush_mode: FlushMode | boolean = false): boolean {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
     let status: number;

@@ -1,19 +1,3 @@
-interface DeflateState {
-  wrap: number;
-  status: number;
-  gzhead: GZheader | null;
-  level: number;
-  strategy: number;
-}
-
-interface InflateState {
-  wrap: number;
-  flags: number;
-  mode: number;
-  havedict: boolean | number;
-  head: GZheader | null;
-}
-
 type FlushMode =
   | typeof Z_NO_FLUSH
   | typeof Z_PARTIAL_FLUSH
@@ -33,17 +17,9 @@ declare class ZStream {
   avail_out: number;
   total_out: number;
   msg: string;
-  state: DeflateState | InflateState;
+  state: any;
   data_type: number;
   adler: number;
-}
-
-interface DeflateStream extends ZStream {
-  state: DeflateState;
-}
-
-interface InflateStream extends ZStream {
-  state: InflateState;
 }
 
 declare class GZheader {
@@ -109,9 +85,7 @@ declare const Z_BUF_ERROR: number;
 
 export {
   GZheader,
-  DeflateStream,
   FlushMode,
-  InflateStream,
   messages,
   ZStream,
 
@@ -145,6 +119,7 @@ export {
   Z_MEM_ERROR,
   Z_NEED_DICT,
   Z_NO_FLUSH,
+
   Z_OK,
   Z_PARTIAL_FLUSH,
   Z_STREAM_END,
