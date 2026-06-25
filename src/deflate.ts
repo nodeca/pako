@@ -138,18 +138,19 @@ class Deflate {
    *
    * @example
    * ```javascript
-   * const pako = require('pako')
-   *   , chunk1 = new Uint8Array([1,2,3,4,5,6,7,8,9])
-   *   , chunk2 = new Uint8Array([10,11,12,13,14,15,16,17,18,19]);
+   * import { Deflate } from 'pako'
    *
-   * const deflate = new pako.Deflate({ level: 3});
+   * const chunk1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+   * const chunk2 = new Uint8Array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
    *
-   * deflate.push(chunk1, false);
-   * deflate.push(chunk2, true);  // true -> last chunk
+   * const deflate = new Deflate({ level: 3 })
    *
-   * if (deflate.err) { throw new Error(deflate.err); }
+   * deflate.push(chunk1, false)
+   * deflate.push(chunk2, true)  // true -> last chunk
    *
-   * console.log(deflate.result);
+   * if (deflate.err) throw new Error(deflate.err)
+   *
+   * console.log(deflate.result)
    * ```
    */
   constructor(options: DeflateOptions = {}) {
@@ -222,9 +223,9 @@ class Deflate {
    *
    * @example
    * ```javascript
-   * push(chunk, false); // push one of data chunks
+   * push(chunk, false) // push one of data chunks
    * ...
-   * push(chunk, true);  // push last chunk
+   * push(chunk, true)  // push last chunk
    * ```
    */
   push(data: DeflateInput, flush_mode: Z_FlushMode | boolean = false): boolean {
@@ -346,10 +347,11 @@ class Deflate {
  *
  * @example
  * ```javascript
- * const pako = require('pako')
- * const data = new Uint8Array([1,2,3,4,5,6,7,8,9]);
+ * import { deflate } from 'pako'
  *
- * console.log(pako.deflate(data));
+ * const data = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+ *
+ * console.log(deflate(data))
  * ```
  */
 function deflate(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {

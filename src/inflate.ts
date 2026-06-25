@@ -108,18 +108,19 @@ class Inflate {
    *
    * @example
    * ```javascript
-   * const pako = require('pako')
-   * const chunk1 = new Uint8Array([1,2,3,4,5,6,7,8,9])
-   * const chunk2 = new Uint8Array([10,11,12,13,14,15,16,17,18,19]);
+   * import { Inflate } from 'pako'
    *
-   * const inflate = new pako.Inflate({ level: 3});
+   * const chunk1 = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+   * const chunk2 = new Uint8Array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
    *
-   * inflate.push(chunk1, false);
-   * inflate.push(chunk2, true);  // true -> last chunk
+   * const inflate = new Inflate({ level: 3 })
    *
-   * if (inflate.err) { throw new Error(inflate.err); }
+   * inflate.push(chunk1, false)
+   * inflate.push(chunk2, true)  // true -> last chunk
    *
-   * console.log(inflate.result);
+   * if (inflate.err) throw new Error(inflate.err)
+   *
+   * console.log(inflate.result)
    * ```
    */
   constructor(options: InflateOptions = {}) {
@@ -206,9 +207,9 @@ class Inflate {
    *
    * @example
    * ```javascript
-   * push(chunk, false); // push one of data chunks
+   * push(chunk, false) // push one of data chunks
    * ...
-   * push(chunk, true);  // push last chunk
+   * push(chunk, true)  // push last chunk
    * ```
    */
   push(data: InflateInput, flush_mode: Z_FlushMode | boolean = false): boolean {
@@ -412,14 +413,15 @@ class Inflate {
  *
  * @example
  * ```javascript
- * const pako = require('pako');
- * const input = pako.deflate(new Uint8Array([1,2,3,4,5,6,7,8,9]));
- * let output;
+ * import { deflate, inflate } from 'pako'
+ *
+ * const input = deflate(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
+ * let output
  *
  * try {
- *   output = pako.inflate(input);
+ *   output = inflate(input)
  * } catch (err) {
- *   console.log(err);
+ *   console.log(err)
  * }
  * ```
  */
