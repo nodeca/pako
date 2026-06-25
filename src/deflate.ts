@@ -97,17 +97,17 @@ const defaultOptions: Required<DeflateOptions> = {
 
 /**
  * Generic JS-style wrapper for zlib calls. If you don't need
- * streaming behaviour - use more simple functions: {@link deflate},
+ * streaming behaviour, use the simpler functions {@link deflate},
  * {@link deflateRaw} and {@link gzip}.
  */
 class Deflate {
   private options: Required<DeflateOptions>;
 
   /**
-   * Error code after deflate finished. {@link Z_OK} on success.
+   * Error code after deflate finishes. {@link Z_OK} on success.
    * You will not need it in real life, because deflate errors
-   * are possible only on wrong options or bad `onData` / `onEnd`
-   * custom handlers.
+   * are possible only on wrong options or bad custom `onData` / `onEnd`
+   * handlers.
    */
   err: Z_CallStatus;
 
@@ -133,8 +133,9 @@ class Deflate {
   result: Uint8Array;
 
   /**
-   * Creates new deflator instance with specified params. Throws exception
-   * on bad params. See {@link DeflateOptions} for the list of supported options.
+   * Creates a new deflator instance with the specified params. Throws an
+   * exception on bad params. See {@link DeflateOptions} for the list of
+   * supported options.
    *
    * @example
    * ```javascript
@@ -210,12 +211,12 @@ class Deflate {
   }
 
   /**
-   * Sends input data to deflate pipe, generating {@link Deflate.onData} calls with
-   * new compressed chunks. Returns `true` on success. The last data block must
-   * have `flush_mode` {@link Z_FINISH} (or `true`). That will flush internal pending
-   * buffers and call {@link Deflate.onEnd}.
+   * Sends input data to the deflate pipe, generating {@link Deflate.onData} calls
+   * with new compressed chunks. Returns `true` on success. The last data block must
+   * have `flush_mode` {@link Z_FINISH} (or `true`). That will flush the internal
+   * pending buffers and call {@link Deflate.onEnd}.
    *
-   * On fail call {@link Deflate.onEnd} with error code and return false.
+   * On failure, calls {@link Deflate.onEnd} with the error code and returns false.
    *
    * @param data input data. Strings will be converted to utf8 byte sequence.
    * @param flush_mode 0..6 for corresponding {@link Z_NO_FLUSH}..{@link Z_TREES} modes.
@@ -316,8 +317,8 @@ class Deflate {
 
 
   /**
-   * By default, stores data blocks in {@link Deflate.chunks} property and glue
-   * those in {@link Deflate.onEnd}. Override this handler, if you need another behaviour.
+   * By default, stores data blocks in the {@link Deflate.chunks} property and glues
+   * them in {@link Deflate.onEnd}. Override this handler if you need another behaviour.
    */
   onData(chunk: Uint8Array): void {
     this.chunks.push(chunk);
@@ -326,8 +327,8 @@ class Deflate {
 
   /**
    * Called once after you tell deflate that the input stream is
-   * complete ({@link Z_FINISH}). By default - join collected {@link Deflate.chunks},
-   * to {@link Deflate.result} property.
+   * complete ({@link Z_FINISH}). By default, joins the collected {@link Deflate.chunks}
+   * into the {@link Deflate.result} property.
    *
    * @param status deflate status. {@link Z_OK} on success, other if not.
    */
@@ -359,7 +360,7 @@ function deflate(input: DeflateInput, options: DeflateOptions = {}): Uint8Array 
 
   deflator.push(input, true);
 
-  // That will never happens, if you don't cheat with options :)
+  // That will never happen if you don't cheat with options :)
   if (deflator.err) { throw new Error(deflator.msg); }
 
   return deflator.result;
@@ -367,7 +368,7 @@ function deflate(input: DeflateInput, options: DeflateOptions = {}): Uint8Array 
 
 
 /**
- * The same as {@link deflate}, but creates raw data, without wrapper
+ * The same as {@link deflate}, but creates raw data without a wrapper
  * (header and adler32 crc).
  */
 function deflateRaw(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {
@@ -376,8 +377,8 @@ function deflateRaw(input: DeflateInput, options: DeflateOptions = {}): Uint8Arr
 
 
 /**
- * The same as {@link deflate}, but create gzip wrapper instead of
- * deflate one.
+ * The same as {@link deflate}, but creates a gzip wrapper instead of
+ * a deflate one.
  */
 function gzip(input: DeflateInput, options: DeflateOptions = {}): Uint8Array {
   return deflate(input, Object.assign({}, options, { gzip: true }));

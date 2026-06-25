@@ -111,8 +111,8 @@ If you need the whole API as an object, use namespace import:
 import * as pako from 'pako';
 ```
 
-Sometimes you can wish to work with strings. For example, to send
-stringified objects to server. Pako's deflate detects input data type, and
+Sometimes you may wish to work with strings — for example, to send
+stringified objects to a server. Pako's deflate detects the input data type and
 automatically recodes strings to utf-8 prior to compression. High-level inflate
 helpers can decode utf-8 output back to JavaScript strings with `toText: true`.
 

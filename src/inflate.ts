@@ -60,15 +60,15 @@ const defaultOptions: Required<InflateOptions> = {
 
 /**
  * Generic JS-style wrapper for zlib calls. If you don't need
- * streaming behaviour - use more simple functions: {@link inflate}
+ * streaming behaviour, use the simpler functions {@link inflate}
  * and {@link inflateRaw}.
  */
 class Inflate {
   private options: Required<InflateOptions>;
 
   /**
-   * Error code after inflate finished. {@link Z_OK} on success.
-   * Should be checked if broken data possible.
+   * Error code after inflate finishes. {@link Z_OK} on success.
+   * Should be checked when broken data is possible.
    */
   err: Z_CallStatus;
 
@@ -100,11 +100,12 @@ class Inflate {
   result: Uint8Array;
 
   /**
-   * Creates new inflator instance with specified params. Throws exception
-   * on bad params. See {@link InflateOptions} for the list of supported options.
+   * Creates a new inflator instance with the specified params. Throws an
+   * exception on bad params. See {@link InflateOptions} for the list of
+   * supported options.
    *
-   * By default, when no options set, autodetect deflate/gzip data format via
-   * wrapper header.
+   * By default, when no options are set, the deflate/gzip data format is
+   * autodetected via the wrapper header.
    *
    * @example
    * ```javascript
@@ -185,16 +186,16 @@ class Inflate {
   }
 
   /**
-   * Sends input data to inflate pipe, generating {@link Inflate.onData} calls with
-   * new output chunks. Returns `true` on success. If end of stream detected,
-   * {@link Inflate.onEnd} will be called.
+   * Sends input data to the inflate pipe, generating {@link Inflate.onData} calls
+   * with new output chunks. Returns `true` on success. If end of stream is
+   * detected, {@link Inflate.onEnd} will be called.
    *
    * `flush_mode` is not needed for normal operation, because end of stream
    * is detected automatically. Pass {@link Z_SYNC_FLUSH} to force the decoder
    * to emit all currently available output — handy when you need to decode
    * data frame-by-frame from a long-running stream.
    *
-   * On fail call {@link Inflate.onEnd} with error code and return false.
+   * On failure, calls {@link Inflate.onEnd} with the error code and returns false.
    *
    * Once the stream has ended (a compressed stream may end before your data
    * does), further `push` calls are no-ops and return whether the decode
@@ -361,25 +362,25 @@ class Inflate {
    * gzip header metadata:
    *
    * ```javascript
-   * import { Inflate, GZheader, zlibInflateGetHeader } from 'pako';
+   * import { Inflate, GZheader, zlibInflateGetHeader } from 'pako'
    *
-   * const inflator = new Inflate();
+   * const inflator = new Inflate()
    *
    * inflator.onStart = function (strm) {
-   *   this.header = new GZheader();
-   *   zlibInflateGetHeader(strm, this.header);
-   * };
+   *   this.header = new GZheader()
+   *   zlibInflateGetHeader(strm, this.header)
+   * }
    *
-   * inflator.push(data, true);
-   * console.log(inflator.header.name);
+   * inflator.push(data, true)
+   * console.log(inflator.header.name)
    * ```
    */
   onStart(strm: ZStream): void {}
 
 
   /**
-   * By default, stores data blocks in {@link Inflate.chunks} property and glue
-   * those in {@link Inflate.onEnd}. Override this handler, if you need another behaviour.
+   * By default, stores data blocks in the {@link Inflate.chunks} property and glues
+   * them in {@link Inflate.onEnd}. Override this handler if you need another behaviour.
    *
    * @param chunk output data.
    */
@@ -389,9 +390,9 @@ class Inflate {
 
 
   /**
-   * Called either after you tell inflate that the input stream is
-   * complete ({@link Z_FINISH}). By default - join collected {@link Inflate.chunks},
-   * free memory and fill {@link Inflate.result} property.
+   * Called after you tell inflate that the input stream is
+   * complete ({@link Z_FINISH}). By default, joins the collected {@link Inflate.chunks},
+   * frees memory and fills the {@link Inflate.result} property.
    *
    * @param status inflate status. {@link Z_OK} on success, other if not.
    */
@@ -406,8 +407,8 @@ class Inflate {
 
 
 /**
- * One-shot inflate decompress. Autodetect `gzip`/`zlib`
- * format via wrapper header — so {@link ungzip} is just a convenience alias of
+ * One-shot inflate decompress. Autodetects `gzip`/`zlib`
+ * format via the wrapper header — so {@link ungzip} is just a convenience alias of
  * this function. See {@link InflateOptions} for zlib options. Set
  * `toText: true` to decode the result as UTF-8 text.
  *
@@ -433,7 +434,7 @@ function inflate<O extends InflateOptions & { toText?: boolean }>(
 
   inflator.push(input, true);
 
-  // That will never happens, if you don't cheat with options :)
+  // That will never happen if you don't cheat with options :)
   if (inflator.err) throw new Error(inflator.msg);
 
   const result = inflator.result;
@@ -444,7 +445,7 @@ function inflate<O extends InflateOptions & { toText?: boolean }>(
 
 
 /**
- * The same as {@link inflate}, but consumes raw data, without wrapper
+ * The same as {@link inflate}, but consumes raw data without a wrapper
  * (header and adler32 crc).
  */
 function inflateRaw<O extends InflateOptions & { toText?: boolean }>(
