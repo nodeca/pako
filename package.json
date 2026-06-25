@@ -67,7 +67,7 @@
     "build": "node support/build-dist.mjs",
     "build_fixtures": "node support/build_fixtures.mjs",
     "doc": "node support/build_doc.mjs",
-    "doc2": "typedoc --entryPoints src/index.ts --out doc --includeVersion",
+    "doc2": "typedoc",
     "gh-doc": "npm run doc && gh-pages -d doc -f",
     "prepack": "npm test && npm run build && npm run doc",
     "postpublish": "npm run gh-doc"

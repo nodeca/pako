@@ -1,3 +1,4 @@
+/** @category constants */
 type Z_FlushMode =
   | typeof Z_NO_FLUSH
   | typeof Z_PARTIAL_FLUSH
@@ -7,6 +8,7 @@ type Z_FlushMode =
   | typeof Z_BLOCK
   | typeof Z_TREES;
 
+/** @category constants */
 type Z_CallStatus =
   | typeof Z_OK
   | typeof Z_STREAM_END
@@ -17,6 +19,7 @@ type Z_CallStatus =
   | typeof Z_MEM_ERROR
   | typeof Z_BUF_ERROR;
 
+/** @category zlib */
 declare class ZStream {
   input: Uint8Array;
   next_in: number;
@@ -32,6 +35,7 @@ declare class ZStream {
   adler: number;
 }
 
+/** @category zlib */
 declare class GZheader {
   text: number;
   time: number;
@@ -45,8 +49,10 @@ declare class GZheader {
   done: boolean;
 }
 
-declare const zlibDeflateInit: (strm: ZStream, level: number) => Z_CallStatus;
-declare const zlibDeflateInit2: (
+/** @category zlib */
+declare function zlibDeflateInit(strm: ZStream, level: number): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateInit2(
   strm: ZStream,
   level: number,
   method: number,
@@ -54,43 +60,71 @@ declare const zlibDeflateInit2: (
   memLevel: number,
   strategy: number,
   legacyHash?: boolean
-) => Z_CallStatus;
-declare const zlibDeflateReset: (strm: ZStream) => Z_CallStatus;
-declare const zlibDeflateResetKeep: (strm: ZStream) => Z_CallStatus;
-declare const zlibDeflateSetHeader: (strm: ZStream, head: GZheader) => Z_CallStatus;
-declare const zlibDeflateSetDictionary: (strm: ZStream, dictionary: Uint8Array) => Z_CallStatus;
-declare const zlibDeflate: (strm: ZStream, flush: Z_FlushMode) => Z_CallStatus;
-declare const zlibDeflateEnd: (strm: ZStream) => Z_CallStatus;
-declare const zlibDeflateInfo: string;
+): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateReset(strm: ZStream): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateResetKeep(strm: ZStream): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateSetHeader(strm: ZStream, head: GZheader): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateSetDictionary(strm: ZStream, dictionary: Uint8Array): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflate(strm: ZStream, flush: Z_FlushMode): Z_CallStatus;
+/** @category zlib */
+declare function zlibDeflateEnd(strm: ZStream): Z_CallStatus;
 
-declare const zlibInflateReset: (strm: ZStream) => Z_CallStatus;
-declare const zlibInflateReset2: (strm: ZStream, windowBits: number) => Z_CallStatus;
-declare const zlibInflateResetKeep: (strm: ZStream) => Z_CallStatus;
-declare const zlibInflateInit: (strm: ZStream) => Z_CallStatus;
-declare const zlibInflateInit2: (strm: ZStream, windowBits: number) => Z_CallStatus;
-declare const zlibInflateGetHeader: (strm: ZStream, head: GZheader) => Z_CallStatus;
-declare const zlibInflateSetDictionary: (strm: ZStream, dictionary: Uint8Array) => Z_CallStatus;
-declare const zlibInflate: (strm: ZStream, flush: Z_FlushMode) => Z_CallStatus;
-declare const zlibInflateEnd: (strm: ZStream) => Z_CallStatus;
-declare const zlibInflateInfo: string;
+/** @category zlib */
+declare function zlibInflateReset(strm: ZStream): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateReset2(strm: ZStream, windowBits: number): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateResetKeep(strm: ZStream): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateInit(strm: ZStream): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateInit2(strm: ZStream, windowBits: number): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateGetHeader(strm: ZStream, head: GZheader): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateSetDictionary(strm: ZStream, dictionary: Uint8Array): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflate(strm: ZStream, flush: Z_FlushMode): Z_CallStatus;
+/** @category zlib */
+declare function zlibInflateEnd(strm: ZStream): Z_CallStatus;
 
 declare const messages: Record<number, string>;
 
+/** @category constants */
 declare const Z_NO_FLUSH: 0;
+/** @category constants */
 declare const Z_PARTIAL_FLUSH: 1;
+/** @category constants */
 declare const Z_SYNC_FLUSH: 2;
+/** @category constants */
 declare const Z_FULL_FLUSH: 3;
+/** @category constants */
 declare const Z_FINISH: 4;
+/** @category constants */
 declare const Z_BLOCK: 5;
+/** @category constants */
 declare const Z_TREES: 6;
 
+/** @category constants */
 declare const Z_OK: 0;
+/** @category constants */
 declare const Z_STREAM_END: 1;
+/** @category constants */
 declare const Z_NEED_DICT: 2;
+/** @category constants */
 declare const Z_ERRNO: -1;
+/** @category constants */
 declare const Z_STREAM_ERROR: -2;
+/** @category constants */
 declare const Z_DATA_ERROR: -3;
+/** @category constants */
 declare const Z_MEM_ERROR: -4;
+/** @category constants */
 declare const Z_BUF_ERROR: -5;
 
 export {
@@ -102,7 +136,6 @@ export {
 
   zlibDeflate,
   zlibDeflateEnd,
-  zlibDeflateInfo,
   zlibDeflateInit,
   zlibDeflateInit2,
   zlibDeflateReset,
@@ -113,7 +146,6 @@ export {
   zlibInflate,
   zlibInflateEnd,
   zlibInflateGetHeader,
-  zlibInflateInfo,
   zlibInflateInit,
   zlibInflateInit2,
   zlibInflateReset,

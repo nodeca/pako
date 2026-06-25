@@ -6,8 +6,7 @@ export {
   deflateSetHeader as zlibDeflateSetHeader,
   deflateSetDictionary as zlibDeflateSetDictionary,
   deflate as zlibDeflate,
-  deflateEnd as zlibDeflateEnd,
-  deflateInfo as zlibDeflateInfo
+  deflateEnd as zlibDeflateEnd
 } from './zlib/deflate.mjs';
 
 export {
@@ -19,8 +18,7 @@ export {
   inflateGetHeader as zlibInflateGetHeader,
   inflateSetDictionary as zlibInflateSetDictionary,
   inflate as zlibInflate,
-  inflateEnd as zlibInflateEnd,
-  inflateInfo as zlibInflateInfo
+  inflateEnd as zlibInflateEnd
 } from './zlib/inflate.mjs';
 
 export { default as ZStream } from './zlib/zstream.mjs';

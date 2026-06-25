@@ -17,7 +17,6 @@ export {
   zlibDeflateSetDictionary,
   zlibDeflate,
   zlibDeflateEnd,
-  zlibDeflateInfo,
 
   zlibInflateReset,
   zlibInflateReset2,
@@ -28,7 +27,6 @@ export {
   zlibInflateSetDictionary,
   zlibInflate,
   zlibInflateEnd,
-  zlibInflateInfo,
 
   ZStream,
   GZheader,

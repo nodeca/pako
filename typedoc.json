@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "doc",
+  "includeVersion": true,
+  "markdownLinkExternal": true,
+  "sourceLinkExternal": true,
+  "defaultCategory": "pako",
+  "categoryOrder": ["pako", "*"],
+  "navigation": {
+    "includeCategories": true
+  }
+}

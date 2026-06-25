@@ -1555,7 +1555,6 @@ export {
   inflateReset, inflateReset2, inflateResetKeep, inflateInit, inflateInit2,
   inflate, inflateEnd, inflateGetHeader, inflateSetDictionary
 };
-export const inflateInfo = 'pako inflate (from Nodeca project)';
 
 /* Not implemented
 module.exports.inflateCodesUsed = inflateCodesUsed;
