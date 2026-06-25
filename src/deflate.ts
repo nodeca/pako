@@ -35,11 +35,6 @@ interface DeflateOptions {
    */
   level?: number;
   /**
-   * Compression method. Only `Z_DEFLATED` is supported.
-   * @group zlib options
-   */
-  method?: number;
-  /**
    * Size of generated data chunks (16K by default).
    * @group Extensions
    */
@@ -90,7 +85,6 @@ interface DeflateOptions {
 
 const defaultOptions: Required<DeflateOptions> = {
   level: Z_DEFAULT_COMPRESSION,
-  method: Z_DEFLATED,
   chunkSize: 16384,
   windowBits: 15,
   memLevel: 8,
@@ -184,7 +178,7 @@ class Deflate {
     let status = zlibDeflateInit2(
       this.strm,
       opt.level,
-      opt.method,
+      Z_DEFLATED,
       opt.windowBits,
       opt.memLevel,
       opt.strategy,
