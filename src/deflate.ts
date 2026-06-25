@@ -364,7 +364,7 @@ function deflate(input: DeflateInput, options: DeflateOptions = {}): Uint8Array 
   deflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (deflator.err) { throw deflator.msg; }
+  if (deflator.err) { throw new Error(deflator.msg); }
 
   return deflator.result;
 }

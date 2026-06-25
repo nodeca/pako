@@ -432,7 +432,7 @@ function inflate<O extends InflateOptions & { toText?: boolean }>(
   inflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (inflator.err) throw inflator.msg;
+  if (inflator.err) throw new Error(inflator.msg);
 
   const result = inflator.result;
 
