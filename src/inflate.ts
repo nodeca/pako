@@ -387,11 +387,10 @@ class Inflate {
 
 
 /**
- * Decompress `data` with inflate/ungzip and `options`. Autodetect
- * format via wrapper header by default — so {@link ungzip} is just a
- * convenience alias of this function.
- * See {@link InflateOptions} for zlib options. Set `toText: true` to decode
- * the result as UTF-8 text.
+ * Decompress `data` with inflate/ungzip and `options`. Autodetect `gzip`/`zlib`
+ * format via wrapper header — so {@link ungzip} is just a convenience alias of
+ * this function. See {@link InflateOptions} for zlib options. Set
+ * `toText: true` to decode the result as UTF-8 text.
  *
  * @example
  * ```javascript
@@ -406,13 +405,12 @@ class Inflate {
  * }
  * ```
  */
-function inflate(input: InflateInput): Uint8Array;
-function inflate(input: InflateInput, options: InflateOptions & { toText: true }): string;
-function inflate(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
-function inflate(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
-function inflate(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
-  const { toText, ...inflateOptions } = options;
-  const inflator = new Inflate(inflateOptions);
+function inflate<O extends InflateOptions & { toText?: boolean } = {}>(
+  input: InflateInput,
+  options?: O
+): O extends { toText: true } ? string : Uint8Array {
+  const opts: InflateOptions & { toText?: boolean } = options ?? {};
+  const inflator = new Inflate(opts);
 
   inflator.push(input, true);
 
@@ -421,35 +419,33 @@ function inflate(input: InflateInput, options: InflateOptions & { toText?: boole
 
   const result = inflator.result as Uint8Array;
 
-  return toText ? new TextDecoder().decode(result) : result;
+  return (opts.toText ? new TextDecoder().decode(result) : result) as
+    O extends { toText: true } ? string : Uint8Array;
 }
 
 
 /**
- * The same as {@link inflate}, but creates raw data, without wrapper
+ * The same as {@link inflate}, but consumes raw data, without wrapper
  * (header and adler32 crc).
  */
-function inflateRaw(input: InflateInput): Uint8Array;
-function inflateRaw(input: InflateInput, options: InflateOptions & { toText: true }): string;
-function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
-function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
-function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
-  return inflate(input, Object.assign({}, options, { raw: true }));
+function inflateRaw<O extends InflateOptions & { toText?: boolean } = {}>(
+  input: InflateInput,
+  options?: O
+): O extends { toText: true } ? string : Uint8Array {
+  return inflate<O>(input, { ...options, raw: true } as O);
 }
 
 
 /**
- * A full copy of {@link inflate} — same behaviour, same options, same return
- * type. Provided under a named export for convenience: {@link inflate} already
- * autodetects the gzip format from the wrapper header, so there is no separate
- * decoding logic here.
+ * The same as {@link inflate}. Provided under a named export for convenience:
+ * {@link inflate} already autodetects the gzip format from the wrapper header,
+ * so there is no separate decoding logic here.
  */
-function ungzip(input: InflateInput): Uint8Array;
-function ungzip(input: InflateInput, options: InflateOptions & { toText: true }): string;
-function ungzip(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
-function ungzip(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
-function ungzip(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
-  return inflate(input, options);
+function ungzip<O extends InflateOptions & { toText?: boolean } = {}>(
+  input: InflateInput,
+  options?: O
+): O extends { toText: true } ? string : Uint8Array {
+  return inflate<O>(input, options);
 }
 
 
