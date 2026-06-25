@@ -66,8 +66,7 @@
     "coverage": "npm run lint && c8 -r text -r html node --test",
     "build": "node support/build-dist.mjs",
     "build_fixtures": "node support/build_fixtures.mjs",
-    "doc": "node support/build_doc.mjs",
-    "doc2": "typedoc",
+    "doc": "typedoc",
     "gh-doc": "npm run doc && gh-pages -d doc -f",
     "prepack": "npm test && npm run build && npm run doc",
     "postpublish": "npm run gh-doc"
@@ -77,7 +76,6 @@
     "c8": "^11.0.0",
     "eslint": "^9.39.4",
     "gh-pages": "^6.3.0",
-    "ndoc": "^6.0.0",
     "neostandard": "^0.13.0",
     "rollup": "^4.62.2",
     "rollup-plugin-dts": "^6.4.1",
