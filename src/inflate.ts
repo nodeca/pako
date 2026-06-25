@@ -387,7 +387,7 @@ class Inflate {
 
 
 /**
- * Decompress `data` with inflate/ungzip and `options`. Autodetect `gzip`/`zlib`
+ * One-shot inflate decompress. Autodetect `gzip`/`zlib`
  * format via wrapper header — so {@link ungzip} is just a convenience alias of
  * this function. See {@link InflateOptions} for zlib options. Set
  * `toText: true` to decode the result as UTF-8 text.
@@ -435,18 +435,5 @@ function inflateRaw<O extends InflateOptions & { toText?: boolean }>(
 }
 
 
-/**
- * The same as {@link inflate}. Provided under a named export for convenience:
- * {@link inflate} already autodetects the gzip format from the wrapper header,
- * so there is no separate decoding logic here.
- */
-function ungzip<O extends InflateOptions & { toText?: boolean }>(
-  input: InflateInput,
-  options: O = {} as O
-): O extends { toText: true } ? string : Uint8Array {
-  return inflate<O>(input, options);
-}
-
-
-export { Inflate, inflate, inflateRaw, ungzip };
+export { Inflate, inflate, inflateRaw, inflate as ungzip };
 export type { InflateInput, InflateOptions };
