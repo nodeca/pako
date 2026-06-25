@@ -7,7 +7,7 @@ import {
   zlibInflateReset,
   zlibInflateEnd
 } from './zlib.mjs';
-import type { FlushMode } from './zlib.mjs';
+import type { Z_CallStatus, Z_FlushMode } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
 
 const toString = Object.prototype.toString;
@@ -121,7 +121,7 @@ const defaultOptions: Required<InflateOptions> = {
  **/
 class Inflate {
   private options: Required<InflateOptions>;
-  err: number;
+  err: Z_CallStatus;
   msg: string;
   private ended: boolean;
   private started: boolean;
@@ -216,11 +216,11 @@ class Inflate {
  * push(chunk, true);  // push last chunk
  * ```
  **/
-  push(data: InflateInput, flush_mode: FlushMode | boolean = false): boolean {
+  push(data: InflateInput, flush_mode: Z_FlushMode | boolean = false): boolean {
     const strm = this.strm;
     const chunkSize = this.options.chunkSize;
-    let status: number;
-    let _flush_mode: FlushMode;
+    let status: Z_CallStatus;
+    let _flush_mode: Z_FlushMode;
     let last_avail_out: number;
 
     if (this.ended) return false;
@@ -414,7 +414,7 @@ class Inflate {
  * complete (Z_FINISH). By default - join collected chunks,
  * free memory and fill `results` / `err` properties.
  **/
-  onEnd(status: number): void {
+  onEnd(status: Z_CallStatus): void {
     // On success - join
     if (status === Z_OK) {
       if (this.options.to === 'string') {
