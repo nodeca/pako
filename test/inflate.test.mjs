@@ -110,12 +110,12 @@ describe('Inflate emits buffered output on Z_SYNC_FLUSH', () => {
         def.flush(zlib.constants.Z_SYNC_FLUSH, () => {
           const p2 = take();
 
-          const inflator = new Inflate({ raw: true, to: 'string' });
+          const inflator = new Inflate({ raw: true });
           inflator.push(p1, Z_SYNC_FLUSH);
           inflator.push(p2, Z_SYNC_FLUSH);
 
           assert.ok(!inflator.err, 'inflate error: ' + inflator.err);
-          assert.deepStrictEqual(inflator.chunks, [ 'AAAA first ', 'BBBB second' ]);
+          assert.deepStrictEqual(inflator.chunks.map(chunk => Buffer.from(chunk).toString()), [ 'AAAA first ', 'BBBB second' ]);
           resolve();
         });
       });

@@ -24,11 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `dictionary` option now accepts only `Uint8Array` / `ArrayBuffer`
   (no `String` anymore).
 - Use native `TextEncoder` / `TextDecoder` for string conversion. Removed shims.
+- Replaced `{ to: 'string' })` with `{ toText: true })` for UTF-8 text output in
+  high-level helpers (`inflate`, `inflateRaw`, `ungzip`).
 - Build `dist/` on publish instead of keeping generated bundles in git.
 
 ### Removed
 
 - Default export. `import pako from 'pako'` is no longer supported.
+- `{ to: 'string' })` option from the streaming `Inflate` class. It now always
+  emits byte chunks.
 - Automatic gzip header collection in `Inflate`. Use `.onStart()` with
   `zlibInflateGetHeader()` to read gzip metadata.
 - Prebuilt `dist/` bundles from repository.

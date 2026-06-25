@@ -24,8 +24,6 @@ import {
 
 /** @inline */
 type InflateInput = Uint8Array | ArrayBuffer;
-/** @inline */
-type InflateChunk = Uint8Array | string;
 
 interface InflateOptions {
   /**
@@ -51,20 +49,12 @@ interface InflateOptions {
    * @group Extensions
    */
   raw?: boolean;
-  /**
-   * If equal to `'string'`, then result will be converted from utf8 to utf16
-   * (javascript) string. When string output requested, chunk length can differ
-   * from `chunkSize`, depending on content.
-   * @group Extensions
-   */
-  to?: string;
 }
 
 const defaultOptions: Required<InflateOptions> = {
   chunkSize: 1024 * 64,
   windowBits: 15,
   raw: false,
-  to: '',
   dictionary: new Uint8Array(0)
 };
 
@@ -92,9 +82,8 @@ class Inflate {
    * Chunks of output data, if {@link Inflate.onData} not overridden.
    * @internal
    */
-  chunks: InflateChunk[];
+  chunks: Uint8Array[];
 
-  private textDecoder: TextDecoder | null;
   private strm: ZStream;
 
   /**
@@ -102,7 +91,7 @@ class Inflate {
    * and {@link Inflate.onEnd} handlers. Filled after you push last chunk
    * (call {@link Inflate.push} with `Z_FINISH` / `true` param).
    */
-  result?: Uint8Array | string;
+  result?: Uint8Array;
 
   /**
    * Creates new inflator instance with specified params. Throws exception
@@ -160,7 +149,6 @@ class Inflate {
     this.ended  = false;  // used to avoid multiple onEnd() calls
     this.started = false; // used to call onStart() only once
     this.chunks = [];     // chunks of compressed data
-    this.textDecoder = opt.to === 'string' ? new TextDecoder() : null;
 
     this.strm   = new ZStream();
     this.strm.avail_out = 0;
@@ -297,23 +285,12 @@ class Inflate {
         // requested (e.g. Z_SYNC_FLUSH) - to push out the tail, same as node's zlib.
         if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
 
-          if (this.options.to === 'string') {
+          this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
 
-            let str = this.textDecoder!.decode(strm.output.subarray(0, strm.next_out), { stream: true });
-
-            strm.next_out = 0;
-            strm.avail_out = chunkSize;
-
-            if (str) this.onData(str);
-
-          } else {
-            this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
-
-            // Force a fresh output buffer on next iteration / next push, so the
-            // already emitted tail is not sent again.
-            strm.avail_out = 0;
-            strm.next_out = 0;
-          }
+          // Force a fresh output buffer on next iteration / next push, so the
+          // already emitted tail is not sent again.
+          strm.avail_out = 0;
+          strm.next_out = 0;
         }
       }
 
@@ -328,10 +305,6 @@ class Inflate {
       // Finalize if end of stream reached.
       if (status === Z_STREAM_END) {
         status = zlibInflateEnd(this.strm);
-        if (status === Z_OK && this.options.to === 'string') {
-          const str = this.textDecoder!.decode();
-          if (str) this.onData(str);
-        }
         this.onEnd(status);
         this.ended = true;
         return true;
@@ -387,9 +360,9 @@ class Inflate {
    * By default, stores data blocks in {@link Inflate.chunks} property and glue
    * those in {@link Inflate.onEnd}. Override this handler, if you need another behaviour.
    *
-   * @param chunk output data. When string output requested, each chunk will be string.
+   * @param chunk output data.
    */
-  onData(chunk: InflateChunk): void {
+  onData(chunk: Uint8Array): void {
     this.chunks.push(chunk);
   }
 
@@ -404,11 +377,7 @@ class Inflate {
   onEnd(status: Z_CallStatus): void {
     // On success - join
     if (status === Z_OK) {
-      if (this.options.to === 'string') {
-        this.result = this.chunks.join('');
-      } else {
-        this.result = flattenChunks(this.chunks as Uint8Array[]);
-      }
+      this.result = flattenChunks(this.chunks);
     }
     this.chunks = [];
     this.err = status;
@@ -421,7 +390,8 @@ class Inflate {
  * Decompress `data` with inflate/ungzip and `options`. Autodetect
  * format via wrapper header by default — so {@link ungzip} is just a
  * convenience alias of this function.
- * See {@link InflateOptions} for the list of supported options.
+ * See {@link InflateOptions} for zlib options. Set `toText: true` to decode
+ * the result as UTF-8 text.
  *
  * @example
  * ```javascript
@@ -436,17 +406,22 @@ class Inflate {
  * }
  * ```
  */
-function inflate(input: InflateInput, options: InflateOptions & { to: 'string' }): string;
-function inflate(input: InflateInput, options?: InflateOptions): Uint8Array;
-function inflate(input: InflateInput, options: InflateOptions = {}): Uint8Array | string {
-  const inflator = new Inflate(options);
+function inflate(input: InflateInput): Uint8Array;
+function inflate(input: InflateInput, options: InflateOptions & { toText: true }): string;
+function inflate(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
+function inflate(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
+function inflate(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
+  const { toText, ...inflateOptions } = options;
+  const inflator = new Inflate(inflateOptions);
 
   inflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
   if (inflator.err) throw inflator.msg || messages[inflator.err];
 
-  return inflator.result as Uint8Array | string;
+  const result = inflator.result as Uint8Array;
+
+  return toText ? new TextDecoder().decode(result) : result;
 }
 
 
@@ -454,9 +429,11 @@ function inflate(input: InflateInput, options: InflateOptions = {}): Uint8Array 
  * The same as {@link inflate}, but creates raw data, without wrapper
  * (header and adler32 crc).
  */
-function inflateRaw(input: InflateInput, options: InflateOptions & { to: 'string' }): string;
-function inflateRaw(input: InflateInput, options?: InflateOptions): Uint8Array;
-function inflateRaw(input: InflateInput, options: InflateOptions = {}): Uint8Array | string {
+function inflateRaw(input: InflateInput): Uint8Array;
+function inflateRaw(input: InflateInput, options: InflateOptions & { toText: true }): string;
+function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
+function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
+function inflateRaw(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
   return inflate(input, Object.assign({}, options, { raw: true }));
 }
 
@@ -467,9 +444,11 @@ function inflateRaw(input: InflateInput, options: InflateOptions = {}): Uint8Arr
  * autodetects the gzip format from the wrapper header, so there is no separate
  * decoding logic here.
  */
-function ungzip(input: InflateInput, options: InflateOptions & { to: 'string' }): string;
-function ungzip(input: InflateInput, options?: InflateOptions): Uint8Array;
-function ungzip(input: InflateInput, options: InflateOptions = {}): Uint8Array | string {
+function ungzip(input: InflateInput): Uint8Array;
+function ungzip(input: InflateInput, options: InflateOptions & { toText: true }): string;
+function ungzip(input: InflateInput, options: InflateOptions & { toText?: false }): Uint8Array;
+function ungzip(input: InflateInput, options: InflateOptions & { toText?: boolean }): Uint8Array | string;
+function ungzip(input: InflateInput, options: InflateOptions & { toText?: boolean } = {}): Uint8Array | string {
   return inflate(input, options);
 }
 

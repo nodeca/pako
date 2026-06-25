@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
 
-import { deflate, inflate } from '../src/index.ts';
+import { deflate, gzip, inflate, inflateRaw, ungzip } from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,8 +38,8 @@ describe('Encode/Decode', () => {
   // Create sample, that contains all types of utf8 (1-4byte) after conversion
   const utf16sample = a2utf16([ 0x1f3b5, 'a', 0x266a, 0x35, 0xe800, 0x10ffff, 0x0fffff ]);
 
-  it('Inflate string output handles utf8 split across chunks', () => {
-    const data = inflate(deflate(utf16sample), { to: 'string', chunkSize: 1 });
+  it('Inflate text output handles utf8 split across chunks', () => {
+    const data = inflate(deflate(utf16sample), { toText: true, chunkSize: 1 });
 
     assert.strictEqual(data, utf16sample);
   });
@@ -62,7 +62,23 @@ describe('Deflate/Inflate strings', () => {
 
   it('Inflate with javascript string (utf16) output', () => {
     const deflatedArray  = deflate(sampleArray);
-    const data = inflate(deflatedArray, { to: 'string', chunkSize: 99 });
+    const data = inflate(deflatedArray, { toText: true, chunkSize: 99 });
+
+    assert.strictEqual(typeof data, 'string');
+    assert.strictEqual(data, sampleString);
+  });
+
+  it('InflateRaw with javascript string (utf16) output', () => {
+    const deflatedArray = deflate(sampleArray, { raw: true });
+    const data = inflateRaw(deflatedArray, { toText: true, chunkSize: 99 });
+
+    assert.strictEqual(typeof data, 'string');
+    assert.strictEqual(data, sampleString);
+  });
+
+  it('Ungzip with javascript string (utf16) output', () => {
+    const deflatedArray = gzip(sampleArray);
+    const data = ungzip(deflatedArray, { toText: true, chunkSize: 99 });
 
     assert.strictEqual(typeof data, 'string');
     assert.strictEqual(data, sampleString);

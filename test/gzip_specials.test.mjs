@@ -58,7 +58,7 @@ describe('Gzip special cases', () => {
     };
     deflator.push(data, true);
 
-    const inflator = new Inflate({ to: 'string' });
+    const inflator = new Inflate();
     inflator.onStart = function (strm) {
       this.header = new GZheader();
       assert.strictEqual(zlibInflateGetHeader(strm, this.header), Z_OK);
@@ -66,7 +66,7 @@ describe('Gzip special cases', () => {
     inflator.push(deflator.result);
 
     assert.strictEqual(inflator.err, 0);
-    assert.strictEqual(inflator.result, data);
+    assert.strictEqual(Buffer.from(inflator.result).toString(), data);
 
     const header = inflator.header;
     assert.strictEqual(header.time, 1234567);

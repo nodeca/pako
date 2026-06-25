@@ -113,9 +113,8 @@ import * as pako from 'pako';
 
 Sometimes you can wish to work with strings. For example, to send
 stringified objects to server. Pako's deflate detects input data type, and
-automatically recodes strings to utf-8 prior to compression. Inflate has special
-option to say compressed data has utf-8 encoding and should be recoded to
-JavaScript's utf-16.
+automatically recodes strings to utf-8 prior to compression. High-level inflate
+helpers can decode utf-8 output back to JavaScript strings with `toText: true`.
 
 ```javascript
 import { deflate, inflate } from 'pako';
@@ -124,7 +123,7 @@ const test = { my: 'super', puper: [456, 567], awesome: 'pako' };
 
 const compressed = deflate(JSON.stringify(test));
 
-const restored = JSON.parse(inflate(compressed, { to: 'string' }));
+const restored = JSON.parse(inflate(compressed, { toText: true }));
 ```
 
 
