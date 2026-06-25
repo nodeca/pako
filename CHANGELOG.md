@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `nodejs` by default.
 - `dictionary` option now accepts only `Uint8Array` / `ArrayBuffer`
   (no `String` anymore).
+- `.onEnd()` now only assembles output chunks into `result`, and no longer sets
+  the `err` / `msg` fields.
 - Use native `TextEncoder` / `TextDecoder` for string conversion. Removed shims.
 - Replaced `{ to: 'string' })` with `{ toText: true })` for UTF-8 text output in
   high-level helpers (`inflate`, `inflateRaw`, `ungzip`).

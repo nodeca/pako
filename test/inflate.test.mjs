@@ -195,7 +195,7 @@ describe('Inflate truncated input', () => {
 
     assert.strictEqual(ok, false);
     assert.notStrictEqual(inflator.err, 0);
-    assert.strictEqual(typeof inflator.result, 'undefined');
+    assert.strictEqual(inflator.result.length, 0);
   });
 
   it('raw truncated input also throws', () => {
