@@ -1,9 +1,7 @@
 import {
-  GZheader,
   messages,
   ZStream,
   zlibInflateInit2,
-  zlibInflateGetHeader,
   zlibInflateSetDictionary,
   zlibInflate,
   zlibInflateReset,
@@ -130,7 +128,6 @@ class Inflate {
   chunks: InflateChunk[];
   private textDecoder: TextDecoder | null;
   private strm: ZStream;
-  header: GZheader;
   result?: Uint8Array | string;
 
   constructor(options?: InflateOptions) {
@@ -179,10 +176,6 @@ class Inflate {
     if (status !== Z_OK) {
       throw new Error(messages[status]);
     }
-
-    this.header = new GZheader();
-
-    zlibInflateGetHeader(this.strm, this.header);
 
     if (toString.call(opt.dictionary) === '[object ArrayBuffer]') {
       opt.dictionary = new Uint8Array(opt.dictionary as ArrayBuffer);
@@ -378,6 +371,23 @@ class Inflate {
  * - strm (ZStream): low-level zlib stream.
  *
  * Called once before the first low-level inflate call.
+ *
+ * Override this handler to attach low-level inflate state, for example to read
+ * gzip header metadata:
+ *
+ * ```javascript
+ * import { Inflate, GZheader, zlibInflateGetHeader } from 'pako';
+ *
+ * const inflator = new Inflate();
+ *
+ * inflator.onStart = function (strm) {
+ *   this.header = new GZheader();
+ *   zlibInflateGetHeader(strm, this.header);
+ * };
+ *
+ * inflator.push(data, true);
+ * console.log(inflator.header.name);
+ * ```
  **/
   onStart(strm: ZStream): void {}
 

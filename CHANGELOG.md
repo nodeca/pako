@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Default export. `import pako from 'pako'` is no longer supported.
+- Automatic gzip header collection in `Inflate`. Use `.onStart()` with
+  `zlibInflateGetHeader()` to read gzip metadata.
 - Prebuilt `dist/` bundles from repository.
 
 

@@ -4,7 +4,17 @@ import path from 'path';
 import assert from 'assert';
 import zlib from 'zlib';
 
-import { Deflate, GZheader, Inflate, gzip, ungzip, zlibDeflateSetHeader, Z_OK, Z_SYNC_FLUSH } from '../src/index.ts';
+import {
+  Deflate,
+  GZheader,
+  Inflate,
+  gzip,
+  ungzip,
+  zlibDeflateSetHeader,
+  zlibInflateGetHeader,
+  Z_OK,
+  Z_SYNC_FLUSH
+} from '../src/index.ts';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +30,10 @@ describe('Gzip special cases', () => {
   it('Read custom headers', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-headers.gz'));
     const inflator = new Inflate();
+    inflator.onStart = function (strm) {
+      this.header = new GZheader();
+      assert.strictEqual(zlibInflateGetHeader(strm, this.header), Z_OK);
+    };
     inflator.push(data);
 
     assert.strictEqual(inflator.header.name, 'test name');
@@ -45,6 +59,10 @@ describe('Gzip special cases', () => {
     deflator.push(data, true);
 
     const inflator = new Inflate({ to: 'string' });
+    inflator.onStart = function (strm) {
+      this.header = new GZheader();
+      assert.strictEqual(zlibInflateGetHeader(strm, this.header), Z_OK);
+    };
     inflator.push(deflator.result);
 
     assert.strictEqual(inflator.err, 0);
