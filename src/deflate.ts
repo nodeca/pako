@@ -158,8 +158,8 @@ class Deflate {
    * console.log(deflate.result);
    * ```
    */
-  constructor(options?: DeflateOptions) {
-    this.options = Object.assign({}, defaultOptions, options || {});
+  constructor(options: DeflateOptions = {}) {
+    this.options = Object.assign({}, defaultOptions, options);
 
     const opt = this.options;
 

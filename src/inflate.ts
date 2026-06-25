@@ -116,8 +116,8 @@ class Inflate {
    * console.log(inflate.result);
    * ```
    */
-  constructor(options?: InflateOptions) {
-    this.options = Object.assign({}, defaultOptions, options || {});
+  constructor(options: InflateOptions = {}) {
+    this.options = Object.assign({}, defaultOptions, options);
 
     const opt = this.options;
 
@@ -130,7 +130,7 @@ class Inflate {
 
     // If `windowBits` not defined (and mode not raw) - set autodetect flag for gzip/deflate
     if ((opt.windowBits >= 0) && (opt.windowBits < 16) &&
-        !(options && options.windowBits)) {
+        !options.windowBits) {
       opt.windowBits += 32;
     }
 
@@ -405,12 +405,11 @@ class Inflate {
  * }
  * ```
  */
-function inflate<O extends InflateOptions & { toText?: boolean } = {}>(
+function inflate<O extends InflateOptions & { toText?: boolean }>(
   input: InflateInput,
-  options?: O
+  options: O = {} as O
 ): O extends { toText: true } ? string : Uint8Array {
-  const opts: InflateOptions & { toText?: boolean } = options ?? {};
-  const inflator = new Inflate(opts);
+  const inflator = new Inflate(options);
 
   inflator.push(input, true);
 
@@ -419,7 +418,7 @@ function inflate<O extends InflateOptions & { toText?: boolean } = {}>(
 
   const result = inflator.result as Uint8Array;
 
-  return (opts.toText ? new TextDecoder().decode(result) : result) as
+  return (options.toText ? new TextDecoder().decode(result) : result) as
     O extends { toText: true } ? string : Uint8Array;
 }
 
@@ -428,9 +427,9 @@ function inflate<O extends InflateOptions & { toText?: boolean } = {}>(
  * The same as {@link inflate}, but consumes raw data, without wrapper
  * (header and adler32 crc).
  */
-function inflateRaw<O extends InflateOptions & { toText?: boolean } = {}>(
+function inflateRaw<O extends InflateOptions & { toText?: boolean }>(
   input: InflateInput,
-  options?: O
+  options: O = {} as O
 ): O extends { toText: true } ? string : Uint8Array {
   return inflate<O>(input, { ...options, raw: true } as O);
 }
@@ -441,9 +440,9 @@ function inflateRaw<O extends InflateOptions & { toText?: boolean } = {}>(
  * {@link inflate} already autodetects the gzip format from the wrapper header,
  * so there is no separate decoding logic here.
  */
-function ungzip<O extends InflateOptions & { toText?: boolean } = {}>(
+function ungzip<O extends InflateOptions & { toText?: boolean }>(
   input: InflateInput,
-  options?: O
+  options: O = {} as O
 ): O extends { toText: true } ? string : Uint8Array {
   return inflate<O>(input, options);
 }
