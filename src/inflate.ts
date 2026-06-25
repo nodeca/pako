@@ -75,7 +75,13 @@ class Inflate {
   /** Error message, if {@link Inflate.err} is not {@link Z_OK}. */
   msg: string;
 
-  private ended: boolean;
+  /**
+   * `true` once the compressed stream has ended. A stream may end before the
+   * caller's data does (trailing bytes), so check this to know when to stop
+   * pushing - further {@link Inflate.push} calls are no-ops.
+   */
+  ended: boolean;
+
   private started: boolean;
 
   /**
@@ -183,10 +189,16 @@ class Inflate {
    * {@link Inflate.onEnd} will be called.
    *
    * `flush_mode` is not needed for normal operation, because end of stream
-   * detected automatically. You may try to use it for advanced things, but
-   * this functionality was not tested.
+   * is detected automatically. Pass {@link Z_SYNC_FLUSH} to force the decoder
+   * to emit all currently available output — handy when you need to decode
+   * data frame-by-frame from a long-running stream.
    *
    * On fail call {@link Inflate.onEnd} with error code and return false.
+   *
+   * Once the stream has ended (a compressed stream may end before your data
+   * does), further `push` calls are no-ops and return whether the decode
+   * finished successfully. The final outcome is in {@link Inflate.result},
+   * {@link Inflate.err} and {@link Inflate.msg}.
    *
    * @param flush_mode 0..6 for corresponding {@link Z_NO_FLUSH}..{@link Z_TREES}
    *   flush modes. See constants. Skipped or `false` means {@link Z_NO_FLUSH},
@@ -206,7 +218,13 @@ class Inflate {
     let _flush_mode: Z_FlushMode;
     let last_avail_out: number;
 
-    if (this.ended) return false;
+    // Once the stream has ended, further pushes are no-ops. A compressed stream
+    // can end before the caller's data does (trailing bytes), and the caller has
+    // no way to know that in advance - so report the recorded outcome rather than
+    // a blanket `false`: a successful decode keeps returning `true` while trailing
+    // chunks are fed, errors keep returning `false`. `err`/`msg`/`result` are
+    // left intact, so the delivered result survives any trailing garbage.
+    if (this.ended) return this.err === Z_OK;
 
     if (typeof flush_mode === 'number') _flush_mode = flush_mode;
     else _flush_mode = flush_mode === true ? Z_FINISH : Z_NO_FLUSH;

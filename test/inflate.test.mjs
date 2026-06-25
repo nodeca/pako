@@ -177,6 +177,43 @@ describe('Inflate trailing data after a complete stream', () => {
 });
 
 
+// A compressed stream can end before the caller's data does. Once it has ended,
+// further pushes are no-ops that report the recorded outcome, not a blanket
+// false - so a successful decode keeps returning true while trailing chunks are
+// fed, and the delivered result stays intact.
+describe('Inflate push after the stream has ended', () => {
+
+  it('extra pushes after a finished stream return true and keep result', () => {
+    const stream = zlib.deflateSync(Buffer.from('payload'));
+    const garbage = new Uint8Array([ 1, 2, 3, 4, 5 ]);
+
+    const inflator = new Inflate();
+    // Stream ends on this chunk, before the caller's data runs out.
+    assert.strictEqual(inflator.push(stream), true);
+    assert.strictEqual(inflator.ended, true);
+    assert.strictEqual(inflator.err, 0);
+
+    // Trailing chunks the caller didn't know were past the end.
+    assert.strictEqual(inflator.push(garbage), true);
+    assert.strictEqual(inflator.push(garbage, true), true);
+
+    assert.strictEqual(Buffer.from(inflator.result).toString(), 'payload');
+    assert.strictEqual(inflator.err, 0);
+  });
+
+  it('pushes after a failed stream keep returning false', () => {
+    const full = zlib.deflateSync(Buffer.from('some longer payload to truncate'));
+    const trunc = full.subarray(0, full.length - 5);
+
+    const inflator = new Inflate();
+    assert.strictEqual(inflator.push(trunc, true), false);
+    assert.notStrictEqual(inflator.err, 0);
+
+    assert.strictEqual(inflator.push(new Uint8Array([ 1, 2, 3 ])), false);
+  });
+});
+
+
 // A stream cut off before its terminating marker is incomplete; finalizing it
 // must fail rather than return the partial output.
 describe('Inflate truncated input', () => {

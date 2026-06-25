@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
 ### Added
 
 - Generated type definitions.
@@ -29,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced `{ to: 'string' })` with `{ toText: true })` for UTF-8 text output in
   high-level helpers (`inflate`, `inflateRaw`, `ungzip`).
 - Build `dist/` on publish instead of keeping generated bundles in git.
+- `Inflate.push()` after stream end returns the decode result, not always
+  `false`.
 
 ### Removed
 
