@@ -5,6 +5,10 @@
   "includeVersion": true,
   "markdownLinkExternal": true,
   "sourceLinkExternal": true,
+  "sourceLinkTemplate": "https://github.com/nodeca/pako/blob/{gitRevision:short}/{path}#L{line}",
+  "navigationLinks": {
+    "GitHub": "https://github.com/nodeca/pako"
+  },
   "defaultCategory": "pako",
   "categoryOrder": ["pako", "*"],
   "sort": ["source-order"],
