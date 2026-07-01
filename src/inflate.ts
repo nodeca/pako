@@ -8,7 +8,7 @@ import {
   zlibInflateEnd
 } from './zlib.mjs';
 import type { Z_CallStatus, Z_FlushMode } from './zlib.mjs';
-import { flattenChunks } from './utils.ts';
+import { flattenChunks, type NonSharedUint8Array } from './utils.ts';
 
 const toString = Object.prototype.toString;
 
@@ -97,7 +97,7 @@ class Inflate {
    * and {@link Inflate.onEnd} handlers. Filled after you push last chunk
    * (call {@link Inflate.push} with {@link Z_FINISH} / `true` param).
    */
-  result: Uint8Array;
+  result: NonSharedUint8Array;
 
   /**
    * Creates a new inflator instance with the specified params. Throws an
@@ -429,7 +429,7 @@ class Inflate {
 function inflate<O extends InflateOptions & { toText?: boolean }>(
   input: InflateInput,
   options: O = {} as O
-): O extends { toText: true } ? string : Uint8Array {
+): O extends { toText: true } ? string : NonSharedUint8Array {
   const inflator = new Inflate(options);
 
   inflator.push(input, true);
@@ -440,7 +440,7 @@ function inflate<O extends InflateOptions & { toText?: boolean }>(
   const result = inflator.result;
 
   return (options.toText ? new TextDecoder().decode(result) : result) as
-    O extends { toText: true } ? string : Uint8Array;
+    O extends { toText: true } ? string : NonSharedUint8Array;
 }
 
 
@@ -451,7 +451,7 @@ function inflate<O extends InflateOptions & { toText?: boolean }>(
 function inflateRaw<O extends InflateOptions & { toText?: boolean }>(
   input: InflateInput,
   options: O = {} as O
-): O extends { toText: true } ? string : Uint8Array {
+): O extends { toText: true } ? string : NonSharedUint8Array {
   return inflate<O>(input, { ...options, raw: true } as O);
 }
 
