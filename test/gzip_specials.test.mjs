@@ -76,6 +76,29 @@ describe('Gzip special cases', () => {
     assert.deepStrictEqual(header.extra, new Uint8Array([ 4, 5, 6 ]));
   });
 
+  it('Read header time past the signed 32-bit boundary (2038) as unsigned', () => {
+    // RFC 1952: MTIME is an unsigned 32-bit value. Timestamps from 2038-01-19
+    // on have bit 31 set and must not be reported as a negative number.
+    const time = 0x80000000;
+
+    const deflator = new Deflate({ gzip: true });
+    deflator.onStart = function (strm) {
+      const header = new GZheader();
+      header.time = time;
+      zlibDeflateSetHeader(strm, header);
+    };
+    deflator.push('x', true);
+
+    const inflator = new Inflate();
+    inflator.onStart = function (strm) {
+      this.header = new GZheader();
+      zlibInflateGetHeader(strm, this.header);
+    };
+    inflator.push(deflator.result);
+
+    assert.strictEqual(inflator.header.time, time);
+  });
+
   it('Read stream with SYNC marks (multistream source, file 1)', () => {
     const data = fs.readFileSync(path.join(__dirname, 'fixtures/gzip-joined.gz'));
 

@@ -557,7 +557,7 @@ const inflate = (strm, flush) => {
         }
         //===//
         if (state.head) {
-          state.head.time = hold;
+          state.head.time = hold >>> 0;
         }
         if ((state.flags & 0x0200) && (state.wrap & 4)) {
           //=== CRC4(state.check, hold)
