@@ -1102,7 +1102,7 @@ const _tr_flush_block = (s, buf, stored_len, last) => {
     //        opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
     //        s->sym_next / 3));
 
-    if (static_lenb <= opt_lenb) { opt_lenb = static_lenb; }
+    if (static_lenb <= opt_lenb || s.strategy === Z_FIXED) { opt_lenb = static_lenb; }
 
   } else {
     // Assert(buf != (char*)0, "lost buf");

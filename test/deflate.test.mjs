@@ -15,6 +15,7 @@ import {
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -107,6 +108,18 @@ describe('deflate misc', () => {
     const inflatedPakoData = inflate(deflatedPakoData);
 
     assert.strictEqual(data.length, inflatedPakoData.length);
+  });
+
+  // zlib 7fabcb5 "Fix bug in block type selection when Z_FIXED used": with
+  // Z_FIXED a fixed block could be emitted where a stored block is smaller.
+  it('matches zlib block-type selection for Z_FIXED on incompressible data', () => {
+    const sample = new Uint8Array(fs.readFileSync(path.join(__dirname, 'fixtures/samples/lorem_cat.jpeg')));
+    const opts = { level: 6, strategy: 4 /* Z_FIXED */ };
+
+    assert.deepStrictEqual(
+      deflate(sample, opts),
+      new Uint8Array(zlib.deflateSync(Buffer.from(sample), opts))
+    );
   });
 
   it('should not hang on wrong flush mode', () => {
