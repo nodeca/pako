@@ -21,32 +21,54 @@
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-// Use ordinary array, since untyped makes no boost here
+// Slicing-by-8 tables: 8 x 256 entries in one flat Uint32Array.
 const makeTable = () => {
-  let c, table = [];
+  const table = new Uint32Array(256 * 8);
+  let c;
 
-  for (var n = 0; n < 256; n++) {
+  for (let n = 0; n < 256; n++) {
     c = n;
-    for (var k = 0; k < 8; k++) {
+    for (let k = 0; k < 8; k++) {
       c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
     }
     table[n] = c;
   }
 
+  for (let n = 0; n < 256; n++) {
+    c = table[n];
+    for (let k = 256; k < 256 * 8; k += 256) {
+      c = table[c & 0xFF] ^ (c >>> 8);
+      table[k + n] = c;
+    }
+  }
+
   return table;
 };
 
-// Create table on load. Just 255 signed longs. Not a problem.
-const crcTable = new Uint32Array(makeTable());
+const crcTable = makeTable();
 
 
 const crc32 = (crc, buf, len, pos) => {
   const t = crcTable;
   const end = pos + len;
+  let i = pos;
 
   crc ^= -1;
 
-  for (let i = pos; i < end; i++) {
+  // Process 8 bytes per iteration (slicing-by-8)
+  for (const end8 = end - 7; i < end8; i += 8) {
+    crc ^= buf[i] | (buf[i + 1] << 8) | (buf[i + 2] << 16) | (buf[i + 3] << 24);
+    crc = t[1792 + (crc & 0xFF)] ^
+          t[1536 + ((crc >>> 8) & 0xFF)] ^
+          t[1280 + ((crc >>> 16) & 0xFF)] ^
+          t[1024 + (crc >>> 24)] ^
+          t[768 + buf[i + 4]] ^
+          t[512 + buf[i + 5]] ^
+          t[256 + buf[i + 6]] ^
+          t[buf[i + 7]];
+  }
+
+  for (; i < end; i++) {
     crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
   }
 
