@@ -679,6 +679,7 @@ const inflate = (strm, flush) => {
             if (state.head && len &&
                 (state.length < 65536 /*state.head.name_max*/)) {
               state.head.name += String.fromCharCode(len);
+              state.length++;
             }
           } while (len && copy < have);
 
@@ -705,6 +706,7 @@ const inflate = (strm, flush) => {
             if (state.head && len &&
                 (state.length < 65536 /*state.head.comm_max*/)) {
               state.head.comment += String.fromCharCode(len);
+              state.length++;
             }
           } while (len && copy < have);
           if ((state.flags & 0x0200) && (state.wrap & 4)) {
