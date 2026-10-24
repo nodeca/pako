@@ -19,6 +19,14 @@ type Z_CallStatus =
   | typeof Z_MEM_ERROR
   | typeof Z_BUF_ERROR;
 
+/** @category constants */
+type Z_Strategy =
+  | typeof Z_FILTERED
+  | typeof Z_HUFFMAN_ONLY
+  | typeof Z_RLE
+  | typeof Z_FIXED
+  | typeof Z_DEFAULT_STRATEGY;
+
 /** @category zlib */
 declare class ZStream {
   input: Uint8Array;
@@ -58,7 +66,7 @@ declare function zlibDeflateInit2(
   method: number,
   windowBits: number,
   memLevel: number,
-  strategy: number,
+  strategy: Z_Strategy,
   legacyHash?: boolean
 ): Z_CallStatus;
 /** @category zlib */
@@ -127,11 +135,23 @@ declare const Z_MEM_ERROR: -4;
 /** @category constants */
 declare const Z_BUF_ERROR: -5;
 
+/** @category constants */
+declare const Z_FILTERED: 1;
+/** @category constants */
+declare const Z_HUFFMAN_ONLY: 2;
+/** @category constants */
+declare const Z_RLE: 3;
+/** @category constants */
+declare const Z_FIXED: 4;
+/** @category constants */
+declare const Z_DEFAULT_STRATEGY: 0;
+
 export {
   GZheader,
   messages,
   Z_CallStatus,
   Z_FlushMode,
+  Z_Strategy,
   ZStream,
 
   zlibDeflate,
@@ -168,5 +188,11 @@ export {
   Z_STREAM_END,
   Z_STREAM_ERROR,
   Z_SYNC_FLUSH,
-  Z_TREES
+  Z_TREES,
+
+  Z_FILTERED,
+  Z_HUFFMAN_ONLY,
+  Z_RLE,
+  Z_FIXED,
+  Z_DEFAULT_STRATEGY
 };

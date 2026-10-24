@@ -6,7 +6,7 @@ import {
   zlibDeflate,
   zlibDeflateEnd
 } from './zlib.mjs';
-import type { Z_CallStatus, Z_FlushMode } from './zlib.mjs';
+import type { Z_CallStatus, Z_FlushMode, Z_Strategy } from './zlib.mjs';
 import { flattenChunks } from './utils.ts';
 
 const toString = Object.prototype.toString;
@@ -56,7 +56,7 @@ interface DeflateOptions {
    * [zlib manual](http://zlib.net/manual.html#Advanced) for more information.
    * @group zlib options
    */
-  strategy?: number;
+  strategy?: Z_Strategy;
   /**
    * Do raw deflate. Say that we work with raw stream, if you don't wish to
    * specify negative `windowBits` implicitly.

@@ -41,5 +41,11 @@ export {
   Z_STREAM_ERROR,
   Z_DATA_ERROR,
   Z_MEM_ERROR,
-  Z_BUF_ERROR
+  Z_BUF_ERROR,
+
+  Z_FILTERED,
+  Z_HUFFMAN_ONLY,
+  Z_RLE,
+  Z_FIXED,
+  Z_DEFAULT_STRATEGY
 } from './zlib/constants.mjs';
