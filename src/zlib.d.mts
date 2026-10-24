@@ -1,4 +1,12 @@
 /** @category constants */
+type Z_Strategy =
+  | typeof Z_DEFAULT_STRATEGY
+  | typeof Z_FILTERED
+  | typeof Z_HUFFMAN_ONLY
+  | typeof Z_RLE
+  | typeof Z_FIXED;
+
+/** @category constants */
 type Z_FlushMode =
   | typeof Z_NO_FLUSH
   | typeof Z_PARTIAL_FLUSH
@@ -58,7 +66,7 @@ declare function zlibDeflateInit2(
   method: number,
   windowBits: number,
   memLevel: number,
-  strategy: number,
+  strategy: Z_Strategy,
   legacyHash?: boolean
 ): Z_CallStatus;
 /** @category zlib */
@@ -94,6 +102,17 @@ declare function zlibInflate(strm: ZStream, flush: Z_FlushMode): Z_CallStatus;
 declare function zlibInflateEnd(strm: ZStream): Z_CallStatus;
 
 declare const messages: Record<number, string>;
+
+/** @category constants */
+declare const Z_DEFAULT_STRATEGY: 0;
+/** @category constants */
+declare const Z_FILTERED: 1;
+/** @category constants */
+declare const Z_HUFFMAN_ONLY: 2;
+/** @category constants */
+declare const Z_RLE: 3;
+/** @category constants */
+declare const Z_FIXED: 4;
 
 /** @category constants */
 declare const Z_NO_FLUSH: 0;
@@ -132,6 +151,7 @@ export {
   messages,
   Z_CallStatus,
   Z_FlushMode,
+  Z_Strategy,
   ZStream,
 
   zlibDeflate,
@@ -152,6 +172,12 @@ export {
   zlibInflateReset2,
   zlibInflateResetKeep,
   zlibInflateSetDictionary,
+
+  Z_DEFAULT_STRATEGY,
+  Z_FILTERED,
+  Z_HUFFMAN_ONLY,
+  Z_RLE,
+  Z_FIXED,
 
   Z_BLOCK,
   Z_BUF_ERROR,

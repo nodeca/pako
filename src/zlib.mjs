@@ -26,6 +26,12 @@ export { default as GZheader } from './zlib/gzheader.mjs';
 export { default as messages } from './zlib/messages.mjs';
 
 export {
+  Z_DEFAULT_STRATEGY,
+  Z_FILTERED,
+  Z_HUFFMAN_ONLY,
+  Z_RLE,
+  Z_FIXED,
+
   Z_NO_FLUSH,
   Z_PARTIAL_FLUSH,
   Z_SYNC_FLUSH,

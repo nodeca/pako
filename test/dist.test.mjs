@@ -13,6 +13,33 @@ function roundtrip(deflate, inflate) {
 }
 
 describe('dist smoke test', () => {
+  it('exports compression strategies in full and deflate bundles', async () => {
+    const { inflate } = require('../dist/pako.cjs.js');
+    const bundles = [
+      require('../dist/pako.cjs.js'),
+      await import('../dist/pako.mjs'),
+      require('../dist/browser/pako.umd.min.js'),
+      await import('../dist/browser/pako.esm.min.mjs'),
+      require('../dist/browser/pako_deflate.umd.min.js'),
+      await import('../dist/browser/pako_deflate.esm.min.mjs')
+    ];
+    const strategies = {
+      Z_DEFAULT_STRATEGY: 0,
+      Z_FILTERED: 1,
+      Z_HUFFMAN_ONLY: 2,
+      Z_RLE: 3,
+      Z_FIXED: 4
+    };
+
+    for (const bundle of bundles) {
+      for (const [name, value] of Object.entries(strategies)) {
+        assert.strictEqual(bundle[name], value);
+        const compressed = bundle.deflate(sample, { strategy: bundle[name] });
+        assert.deepStrictEqual(inflate(compressed), sample);
+      }
+    }
+  });
+
   it('loads CJS bundle', () => {
     const { deflate, inflate } = require('../dist/pako.cjs.js');
 

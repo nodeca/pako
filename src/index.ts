@@ -6,7 +6,7 @@ export type { DeflateOptions } from './deflate.ts';
 export { Inflate, inflate, inflateRaw, ungzip } from './inflate.ts';
 export type { InflateOptions } from './inflate.ts';
 
-export type { Z_CallStatus, Z_FlushMode } from './zlib.mjs';
+export type { Z_CallStatus, Z_FlushMode, Z_Strategy } from './zlib.mjs';
 
 export {
   zlibDeflateInit,
@@ -30,6 +30,12 @@ export {
 
   ZStream,
   GZheader,
+
+  Z_DEFAULT_STRATEGY,
+  Z_FILTERED,
+  Z_HUFFMAN_ONLY,
+  Z_RLE,
+  Z_FIXED,
 
   Z_NO_FLUSH,
   Z_PARTIAL_FLUSH,
