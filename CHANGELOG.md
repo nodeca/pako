@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.0.3 - 2026-10-26
+
+### Added
+
+- Export `Z_Strategy` type for compression strategy options, #326.
+
+### Changed
+
+- Speed up CRC32 with slicing-by-8, #320.
+
+### Fixed
+
+- Restore compression strategy constant exports, #326.
+- Enforce the 65536-character limit when collecting gzip header names and comments.
+
+
 ## 3.0.2 - 2026-09-12
 
 ### Fixed
