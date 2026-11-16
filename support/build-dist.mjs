@@ -96,13 +96,19 @@ for (const [ entry, name ] of [
   });
 }
 
-const bundle = await rollup({
-  input: 'src/index.ts',
-  plugins: [ dts({ tsconfig: './tsconfig.json' }) ]
-});
+for (const [ entry, name ] of [
+  [ 'src/index.ts', 'pako' ],
+  [ 'src/deflate.ts', 'pako_deflate' ],
+  [ 'src/inflate.ts', 'pako_inflate' ]
+]) {
+  const bundle = await rollup({
+    input: entry,
+    plugins: [ dts({ tsconfig: './tsconfig.json' }) ]
+  });
 
-try {
-  await bundle.write({ file: 'dist/pako.d.ts', format: 'es' });
-} finally {
-  await bundle.close();
+  try {
+    await bundle.write({ file: `dist/${name}.d.ts`, format: 'es' });
+  } finally {
+    await bundle.close();
+  }
 }
