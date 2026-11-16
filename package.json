@@ -47,12 +47,13 @@
       "default": "./dist/browser/pako.umd.min.js"
     },
     "./browser/deflate": {
-      "types": "./dist/pako.d.ts",
+      "types": "./dist/pako_deflate.d.ts",
       "import": "./dist/browser/pako_deflate.esm.min.mjs",
       "require": "./dist/browser/pako_deflate.umd.min.js",
       "default": "./dist/browser/pako_deflate.umd.min.js"
     },
     "./browser/inflate": {
+      "types": "./dist/pako_inflate.d.ts",
       "import": "./dist/browser/pako_inflate.esm.min.mjs",
       "require": "./dist/browser/pako_inflate.umd.min.js",
       "default": "./dist/browser/pako_inflate.umd.min.js"
