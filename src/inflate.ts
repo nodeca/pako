@@ -320,6 +320,20 @@ class Inflate {
 
       // End of stream reached - finalize with the inflateEnd status.
       if (status === Z_STREAM_END) {
+        // A gzip member that ends exactly at the end of the pushed data may be
+        // followed by more concatenated members in later pushes (RFC 1952: a
+        // gzip file is "a series of members"), but only the caller knows if
+        // more input is coming. Unless the caller declared the input complete
+        // (Z_FINISH), leave the stream open: inflate keeps reporting
+        // Z_STREAM_END in its post-end state, so the next push either restarts
+        // decoding in the loop above (a member follows) or falls through to
+        // finalization here (trailing zeros, or no more input at all). zlib
+        // and raw streams have no concatenated form and always finalize.
+        if (strm.avail_in === 0 &&
+            _flush_mode !== Z_FINISH &&
+            (strm.state.wrap & 2) && (strm.state as any).flags !== 0) {
+          return true;
+        }
         status = zlibInflateEnd(this.strm);
         break;
       }

@@ -63,7 +63,7 @@ describe('Gzip special cases', () => {
       this.header = new GZheader();
       assert.strictEqual(zlibInflateGetHeader(strm, this.header), Z_OK);
     };
-    inflator.push(deflator.result);
+    inflator.push(deflator.result, true);
 
     assert.strictEqual(inflator.err, 0);
     assert.strictEqual(Buffer.from(inflator.result).toString(), data);
@@ -137,6 +137,87 @@ describe('Gzip special cases', () => {
 
     assert.deepStrictEqual(ungzip(flushed), ungzip(normal));
     assert.ok(flushed.length > normal.length);
+  });
+
+  it('Decode concatenated members split at the exact member boundary', () => {
+    const a = zlib.gzipSync(Buffer.from('hello '));
+    const b = zlib.gzipSync(Buffer.from('world'));
+    const both = Buffer.concat([ a, b ]);
+
+    for (const split of [ a.length - 1, a.length, a.length + 1 ]) {
+      const inflator = new Inflate();
+      inflator.push(both.subarray(0, split));
+      inflator.push(both.subarray(split), true);
+
+      assert.strictEqual(inflator.err, 0, `split at ${split}`);
+      assert.strictEqual(Buffer.from(inflator.result).toString(), 'hello world', `split at ${split}`);
+    }
+  });
+
+  it('Decode one gzip member per push (BGZF-style feeding)', () => {
+    const m1 = zlib.gzipSync(Buffer.from('x'.repeat(1000)));
+    const m2 = zlib.gzipSync(Buffer.from('y'.repeat(1000)));
+    const m3 = zlib.gzipSync(Buffer.from('z'.repeat(1000)));
+
+    const inflator = new Inflate();
+    inflator.push(m1);
+    inflator.push(m2);
+    inflator.push(m3, true);
+
+    assert.strictEqual(inflator.err, 0);
+    assert.strictEqual(
+      Buffer.from(inflator.result).toString(),
+      'x'.repeat(1000) + 'y'.repeat(1000) + 'z'.repeat(1000)
+    );
+  });
+
+  it('Decode joined members fed byte by byte', () => {
+    for (const fixture of [ 'gzip-joined.gz', 'gzip-joined-bgzip.gz' ]) {
+      const data = fs.readFileSync(path.join(__dirname, 'fixtures', fixture));
+      const inflator = new Inflate();
+
+      for (let i = 0; i < data.length; i++) {
+        inflator.push(data.subarray(i, i + 1));
+      }
+      inflator.push(new Uint8Array(0), true);
+
+      assert.strictEqual(inflator.err, 0, fixture);
+      assert.deepStrictEqual(
+        new Uint8Array(inflator.result),
+        new Uint8Array(zlib.gunzipSync(data)),
+        fixture
+      );
+    }
+  });
+
+  it('Finalize a member that ends at the input boundary once input is complete', () => {
+    const member = zlib.gzipSync(Buffer.from('single'));
+
+    const inflator = new Inflate();
+    inflator.push(member);
+
+    assert.strictEqual(inflator.ended, false);
+
+    inflator.push(new Uint8Array(0), true);
+
+    assert.strictEqual(inflator.err, 0);
+    assert.strictEqual(Buffer.from(inflator.result).toString(), 'single');
+  });
+
+  it('Keep ignoring trailing data after a zlib stream ends at the input boundary', () => {
+    const stream = zlib.deflateSync(Buffer.from('plain zlib'));
+
+    const inflator = new Inflate();
+    inflator.push(stream);
+
+    // zlib (RFC 1950) has no concatenated form: the stream finalizes on the
+    // spot, exactly at the input boundary or not, and later pushes are no-ops.
+    assert.strictEqual(inflator.ended, true);
+
+    inflator.push(stream, true);
+
+    assert.strictEqual(inflator.err, 0);
+    assert.strictEqual(Buffer.from(inflator.result).toString(), 'plain zlib');
   });
 
 });
